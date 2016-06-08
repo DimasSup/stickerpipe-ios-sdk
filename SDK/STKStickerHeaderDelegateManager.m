@@ -19,40 +19,56 @@
 @implementation STKStickerHeaderDelegateManager
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
-    return (self.stickerPacksArray.count > 0) ? 2 : 1;
+    return (self.stickerPacksArray.count > 0) ? 3 : 2;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (section == 0 && self.stickerPacksArray.count > 0) {
-        return self.stickerPacksArray.count;
-    } else {
-        return 1;
-    }
+	if(section==0)
+	{
+		return 1;
+	}
+	else if (section == 1 && self.stickerPacksArray.count > 0) {
+		return self.stickerPacksArray.count;
+	} else {
+		return 1;
+	}
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     STKStickerHeaderCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"STKStickerPanelHeaderCell" forIndexPath:indexPath];
     
-    if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
-        STKStickerPackObject *stickerPack = self.stickerPacksArray[indexPath.item];
-        
-        [cell configWithStickerPack:stickerPack placeholder:self.placeholderImage placeholderTintColor:self.placeholderHeadercolor];
-    } else {
-        [cell configureSettingsCell];
-    }
-    
-    return cell;
+	
+	if (indexPath.section == 1 && self.stickerPacksArray.count > 0) {
+		STKStickerPackObject *stickerPack = self.stickerPacksArray[indexPath.item];
+		
+		[cell configWithStickerPack:stickerPack placeholder:self.placeholderImage placeholderTintColor:self.placeholderHeadercolor];
+	} else if(indexPath.section == 0)
+	{
+		[cell configureSmileCell];
+	} else {
+		[cell configureSettingsCell];
+	}
+	
+	return cell;
 }
 
 #pragma mark - UICollectionViewDelegate
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
-        STKStickerPackObject *stickerPackObject = self.stickerPacksArray[indexPath.item];
-        self.didSelectRow(indexPath, stickerPackObject);
-    } else {
-        self.didSelectSettingsRow();
-    }
+	if (indexPath.section == 1 && self.stickerPacksArray.count > 0) {
+		STKStickerPackObject *stickerPackObject = self.stickerPacksArray[indexPath.item];
+		self.didSelectRow(indexPath, stickerPackObject);
+	}
+	else if(indexPath.section>0) {
+		self.didSelectSettingsRow();
+	}
+	else
+	{
+		if(self.didSelectCustomSmilesRow)
+		{
+			self.didSelectCustomSmilesRow();
+		};
+	}
 }
 
 - (void)setStickerPacks:(NSArray *)stickerPacks {

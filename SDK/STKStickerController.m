@@ -31,13 +31,16 @@
 #import "UIImage+CustomBundle.h"
 
 
+#import "SmilesHelper.h"
+#import "StickerPipeCustomSmilesDelegateManager.h"
+
 //SIZES
 
 static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 
 @interface STKStickerController()
 
-@property (strong, nonatomic) UIView *keyboardButtonSuperView;
+@property (weak, nonatomic) UIView *keyboardButtonSuperView;
 
 @property (weak, nonatomic) IBOutlet UIView *internalStickersView;
 
@@ -45,9 +48,12 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 
 @property (weak, nonatomic) IBOutlet STKShowStickerButton *stickersShopButton;
 @property (weak, nonatomic) IBOutlet UICollectionView *stickersCollectionView;
+@property (weak, nonatomic) IBOutlet UICollectionView *customSmilesCollectionView;
 
 @property (strong, nonatomic) STKStickerDelegateManager *stickersDelegateManager;
 @property (strong, nonatomic) STKStickerHeaderDelegateManager *stickersHeaderDelegateManager;
+@property (nonatomic,strong) StickerPipeCustomSmilesDelegateManager* customSmileDelegateManager;
+
 @property (strong, nonatomic) UIButton *shopButton;
 @property (assign, nonatomic) BOOL isKeyboardShowed;
 
@@ -67,6 +73,27 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 
 @implementation STKStickerController
 
+#pragma mark - prepare spacks
+-(NSMutableArray*)prepareStickerPacks:(NSArray*)source
+{
+	if(self.showRecents)
+	{
+		return [NSMutableArray arrayWithArray:source];
+	}
+	else
+	{
+		NSMutableArray* packs = [NSMutableArray arrayWithCapacity:source.count];
+		for (STKStickerPackObject* stpack in source)
+		{
+			if(stpack.packID)
+			{
+				[packs addObject:stpack];
+			}
+		}
+		return packs;
+	}
+}
+
 #pragma mark - Inits
 
 - (void)loadStickerPacks {
@@ -74,7 +101,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *stickerPacks) {
         dispatch_async(dispatch_get_main_queue(), ^{
             
-            self.stickersService.stickersArray = stickerPacks;
+            self.stickersService.stickersArray = [self prepareStickerPacks: stickerPacks];
             self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
             self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
             if (self.showStickersOnStart) {
@@ -90,7 +117,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     
     [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *stickerPacks) {
         
-        self.stickersService.stickersArray = stickerPacks;
+        self.stickersService.stickersArray = [self prepareStickerPacks: stickerPacks];
         self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
         self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
         if (self.isStickerViewShowed) {
@@ -168,12 +195,46 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     }];
 }
 
+
+-(void)reloadSmiles
+{
+	self.customSmileDelegateManager = [StickerPipeCustomSmilesDelegateManager new];
+	NSArray* allSmiles = [SmilesHelper newAllSmiles];
+	NSMutableArray* smileIds = [NSMutableArray new];
+	for (NSString* item  in allSmiles)
+	{
+		[smileIds addObject:[SmilesHelper smilesMappingCode][item]];
+	}
+	[self.customSmileDelegateManager setAllSmiles:smileIds];
+	__weak typeof(self) weakSelf = self;
+	
+	[self.customSmileDelegateManager setDidSelectCustomSmile:^(NSString * smileId, NSIndexPath * indexPath) {
+		if(weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(stickerController:didSelectCustomSmile:)])
+		{
+			[weakSelf.delegate stickerController:weakSelf didSelectCustomSmile:smileId];
+		}
+	}];
+	
+	self.customSmilesCollectionView.dataSource = self.customSmileDelegateManager;
+	self.customSmilesCollectionView.delegate = self.customSmileDelegateManager;
+	[self.customSmilesCollectionView registerNib:[UINib nibWithNibName:@"StickerPipeCustomSmileCell" bundle:nil] forCellWithReuseIdentifier:kStickerPipeCustomSmileCell];
+	[self.customSmilesCollectionView registerClass:[STKStickersSeparator class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"STKStickerPanelSeparator"];
+	
+}
+
+
 - (void)reloadRecent {
     
-    STKStickerPackObject *recentPack = [self.stickersService recentPack];
-    NSMutableArray *stickers = [self.stickersService.stickersArray mutableCopy];
-    [stickers replaceObjectAtIndex:0 withObject:recentPack];
-    self.stickersService.stickersArray = stickers;
+	STKStickerPackObject *recentPack = [self.stickersService recentPack];
+	NSMutableArray *stickers = [self.stickersService.stickersArray mutableCopy];
+	if(self.showRecents)
+	{
+		[stickers replaceObjectAtIndex:0 withObject:recentPack];
+	}
+	
+	stickers = [self prepareStickerPacks:stickers];
+	
+	self.stickersService.stickersArray = stickers;
     [self.stickersDelegateManager setStickerPacksArray: stickers];
     [self.stickersCollectionView reloadSections:[NSIndexSet indexSetWithIndex:0]];
 }
@@ -182,6 +243,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     
     NSMutableArray *stickers = notification.userInfo[@"packs"];
     [stickers insertObject:self.stickersService.stickersArray[0] atIndex:0];
+	stickers = [self prepareStickerPacks:stickers];
     self.stickersService.stickersArray = stickers;
     [self.stickersHeaderDelegateManager setStickerPacks:stickers];
     [self.stickersDelegateManager setStickerPacksArray:stickers];
@@ -206,6 +268,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     }
     if (hasPack) {
         [stickerPacks removeObjectAtIndex:packIndex];
+		stickerPacks = [self prepareStickerPacks:stickerPacks];
         self.stickersService.stickersArray = stickerPacks;
         [self.stickersHeaderDelegateManager setStickerPacks:stickerPacks];
         [self.stickersDelegateManager setStickerPacksArray:stickerPacks];
@@ -217,15 +280,16 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 }
 
 - (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+	[_internalStickersView removeFromSuperview];
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)newPackDownloaded:(NSNotification *)notification {
     
-    [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *stickerPacks) {
+    [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *packs) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            
-            
+			NSArray* stickerPacks = [self prepareStickerPacks:packs];
+			
             self.stickersService.stickersArray = stickerPacks;
             self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
             self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
@@ -240,7 +304,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
             
             [self showStickersView];
             [self setPackSelectedAtIndex:stickerIndex];
-            [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:stickerIndex inSection:0]];
+            [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:stickerIndex inSection:1]];
         });
     } failure:nil];
 }
@@ -284,7 +348,14 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [button setTintColor:[STKUtility defaultBlueColor]];
     button.backgroundColor = self.headerBackgroundColor ? self.headerBackgroundColor : [STKUtility defaultGreyColor];
 }
-
+-(void)hideCustomSmiles
+{
+	self.customSmilesCollectionView.hidden = YES;
+}
+-(void)showCustomSmiles
+{
+	self.customSmilesCollectionView.hidden = NO;
+}
 
 - (void) initStickerHeader {
     //    self.stickersHeaderDelegateManager = [STKStickerHeaderDelegateManager new];
@@ -302,8 +373,13 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
             weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
         }
         
-    }];
-    
+		[weakSelf hideCustomSmiles];
+		
+	}];
+	[self.stickersHeaderDelegateManager setDidSelectCustomSmilesRow:^{
+		[weakSelf showCustomSmiles];
+	}];
+	
     [self.stickersHeaderDelegateManager setDidSelectSettingsRow:^{
         [weakSelf collectionsButtonAction:nil];
     }];
@@ -341,6 +417,9 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [self initStickerHeader];
     [self initStickersCollectionView];
     [self initHeaderButton:self.stickersShopButton];
+	
+	[self reloadSmiles];
+	[self hideCustomSmiles];
 }
 
 - (void)addKeyboardButtonConstraintsToView:(UIView *)view {
@@ -363,10 +442,10 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
                                                                constant:33];
     
     NSLayoutConstraint *right = [NSLayoutConstraint constraintWithItem:self.keyboardButton
-                                                             attribute:NSLayoutAttributeRight
+                                                             attribute:NSLayoutAttributeLeft
                                                              relatedBy:NSLayoutRelationEqual
                                                                 toItem:view
-                                                             attribute:NSLayoutAttributeRight
+                                                             attribute:NSLayoutAttributeLeft
                                                             multiplier:1
                                                               constant:0];
     
@@ -514,8 +593,8 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     
     NSArray *stickerPacks = self.stickersService.stickersArray;
     [self.stickersHeaderDelegateManager setStickerPacks:stickerPacks];
-    [self.stickersHeaderCollectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:0]]];
-    NSIndexPath *selectedIndexPath = [NSIndexPath indexPathForItem:self.stickersDelegateManager.currentDisplayedSection inSection:0];
+    [self.stickersHeaderCollectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:1 inSection:1]]];
+    NSIndexPath *selectedIndexPath = [NSIndexPath indexPathForItem:self.stickersDelegateManager.currentDisplayedSection inSection:1];
     [self.stickersHeaderCollectionView selectItemAtIndexPath:selectedIndexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
 }
 
@@ -537,14 +616,14 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 
 - (void)setPackSelectedAtIndex:(NSInteger)index {
     
-    if ([self.stickersHeaderCollectionView numberOfItemsInSection:0] - 1 >= index) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    if ([self.stickersHeaderCollectionView numberOfItemsInSection:1] - 1 >= index) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:1];
         
         STKStickerPackObject *stickerPack = [self.stickersHeaderDelegateManager itemAtIndexPath:indexPath];
         if (stickerPack.isNew.boolValue) {
             stickerPack.isNew = @NO;
             [self.stickersService updateStickerPackInCache:stickerPack];
-            [self reloadHeaderItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
+            [self reloadHeaderItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:1]];
         }
         [self.stickersHeaderCollectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
     }
@@ -597,7 +676,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 
 - (void)selectPack:(NSUInteger)index {
     [self setPackSelectedAtIndex:index];
-    [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
+    [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:1]];
 }
 
 #pragma mark - Checks
@@ -706,8 +785,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 }
 
 - (NSBundle *)getResourceBundle {
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
+	NSBundle *bundle = [NSBundle mainBundle];
     
     return bundle;
 }

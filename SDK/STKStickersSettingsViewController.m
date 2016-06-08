@@ -99,8 +99,7 @@
 }
 
 - (NSString *)getImageName:(NSString *)imName {
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    NSString *imageName = [[NSBundle bundleWithPath:bundlePath] pathForResource:imName ofType:@"png"];
+    NSString *imageName = [[NSBundle mainBundle] pathForResource:imName ofType:@"png"];
     
     return imageName;
 }
@@ -164,8 +163,8 @@
 }
 
 - (NSBundle *)getResourceBundle {
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
+	
+    NSBundle *bundle = [NSBundle mainBundle];
     
     return bundle;
 }

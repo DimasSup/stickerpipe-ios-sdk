@@ -11,8 +11,8 @@
 @implementation UIImage (CustomBundle)
 
 + (UIImage *)imageNamedInCustomBundle:(NSString *)name {
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    return [UIImage imageNamed:name inBundle:[NSBundle bundleWithPath:bundlePath] compatibleWithTraitCollection:nil];
+	
+    return [UIImage imageNamed:name inBundle:[NSBundle mainBundle] compatibleWithTraitCollection:nil];
 }
 
 

@@ -15,6 +15,8 @@
 
 @property (copy, nonatomic) void(^didSelectRow)(NSIndexPath *indexPath, STKStickerPackObject *stickerPackObject);
 @property (copy, nonatomic) void(^didSelectSettingsRow)(void);
+@property (copy, nonatomic) void(^didSelectCustomSmilesRow)(void);
+
 @property (strong, nonatomic) UIImage *placeholderImage;
 @property (strong, nonatomic) UIColor *placeholderHeadercolor;
 

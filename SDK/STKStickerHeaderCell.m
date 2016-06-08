@@ -129,4 +129,12 @@
     self.dotView.hidden = YES;
 }
 
+- (void)configureSmileCell {
+	self.originalImage = [UIImage imageNamed:@"iconChatSmileyBtn"];
+	self.grayImage = [UIImage imageNamed:@"iconChatSmileyBtn"];
+	self.imageView.image = self.grayImage;
+	self.imageView.tintColor = [UIColor colorWithRed:4/255.0 green:122/255.0 blue:1 alpha:1];
+	self.dotView.hidden = YES;
+}
+
 @end

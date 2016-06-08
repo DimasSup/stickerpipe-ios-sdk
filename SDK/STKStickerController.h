@@ -29,6 +29,8 @@
 - (void)stickerController:(STKStickerController*)stickerController
     willShareStickerWithMessage:(NSString *)message;
 
+- (void)stickerController:(STKStickerController*)stickerController didSelectCustomSmile:(NSString*)smile;
+
 - (void)stickerControllerErrorHandle:(NSError *)error;
 
 - (void)stickerControllerReloadView;
@@ -46,7 +48,7 @@
 
 @property (nonatomic, strong) UIColor *headerBackgroundColor;
 
-@property (nonatomic, strong) UITextView *textInputView;
+@property (nonatomic, weak) UITextView *textInputView;
 
 @property (strong, nonatomic) STKShowStickerButton *keyboardButton;
 
@@ -55,6 +57,7 @@
 @property (nonatomic) BOOL showStickersOnStart;
 
 @property (nonatomic) BOOL isNetworkReachable;
+@property (nonatomic) BOOL showRecents;
 
 
 //@property (nonatomic, strong) UIColor *stickersShopTintColor;
