@@ -16,42 +16,6 @@
 
 @implementation STKImageManager
 
-//- (void)getImageForStickerMessage:(NSString *)stickerMessage andDensity:(NSString *)density withProgress:(STKDownloadingProgressBlock)progressBlock andCompletion:(STKCompletionBlock)completion {
-//
-//    NSURL *stickerUrl = [STKUtility imageUrlForStikerMessage:stickerMessage andDensity:density];
-//
-//    DFImageRequestOptions *options = [DFImageRequestOptions new];
-//    options.allowsClipping = YES;
-//    options.progressHandler = ^(double progress){
-//        // Observe progress
-//        if (progressBlock) {
-//            progressBlock(progress);
-//        }
-//    };
-//
-//    DFImageRequest *request = [DFImageRequest requestWithResource:stickerUrl targetSize:CGSizeZero contentMode:DFImageContentModeAspectFit options:options];
-//
-//    self.imageTask = [[DFImageManager sharedManager] imageTaskForRequest:request completion:^(UIImage *image, NSDictionary *info) {
-//        NSError *error = info[DFImageInfoErrorKey];
-//
-//        NSCharacterSet *characterSet = [NSCharacterSet characterSetWithCharactersInString:@"[]"];
-//        NSString *stickerName = [stickerMessage stringByTrimmingCharactersInSet:characterSet];
-//        SDImageCache *imageCache = [[SDImageCache alloc] initWithNamespace:@"myNamespace"];
-//       [imageCache queryDiskCacheForKey:stickerName done:^(UIImage *image, SDImageCacheType cacheType) {
-//           if (image) {
-//               completion(nil, image);
-//           }
-//
-//       }];
-//
-////        if (completion) {
-////            completion(error, image);
-//       // }
-//    }];
-//    [self.imageTask resume];
-//
-//}
-
 - (DFImageTask *)imageTask {
     return objc_getAssociatedObject(self, @selector(imageTask));
 }

@@ -76,7 +76,7 @@
     
     [[RMStore defaultStore] addPayment:[STKInAppProductsManager productIdWithPackPrice:packPrice] success:^(SKPaymentTransaction *transaction) {
         NSLog(@"purchase complete");
-        BOOL consumed = [wself.persistence consumeProductOfIdentifier:
+        [wself.persistence consumeProductOfIdentifier:
                          [STKInAppProductsManager productIdWithPackPrice:packPrice]];
         
         [wself purchaseSucceedForPack:packName withPrice:packPrice];

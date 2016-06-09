@@ -63,8 +63,7 @@
     
     UIImage *coloredPlaceholder = [resultPlaceholder imageWithImageTintColor:colorForPlaceholder];
     
-    //    NSURL *stickerUrl = [STKUtility imageUrlForStickerPanelWithMessage:stickerMessage];
-    NSURL *stickerUrl = [STKUtility imageUrlForStikerMessage:stickerMessage andDensity:[STKUtility scaleString]];
+    [STKUtility imageUrlForStikerMessage:stickerMessage andDensity:[STKUtility scaleString]];
     
     DFImageRequestOptions *options = [DFImageRequestOptions new];
     options.priority = DFImageRequestPriorityNormal;
@@ -72,23 +71,8 @@
     self.stickerImageView.image = coloredPlaceholder;
     [self setNeedsLayout];
     
-    DFImageRequest *request = [DFImageRequest requestWithResource:stickerUrl targetSize:CGSizeZero contentMode:DFImageContentModeAspectFit options:options];
-    
     __weak typeof(self) weakSelf = self;
-    
-    //TODO:MOVE TASK TO MODEL
-    
-    //    self.imageTask =[[DFImageManager sharedManager] imageTaskForRequest:request completion:^(UIImage *image, NSDictionary *info) {
-    //        if (image) {
-    //            weakSelf.stickerImageView.image = image;
-    //            [weakSelf setNeedsLayout];
-    //        } else {
-    //            NSError *error = info[DFImageInfoErrorKey];
-    //            if (error && error.code != -1) {
-    //                STKLog(@"Failed loading from stickerView cell: %@", error.localizedDescription);
-    //            }
-    //        }
-    //    }];
+
     NSCharacterSet *characterSet = [NSCharacterSet characterSetWithCharactersInString:@"[]"];
     NSString *stickerName = [stickerMessage stringByTrimmingCharactersInSet:characterSet];
     

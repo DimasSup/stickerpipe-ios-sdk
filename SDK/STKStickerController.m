@@ -34,8 +34,11 @@
 //SIZES
 
 static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
+static const CGFloat kKeyboardButtonHeight = 33.0;
 
 @interface STKStickerController()
+
+@property (strong, nonatomic) UIRefreshControl *refreshControl;
 
 @property (strong, nonatomic) UIView *keyboardButtonSuperView;
 
@@ -80,10 +83,14 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
             if (self.showStickersOnStart) {
                 [self showStickersView];
             }
+            
+            [self.refreshControl endRefreshing];
         });
         
         
-    } failure:nil];
+    } failure:^(NSError *error) {
+        [self.refreshControl endRefreshing];
+    }];
 }
 
 - (void)loadStartPacks {
@@ -271,11 +278,20 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [self.stickersCollectionView registerClass:[STKStickersSeparator class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"STKStickerPanelSeparator"];
     
     self.stickersDelegateManager.collectionView = self.stickersCollectionView;
-    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    self.stickersDelegateManager.refreshBlock = ^{
+        if ([weakSelf.refreshControl isRefreshing]) {
+            return;
+        }
+        [weakSelf.refreshControl beginRefreshing];
+        
+        [weakSelf handleRefresh:weakSelf.refreshControl];
+    };
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        [refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
-        [self.stickersCollectionView addSubview:refreshControl];
+        [self.refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
+        [self.stickersCollectionView addSubview:self.refreshControl];
         self.stickersCollectionView.alwaysBounceVertical = YES;
     });
 }
@@ -284,7 +300,6 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [button setTintColor:[STKUtility defaultBlueColor]];
     button.backgroundColor = self.headerBackgroundColor ? self.headerBackgroundColor : [STKUtility defaultGreyColor];
 }
-
 
 - (void) initStickerHeader {
     //    self.stickersHeaderDelegateManager = [STKStickerHeaderDelegateManager new];
@@ -353,14 +368,14 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
                                                                 toItem:nil
                                                              attribute:NSLayoutAttributeNotAnAttribute
                                                             multiplier:1
-                                                              constant:33];
+                                                              constant:kKeyboardButtonHeight];
     NSLayoutConstraint *height = [NSLayoutConstraint constraintWithItem:self.keyboardButton
                                                               attribute:NSLayoutAttributeHeight
                                                               relatedBy:NSLayoutRelationEqual
                                                                  toItem:nil
                                                               attribute:NSLayoutAttributeNotAnAttribute
                                                              multiplier:1
-                                                               constant:33];
+                                                               constant:kKeyboardButtonHeight];
     
     NSLayoutConstraint *right = [NSLayoutConstraint constraintWithItem:self.keyboardButton
                                                              attribute:NSLayoutAttributeRight
@@ -373,7 +388,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     NSLayoutConstraint *top = [NSLayoutConstraint constraintWithItem:self.keyboardButton
                                                            attribute:NSLayoutAttributeTop
                                                            relatedBy:NSLayoutRelationEqual
-                                                              toItem:view
+                                                               toItem:view
                                                            attribute:NSLayoutAttributeTop
                                                           multiplier:1
                                                             constant:0];
@@ -392,7 +407,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     self.keyboardButton.tintColor = [UIColor grayColor];
     self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
     
-    CGRect frame = CGRectMake(0, 0, self.textInputView.contentSize.width, 33);
+    CGRect frame = CGRectMake(self.textInputView.frame.size.width - kKeyboardButtonHeight, 0, kKeyboardButtonHeight, kKeyboardButtonHeight);
     UIView *view = [[UIView alloc]initWithFrame:frame];
     [view addSubview:self.keyboardButton];
     [self.textInputView addSubview:view];
@@ -401,9 +416,17 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 }
 
 - (void)updateFrames {
-    CGRect frame = CGRectMake(0, 0, self.textInputView.frame.size.width, 33);
+    CGRect frame = CGRectMake(self.textInputView.frame.size.width - kKeyboardButtonHeight, 0, kKeyboardButtonHeight, kKeyboardButtonHeight);
     self.keyboardButtonSuperView.frame = frame;
     [self.keyboardButton layoutIfNeeded];
+    
+    [self textResizeForButton];
+}
+
+- (void)textResizeForButton {
+    CGRect viewFrame = self.keyboardButtonSuperView.frame;
+    UIBezierPath *exclusivePath = [UIBezierPath bezierPathWithRect:viewFrame];
+    self.textInputView.textContainer.exclusionPaths = @[exclusivePath];
 }
 
 - (void)showModalViewController:(UIViewController *)viewController {
@@ -437,13 +460,13 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     }
 }
 
-
 - (void)handleRefresh:(UIRefreshControl *)refresh {
     if (self.isNetworkReachable) {
         [self loadStickerPacks];
         self.errorView.hidden = YES;
+    } else {
+        [refresh endRefreshing];
     }
-    [refresh endRefreshing];
 }
 
 - (void)handleError:(NSError *)error {
@@ -668,7 +691,6 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     
     [self reloadStickersInputViews];
 }
-
 
 - (void) reloadStickersInputViews {
     [self.textInputView reloadInputViews];

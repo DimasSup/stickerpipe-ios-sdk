@@ -13,7 +13,7 @@
 
 @interface STKStickersManager : NSObject
 
-+ (void) initWitApiKey:(NSString*) apiKey;
++ (void) initWithApiKey:(NSString*) apiKey;
 
 + (void)setUserKey:(NSString *)userKey;
 + (NSString *)userKey;
@@ -21,14 +21,9 @@
 + (void)setLocalization:(NSString *)localization;
 + (NSString *)localization;
 
-- (void) getStickerForMessage:(NSString*) message
-                     progress:(void(^)(double progress)) progress
-                      success:(void(^)(UIImage *sticker))success
-                      failure:(void(^)(NSError *error, NSString *errorMessage)) failure;
++ (BOOL)isStickerMessage:(NSString *)message;
 
-+ (BOOL) isStickerMessage:(NSString*) message;
-
-+ (BOOL) isOldFormatStickerMessage:(NSString*) message;
++ (BOOL)isOldFormatStickerMessage:(NSString *)message;
 
 + (void)setStartTimeInterval;
 
@@ -44,7 +39,7 @@
 + (NSString *)priceCLabel;
 + (CGFloat)priceCValue;
 
-+ (void)setUserIsSubscriber:(BOOL)isSubscriber;
++ (void)setUserAsSubscriber:(BOOL)subscriber;
 + (BOOL)isSubscriber;
 
 + (void)setPriceBProductId:(NSString *)priceBProductId andPriceCProductId:(NSString *)priceCProductId;

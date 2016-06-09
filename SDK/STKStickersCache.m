@@ -276,7 +276,7 @@ static NSString *const recentName = @"Recent";
     STKStickerPackObject *recentPack = [weakSelf recentStickerPack];
     
     NSMutableArray *result = [NSMutableArray array];
-#warning Check recent stickers
+//TODO: Check recent stickers
     [weakSelf getStickerPacksIgnoringRecentForContext:self.mainContext response:^(NSArray *stickerPacks) {
         
         if (recentPack) {
@@ -413,7 +413,6 @@ static NSString *const recentName = @"Recent";
 - (BOOL)hasPackWithName:(NSString *)packName {
     
     NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:[STKStickerPack entityName]];
-    NSUInteger allRecordsCount = [[NSManagedObjectContext stk_defaultContext] countForFetchRequest:request error:nil];
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@", STKStickerPackAttributes.packName, packName];
     
     request.predicate = predicate;

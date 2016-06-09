@@ -168,6 +168,12 @@ typedef enum {
     }
     
     self.lastContentOffset = scrollView.contentOffset.y;
+ 
+    if (scrollView.frame.size.height < 250 && scrollView.contentOffset.y < -50) {
+        if (self.refreshBlock) {
+            self.refreshBlock();
+        }
+    }
 }
 
 #pragma mark - Properties

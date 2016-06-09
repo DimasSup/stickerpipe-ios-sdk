@@ -24,15 +24,7 @@
 
 - (void)stickerController:(STKStickerController*)stickerController didSelectStickerWithMessage:(NSString*)message;
 
-- (void)stickerControllerDidChangePackStatus:(STKStickerController*)stickerController;
-
-- (void)stickerController:(STKStickerController*)stickerController
-    willShareStickerWithMessage:(NSString *)message;
-
 - (void)stickerControllerErrorHandle:(NSError *)error;
-
-- (void)stickerControllerReloadView;
-
 
 @end
 
@@ -55,7 +47,6 @@
 @property (nonatomic) BOOL showStickersOnStart;
 
 @property (nonatomic) BOOL isNetworkReachable;
-
 
 //@property (nonatomic, strong) UIColor *stickersShopTintColor;
 

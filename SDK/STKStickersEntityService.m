@@ -150,7 +150,7 @@ static const NSTimeInterval kUpdatesDelay = 900.0; //15 min
     
     __weak typeof(self) weakSelf = self;
 //    dispatch_async(self.queue, ^{
-#warning - Handle error, Split this method
+//TODO: Handle error, Split this method
         NSTimeInterval lastUpdate = [self lastUpdateDate];
         NSTimeInterval timeSinceLastUpdate = [[NSDate date] timeIntervalSince1970] - lastUpdate;
         if (timeSinceLastUpdate > kUpdatesDelay) {
