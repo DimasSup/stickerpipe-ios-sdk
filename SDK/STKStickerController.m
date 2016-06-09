@@ -470,18 +470,21 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [self.keyboardButton addTarget:self action:@selector(keyboardButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     self.keyboardButton.tintColor = [UIColor grayColor];
     self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
-    
+	self.keyboardButton.frame = CGRectMake(0, 0, 33, 33);
+	
     CGRect frame = CGRectMake(0, 0, self.textInputView.contentSize.width, 33);
+	
     UIView *view = [[UIView alloc]initWithFrame:frame];
+	view.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleBottomMargin;
     [view addSubview:self.keyboardButton];
     [self.textInputView addSubview:view];
-    [self addKeyboardButtonConstraintsToView:view];
+//    [self addKeyboardButtonConstraintsToView:view];
     self.keyboardButtonSuperView = view;
 }
 
 - (void)updateFrames {
-    CGRect frame = CGRectMake(0, 0, self.textInputView.frame.size.width, 33);
-    self.keyboardButtonSuperView.frame = frame;
+//    CGRect frame = CGRectMake(0, 0, self.textInputView.frame.size.width, 33);
+//    self.keyboardButtonSuperView.frame = frame;
     [self.keyboardButton layoutIfNeeded];
 }
 
