@@ -71,7 +71,7 @@
     if ([stickerPack.packName isEqualToString:@"Recent"]) {
         
         self.originalImage = [UIImage imageNamedInCustomBundle:@"STKRecentSelectedIcon"];
-        self.grayImage = [UIImage imageNamedInCustomBundle:@"STKRecentIcon"];
+//        self.grayImage = [UIImage imageNamedInCustomBundle:@"STKRecentIcon"];
         self.imageView.image = [UIImage imageNamedInCustomBundle:@"STKRecentIcon"];
         self.dotView.hidden = YES;
     } else {
@@ -102,10 +102,10 @@
         self.imageTask =[[DFImageManager sharedManager] imageTaskForRequest:request completion:^(UIImage *image, NSDictionary *info) {
             
             if (image) {
-                weakSelf.grayImage = [UIImage convertImageToGrayScale:image];
+//                weakSelf.grayImage = [UIImage convertImageToGrayScale:image];
                 weakSelf.originalImage = image;
-                UIImage *resultImage = weakSelf.selected ? image : [UIImage convertImageToGrayScale:image];
-                weakSelf.imageView.image = resultImage;
+//                UIImage *resultImage = weakSelf.selected ? image : [UIImage convertImageToGrayScale:image];
+                weakSelf.imageView.image = image;
                 [weakSelf setNeedsLayout];
             } else {
                 NSError *error = info[DFImageInfoErrorKey];
@@ -124,7 +124,7 @@
 - (void)configureSettingsCell {
     self.originalImage = [UIImage imageNamedInCustomBundle:@"STKSettingsSelectedIcon"];
     self.grayImage = [UIImage imageNamedInCustomBundle:@"STKSettingsIcon"];
-    self.imageView.image = self.grayImage;
+	self.imageView.image = self.grayImage?:self.originalImage;
     self.imageView.tintColor = [UIColor colorWithRed:4/255.0 green:122/255.0 blue:1 alpha:1];
     self.dotView.hidden = YES;
 }
@@ -132,7 +132,7 @@
 - (void)configureSmileCell {
 	self.originalImage = [UIImage imageNamed:@"iconChatSmileyBtn"];
 	self.grayImage = [UIImage imageNamed:@"iconChatSmileyBtn"];
-	self.imageView.image = self.grayImage;
+	self.imageView.image = self.grayImage?:self.originalImage;
 	self.imageView.tintColor = [UIColor colorWithRed:4/255.0 green:122/255.0 blue:1 alpha:1];
 	self.dotView.hidden = YES;
 }
