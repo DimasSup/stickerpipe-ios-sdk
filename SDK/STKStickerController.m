@@ -665,8 +665,8 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 - (void)showCollections {
     [self hideStickersView];
     UIViewController *presentViewController = [self.delegate stickerControllerViewControllerForPresentingModalView];
-    [presentViewController dismissViewControllerAnimated:YES completion:nil];
-    
+//    [presentViewController dismissViewControllerAnimated:YES completion:nil];
+	
     [self collectionsButtonAction:nil];
 }
 
