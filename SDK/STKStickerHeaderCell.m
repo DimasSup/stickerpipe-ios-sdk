@@ -72,7 +72,7 @@
         
         self.originalImage = [UIImage imageNamedInCustomBundle:@"STKRecentSelectedIcon"];
 //        self.grayImage = [UIImage imageNamedInCustomBundle:@"STKRecentIcon"];
-        self.imageView.image = [UIImage imageNamedInCustomBundle:@"STKRecentIcon"];
+        self.imageView.image = self.originalImage;
         self.dotView.hidden = YES;
     } else {
         self.dotView.hidden = !stickerPack.isNew.boolValue;
