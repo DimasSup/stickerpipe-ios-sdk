@@ -38,7 +38,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 @interface STKStickerController()
 
-@property (strong, nonatomic) UIRefreshControl *refreshControl;
+//@property (strong, nonatomic) UIRefreshControl *refreshControl;
 
 @property (strong, nonatomic) UIView *keyboardButtonSuperView;
 
@@ -84,12 +84,12 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
                 [self showStickersView];
             }
             
-            [self.refreshControl endRefreshing];
+//            [self.refreshControl endRefreshing];
         });
         
         
     } failure:^(NSError *error) {
-        [self.refreshControl endRefreshing];
+//        [self.refreshControl endRefreshing];
     }];
 }
 
@@ -279,21 +279,21 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
     self.stickersDelegateManager.collectionView = self.stickersCollectionView;
     
-    self.refreshControl = [[UIRefreshControl alloc] init];
-    self.stickersDelegateManager.refreshBlock = ^{
-        if ([weakSelf.refreshControl isRefreshing]) {
-            return;
-        }
-        [weakSelf.refreshControl beginRefreshing];
-        
-        [weakSelf handleRefresh:weakSelf.refreshControl];
-    };
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
-        [self.stickersCollectionView addSubview:self.refreshControl];
-        self.stickersCollectionView.alwaysBounceVertical = YES;
-    });
+//    self.refreshControl = [[UIRefreshControl alloc] init];
+//    self.stickersDelegateManager.refreshBlock = ^{
+//        if ([weakSelf.refreshControl isRefreshing]) {
+//            return;
+//        }
+//        [weakSelf.refreshControl beginRefreshing];
+//        
+//        [weakSelf handleRefresh:weakSelf.refreshControl];
+//    };
+//    
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        [self.refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
+//        [self.stickersCollectionView addSubview:self.refreshControl];
+//        self.stickersCollectionView.alwaysBounceVertical = YES;
+//    });
 }
 
 - (void)initHeaderButton:(UIButton *)button {
@@ -304,7 +304,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void) initStickerHeader {
     //    self.stickersHeaderDelegateManager = [STKStickerHeaderDelegateManager new];
     __weak typeof(self) weakSelf = self;
-    [self.stickersHeaderDelegateManager setDidSelectRow:^(NSIndexPath *indexPath, STKStickerPackObject *stickerPack) {
+    [self.stickersHeaderDelegateManager setDidSelectRow:^(NSIndexPath *indexPath, STKStickerPackObject *stickerPack, BOOL animated) {
         if (stickerPack.isNew.boolValue) {
             stickerPack.isNew = @NO;
             [weakSelf.stickersService updateStickerPackInCache:stickerPack];
@@ -313,10 +313,9 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
         NSIndexPath *newIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.item];
         CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath:newIndexPath].frame;
         if (stickerPack.stickers.count > 0 || indexPath.item == 0) {
-            [weakSelf.stickersCollectionView setContentOffset:CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y  - kStickersSectionPaddingTopBottom) animated:YES];
+            [weakSelf.stickersCollectionView setContentOffset:CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y  - kStickersSectionPaddingTopBottom) animated:animated];
             weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
         }
-        
     }];
     
     [self.stickersHeaderDelegateManager setDidSelectSettingsRow:^{
@@ -460,14 +459,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     }
 }
 
-- (void)handleRefresh:(UIRefreshControl *)refresh {
-    if (self.isNetworkReachable) {
-        [self loadStickerPacks];
-        self.errorView.hidden = YES;
-    } else {
-        [refresh endRefreshing];
-    }
-}
+//- (void)handleRefresh:(UIRefreshControl *)refresh {
+//    if (self.isNetworkReachable) {
+//        [self loadStickerPacks];
+//        self.errorView.hidden = YES;
+//    } else {
+//        [refresh endRefreshing];
+//    }
+//}
 
 - (void)handleError:(NSError *)error {
     
@@ -614,8 +613,13 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)showPack:(NSNotification *)notification {
     NSString *packName = notification.userInfo[@"packName"];
     NSUInteger stickerIndex = [self.stickersService indexOfPackWithName:packName];
-    //[self showStickersView];
+    [self showStickersView];
     [self setPackSelectedAtIndex:stickerIndex];
+    
+    if ([self.stickersHeaderCollectionView numberOfItemsInSection:0] - 1 >= stickerIndex) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:stickerIndex inSection:0];
+        [(id<STKStickerHeaderCollectionViewDelegate>)self.stickersHeaderCollectionView.delegate scrollToIndexPath:indexPath animated:NO];
+    }
 }
 
 - (void)selectPack:(NSUInteger)index {
@@ -656,7 +660,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     return isShowed;
 }
 
--(UIView *)stickersView {
+- (UIView *)stickersView {
     
     [self reloadStickers];
     

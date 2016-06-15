@@ -49,7 +49,16 @@
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
         STKStickerPackObject *stickerPackObject = self.stickerPacksArray[indexPath.item];
-        self.didSelectRow(indexPath, stickerPackObject);
+        self.didSelectRow(indexPath, stickerPackObject, YES);
+    } else {
+        self.didSelectSettingsRow();
+    }
+}
+
+- (void)scrollToIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated {
+    if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
+        STKStickerPackObject *stickerPackObject = self.stickerPacksArray[indexPath.item];
+        self.didSelectRow(indexPath, stickerPackObject, animated);
     } else {
         self.didSelectSettingsRow();
     }

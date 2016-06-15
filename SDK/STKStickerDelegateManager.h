@@ -17,7 +17,7 @@
 @property (nonatomic, copy) void(^didChangeDisplayedSection)(NSInteger displayedSection);
 @property (nonatomic, copy) void(^didSelectSticker)(STKStickerObject* sticker);
 
-@property (nonatomic, copy) void(^refreshBlock)(void);
+//@property (nonatomic, copy) void(^refreshBlock)(void);
 
 @property (nonatomic, weak) UICollectionView *collectionView;
 

@@ -80,9 +80,9 @@ static NSUInteger const productsCount = 2;
     
     self.apiService = [STKStickersApiService new];
     
-    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-    [refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
-    [self.stickersShopWebView.scrollView addSubview:refreshControl];
+//    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+//    [refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
+//    [self.stickersShopWebView.scrollView addSubview:refreshControl];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -123,13 +123,13 @@ static NSUInteger const productsCount = 2;
     self.errorLabel.text = (error.code == NSURLErrorNotConnectedToInternet) ? NSLocalizedString(@"No internet connection", nil) : NSLocalizedString(@"Oops... something went wrong", nil);
 }
 
-- (void)handleRefresh:(UIRefreshControl *)refresh {
-    if (self.isNetworkReachable) {
-        [self checkNetwork];
-        self.errorView.hidden = YES;
-    }
-    [refresh endRefreshing];
-}
+//- (void)handleRefresh:(UIRefreshControl *)refresh {
+//    if (self.isNetworkReachable) {
+//        [self checkNetwork];
+//        self.errorView.hidden = YES;
+//    }
+//    [refresh endRefreshing];
+//}
 
 - (void)packDownloaded {
     dispatch_async(dispatch_get_main_queue(), ^{

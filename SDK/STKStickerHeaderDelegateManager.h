@@ -11,9 +11,15 @@
 
 @class STKStickerPackObject;
 
-@interface STKStickerHeaderDelegateManager : NSObject <UICollectionViewDataSource, UICollectionViewDelegate>
+@protocol STKStickerHeaderCollectionViewDelegate <NSObject>
 
-@property (copy, nonatomic) void(^didSelectRow)(NSIndexPath *indexPath, STKStickerPackObject *stickerPackObject);
+- (void)scrollToIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated;
+
+@end
+
+@interface STKStickerHeaderDelegateManager : NSObject <UICollectionViewDataSource, UICollectionViewDelegate, STKStickerHeaderCollectionViewDelegate>
+
+@property (copy, nonatomic) void(^didSelectRow)(NSIndexPath *indexPath, STKStickerPackObject *stickerPackObject, BOOL animated);
 @property (copy, nonatomic) void(^didSelectSettingsRow)(void);
 @property (strong, nonatomic) UIImage *placeholderImage;
 @property (strong, nonatomic) UIColor *placeholderHeadercolor;
