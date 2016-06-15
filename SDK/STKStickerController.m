@@ -30,6 +30,7 @@
 
 #import "UIImage+CustomBundle.h"
 
+#import "UITextView+StickerButtonControl.h"
 
 #import "SmilesHelper.h"
 #import "StickerPipeCustomSmilesDelegateManager.h"
@@ -49,6 +50,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 @property (weak, nonatomic) IBOutlet STKShowStickerButton *stickersShopButton;
 @property (weak, nonatomic) IBOutlet UICollectionView *stickersCollectionView;
 @property (weak, nonatomic) IBOutlet UICollectionView *customSmilesCollectionView;
+@property (weak, nonatomic) IBOutlet UIView *customSmilesMainView;
 
 @property (strong, nonatomic) STKStickerDelegateManager *stickersDelegateManager;
 @property (strong, nonatomic) STKStickerHeaderDelegateManager *stickersHeaderDelegateManager;
@@ -280,7 +282,12 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 }
 
 - (void)dealloc {
+	if(_textInputView)
+	{
+		[_textInputView removeObserver:self forKeyPath:@"showSmileButton"];
+	}
 	[_internalStickersView removeFromSuperview];
+	
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -348,13 +355,22 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [button setTintColor:[STKUtility defaultBlueColor]];
     button.backgroundColor = self.headerBackgroundColor ? self.headerBackgroundColor : [STKUtility defaultGreyColor];
 }
+
+
+- (IBAction)btnSmileBackspace:(id)sender {
+	if([self.delegate respondsToSelector:@selector(stickerControllerDidRemoveSmile:)])
+	{
+		[self.delegate stickerControllerDidRemoveSmile:self];
+	}
+}
+
 -(void)hideCustomSmiles
 {
-	self.customSmilesCollectionView.hidden = YES;
+	self.customSmilesMainView.hidden = YES;
 }
 -(void)showCustomSmiles
 {
-	self.customSmilesCollectionView.hidden = NO;
+	self.customSmilesMainView.hidden = NO;
 }
 
 - (void) initStickerHeader {
@@ -470,16 +486,11 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [self.keyboardButton addTarget:self action:@selector(keyboardButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     self.keyboardButton.tintColor = [UIColor grayColor];
     self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
-	self.keyboardButton.frame = CGRectMake(0, 0, 33, 33);
+	self.keyboardButton.frame = CGRectMake(self.textInputView.frame.origin.x, self.textInputView.frame.origin.y, 33, 33);
 	
-    CGRect frame = CGRectMake(0, 0, self.textInputView.contentSize.width, 33);
 	
-    UIView *view = [[UIView alloc]initWithFrame:frame];
-	view.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleBottomMargin;
-    [view addSubview:self.keyboardButton];
-    [self.textInputView addSubview:view];
-//    [self addKeyboardButtonConstraintsToView:view];
-    self.keyboardButtonSuperView = view;
+    [self.textInputView.superview addSubview:self.keyboardButton];
+
 }
 
 - (void)updateFrames {
@@ -723,10 +734,25 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 }
 
 - (void)setTextInputView:(UITextView *)textInputView {
+	if(_textInputView)
+	{
+		[_textInputView removeObserver:self forKeyPath:@"showSmileButton"];
+	}
+	
     _textInputView = textInputView;
-    [self initKeyBoardButton];
+	[_textInputView addObserver:self forKeyPath:@"showSmileButton" options:NSKeyValueObservingOptionNew context:NULL];
+	[self initKeyBoardButton];
+	_keyboardButton.hidden = !_textInputView.showSmileButton;
 }
 
+#pragma mark - 
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context
+{
+	if([keyPath isEqualToString:@"showSmileButton"])
+	{
+		_keyboardButton.hidden = !_textInputView.showSmileButton;
+	}
+}
 #pragma mark - Show/hide stickers
 
 - (void)showStickersView {

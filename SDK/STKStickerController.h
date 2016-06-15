@@ -30,6 +30,7 @@
     willShareStickerWithMessage:(NSString *)message;
 
 - (void)stickerController:(STKStickerController*)stickerController didSelectCustomSmile:(NSString*)smile;
+- (void)stickerControllerDidRemoveSmile:(STKStickerController*)stickerController;
 
 - (void)stickerControllerErrorHandle:(NSError *)error;
 
