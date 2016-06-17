@@ -145,7 +145,7 @@ typedef enum {
         
         UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout*)collectionViewLayout;
         
-        return CGSizeMake(self.collectionView.frame.size.width - (layout.sectionInset.left + layout.sectionInset.right), 100.0);
+		return CGSizeMake(self.collectionView.frame.size.width - (layout.sectionInset.left + layout.sectionInset.right), 50);
         
     } else {
         return CGSizeMake(80.0, 80.0);
