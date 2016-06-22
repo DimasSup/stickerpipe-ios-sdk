@@ -19,6 +19,8 @@
 
 #import "UIImage+CustomBundle.h"
 
+#import "STKStickerController.h"
+
 @interface STKStickersSettingsViewController () <UITableViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
@@ -66,7 +68,6 @@
         
         [wself reorderPacks];
     };
-    
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -157,6 +158,12 @@
         
         [[NSNotificationCenter defaultCenter]postNotificationName:STKStickersReorderStickersNotification object:self userInfo:@{@"packs": self.dataSource.dataSource}];
         [[NSNotificationCenter defaultCenter] postNotificationName:STKCloseModalViewNotification object:self];
+        
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setObject:@"currentVC" forKey:@"viewController"];
+        [userDefaults synchronize];
+        
+        [self.stickerController showStickersView];
     }];
 }
 

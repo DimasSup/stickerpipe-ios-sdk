@@ -55,7 +55,9 @@
 
 - (void) configureWithStickerMessage:(NSString*)stickerMessage
                          placeholder:(UIImage*)placeholder
-                    placeholderColor:(UIColor*)placeholderColor {
+                    placeholderColor:(UIColor*)placeholderColor
+                      collectionView:(UICollectionView *)collectionView
+                cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     
     UIImage *resultPlaceholder = placeholder ? placeholder : [UIImage imageNamedInCustomBundle:@"STKStickerPanelPlaceholder"];
     
@@ -97,8 +99,13 @@
                                                
                                                [[SDImageCache sharedImageCache] storeImage:image forKey:stickerName];
                                                dispatch_async(dispatch_get_main_queue(), ^{
-                                                   weakSelf.stickerImageView.image = image;
-                                                   [weakSelf setNeedsLayout];
+                                                   
+                                                   NSIndexPath *currentIndexPath = [collectionView indexPathForCell:weakSelf];
+                                                   if ([currentIndexPath compare:indexPath] == NSOrderedSame) {
+                                                       weakSelf.stickerImageView.image = image;
+                                                       [weakSelf setNeedsLayout];
+                                                   }
+                                                   
                                                });
                                                
                                            }

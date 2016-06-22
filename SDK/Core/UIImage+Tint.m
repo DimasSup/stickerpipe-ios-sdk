@@ -32,16 +32,34 @@
 
 + (UIImage *)convertImageToGrayScale:(UIImage *)image {
     
-    CIImage *beginImage = [CIImage imageWithCGImage:image.CGImage];
-    CIFilter *filter = [CIFilter filterWithName:@"CIPhotoEffectTonal"];
-    [filter setValue:beginImage forKey:@"inputImage"];
-    CIImage *output = [filter outputImage];
+//    CIImage *beginImage = [CIImage imageWithCGImage:image.CGImage];
+//    CIFilter *filter = [CIFilter filterWithName:@"CIPhotoEffectTonal"];
+//    [filter setValue:beginImage forKey:@"inputImage"];
+//    CIImage *output = [filter outputImage];
+//    
+//    CIContext *context = [CIContext contextWithOptions:nil];
+//    CGImageRef cgiimage = [context createCGImage:output fromRect:output.extent];
+//    UIImage *newImage = [UIImage imageWithCGImage:cgiimage];
+//    
+//    CGImageRelease(cgiimage);
     
-    CIContext *context = [CIContext contextWithOptions:nil];
-    CGImageRef cgiimage = [context createCGImage:output fromRect:output.extent];
-    UIImage *newImage = [UIImage imageWithCGImage:cgiimage];
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0f);
     
-    CGImageRelease(cgiimage);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGRect area = CGRectMake(0, 0, image.size.width, image.size.height);
+    
+    CGContextScaleCTM(ctx, 1, -1);
+    CGContextTranslateCTM(ctx, 0, -area.size.height);
+    
+    CGContextSetBlendMode(ctx, kCGBlendModeMultiply);
+    
+    CGContextSetAlpha(ctx, 0.7);
+    
+    CGContextDrawImage(ctx, area, image.CGImage);
+    
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
     
     return newImage;
 }

@@ -163,6 +163,9 @@ static BOOL downloadMaxIm = NO;
 
 + (void)getUserInfo:(NSDictionary *)info stickerController:(STKStickerController *)stickerController {
     NSString *packName = info[@"pack"];
+    NSString *pushId = [NSString stringWithFormat:@"%@", info[@"push_id"]];
+    
+    [[STKAnalyticService sharedService] sendEventWithCategory:@"app_open" action:@"push" label:pushId value:nil];
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:@"yes" forKey:@"isNotification"];

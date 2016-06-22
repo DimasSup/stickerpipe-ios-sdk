@@ -36,9 +36,9 @@
 static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 static const CGFloat kKeyboardButtonHeight = 33.0;
 
-@interface STKStickerController()
-
-//@property (strong, nonatomic) UIRefreshControl *refreshControl;
+@interface STKStickerController() {
+    BOOL startstart;
+}
 
 @property (strong, nonatomic) UIView *keyboardButtonSuperView;
 
@@ -72,7 +72,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Inits
 
-- (void)loadStickerPacks {
+- (void)loadStickerPacks { //30 //43
     
     [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *stickerPacks) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -83,31 +83,33 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
             if (self.showStickersOnStart) {
                 [self showStickersView];
             }
-            
-//            [self.refreshControl endRefreshing];
         });
         
-        
-    } failure:^(NSError *error) {
-//        [self.refreshControl endRefreshing];
-    }];
+    } failure:nil];
 }
 
-- (void)loadStartPacks {
-    
+- (void)loadStartPacks { //8 //41
+    NSLog(@"STAaaaaaaaaaaAAAAaaAaaaaaAAAAAAAAaaaaaaAAAAaaaAAAARTTTT!!");
     [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *stickerPacks) {
         
         self.stickersService.stickersArray = stickerPacks;
         self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
         self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
-        if (self.isStickerViewShowed) {
+//        if (self.isStickerViewShowed) {
+//            [self showStickersView];
+//        }
+        
+        if (!startstart && self.isStickerViewShowed) {
             [self showStickersView];
+           // startstart = NO;
+        } else {
+            [self.stickersCollectionView reloadData];
         }
+        NSLog(@"FIIIIINIIIIIIIIINININININIININIINNIIINISSSSSHHHHHHHHHHH");
     } failure:nil];
 }
 
-
-- (instancetype)init {
+- (instancetype)init { //1
     
     self = [super init];
     if (self) {
@@ -151,14 +153,19 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removePack:) name:STKPackRemovedNotification object:nil];
         
+   //     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self reloadRecentAtStart];
+  //      });
+        
         [self.stickersHeaderCollectionView reloadData];
         [self.stickersCollectionView reloadData];
+       
         
     }
     return self;
 }
 
-- (void)checkNetwork {
+- (void)checkNetwork { //7
     
     __weak typeof(self) wself = self;
     
@@ -180,6 +187,16 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     STKStickerPackObject *recentPack = [self.stickersService recentPack];
     NSMutableArray *stickers = [self.stickersService.stickersArray mutableCopy];
     [stickers replaceObjectAtIndex:0 withObject:recentPack];
+    self.stickersService.stickersArray = stickers;
+    [self.stickersDelegateManager setStickerPacksArray: stickers];
+    [self.stickersCollectionView reloadSections:[NSIndexSet indexSetWithIndex:0]];
+}
+
+- (void)reloadRecentAtStart {
+    
+    STKStickerPackObject *recentPack = [self.stickersService recentPack];
+    NSMutableArray *stickers = [@[recentPack] mutableCopy];
+
     self.stickersService.stickersArray = stickers;
     [self.stickersDelegateManager setStickerPacksArray: stickers];
     [self.stickersCollectionView reloadSections:[NSIndexSet indexSetWithIndex:0]];
@@ -220,7 +237,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
         [self.stickersHeaderCollectionView reloadData];
         [self reloadRecent];
     }
-    
 }
 
 - (void)dealloc {
@@ -252,7 +268,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     } failure:nil];
 }
 
-- (void)initStickersCollectionView {
+- (void)initStickersCollectionView { //5 //10 //15
     
     //    self.stickersDelegateManager = [STKStickerDelegateManager new];
     
@@ -278,30 +294,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self.stickersCollectionView registerClass:[STKStickersSeparator class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"STKStickerPanelSeparator"];
     
     self.stickersDelegateManager.collectionView = self.stickersCollectionView;
-    
-//    self.refreshControl = [[UIRefreshControl alloc] init];
-//    self.stickersDelegateManager.refreshBlock = ^{
-//        if ([weakSelf.refreshControl isRefreshing]) {
-//            return;
-//        }
-//        [weakSelf.refreshControl beginRefreshing];
-//        
-//        [weakSelf handleRefresh:weakSelf.refreshControl];
-//    };
-//    
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        [self.refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
-//        [self.stickersCollectionView addSubview:self.refreshControl];
-//        self.stickersCollectionView.alwaysBounceVertical = YES;
-//    });
 }
 
-- (void)initHeaderButton:(UIButton *)button {
+- (void)initHeaderButton:(UIButton *)button { //6 //11 //16
     [button setTintColor:[STKUtility defaultBlueColor]];
     button.backgroundColor = self.headerBackgroundColor ? self.headerBackgroundColor : [STKUtility defaultGreyColor];
 }
 
-- (void) initStickerHeader {
+- (void)initStickerHeader { //4 //9 //14
     //    self.stickersHeaderDelegateManager = [STKStickerHeaderDelegateManager new];
     __weak typeof(self) weakSelf = self;
     [self.stickersHeaderDelegateManager setDidSelectRow:^(NSIndexPath *indexPath, STKStickerPackObject *stickerPack, BOOL animated) {
@@ -310,12 +310,22 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
             [weakSelf.stickersService updateStickerPackInCache:stickerPack];
             [weakSelf reloadHeaderItemAtIndexPath:indexPath];
         }
-        NSIndexPath *newIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.item];
-        CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath:newIndexPath].frame;
-        if (stickerPack.stickers.count > 0 || indexPath.item == 0) {
-            [weakSelf.stickersCollectionView setContentOffset:CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y  - kStickersSectionPaddingTopBottom) animated:animated];
-            weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
+        
+ //       NSInteger sectionsCount = [weakSelf.stickersCollectionView numberOfSections];
+        
+        NSInteger numberOfItems = [weakSelf.stickersCollectionView numberOfItemsInSection:indexPath.item];
+        
+ //       NSInteger section = indexPath.item;
+        
+        if (numberOfItems != 0) {
+            NSIndexPath *newIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.item];
+            CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath:newIndexPath].frame;
+            if (stickerPack.stickers.count > 0 || indexPath.item == 0) {
+                [weakSelf.stickersCollectionView setContentOffset:CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y  - kStickersSectionPaddingTopBottom) animated:animated];
+                weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
+            }
         }
+      
     }];
     
     [self.stickersHeaderDelegateManager setDidSelectSettingsRow:^{
@@ -332,7 +342,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
 }
 
-- (void)setupInternalStickersView {
+- (void)setupInternalStickersView { //2 //12
     
     self.stickersShopButton.badgeBorderColor = [STKUtility defaultGreyColor];
     
@@ -357,7 +367,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self initHeaderButton:self.stickersShopButton];
 }
 
-- (void)addKeyboardButtonConstraintsToView:(UIView *)view {
+- (void)addKeyboardButtonConstraintsToView:(UIView *)view { //21
     
     self.keyboardButton.translatesAutoresizingMaskIntoConstraints = NO;
     
@@ -387,7 +397,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     NSLayoutConstraint *top = [NSLayoutConstraint constraintWithItem:self.keyboardButton
                                                            attribute:NSLayoutAttributeTop
                                                            relatedBy:NSLayoutRelationEqual
-                                                               toItem:view
+                                                              toItem:view
                                                            attribute:NSLayoutAttributeTop
                                                           multiplier:1
                                                             constant:0];
@@ -396,7 +406,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
                            ]];
 }
 
-- (void)initKeyBoardButton {
+- (void)initKeyBoardButton { //20
     
     self.keyboardButton = [STKShowStickerButton buttonWithType:UIButtonTypeSystem];
     
@@ -414,7 +424,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.keyboardButtonSuperView = view;
 }
 
-- (void)updateFrames {
+- (void)updateFrames { //22 //28
     CGRect frame = CGRectMake(self.textInputView.frame.size.width - kKeyboardButtonHeight, 0, kKeyboardButtonHeight, kKeyboardButtonHeight);
     self.keyboardButtonSuperView.frame = frame;
     [self.keyboardButton layoutIfNeeded];
@@ -422,7 +432,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self textResizeForButton];
 }
 
-- (void)textResizeForButton {
+- (void)textResizeForButton { //23 //29
     CGRect viewFrame = self.keyboardButtonSuperView.frame;
     UIBezierPath *exclusivePath = [UIBezierPath bezierPathWithRect:viewFrame];
     self.textInputView.textContainer.exclusionPaths = @[exclusivePath];
@@ -459,15 +469,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     }
 }
 
-//- (void)handleRefresh:(UIRefreshControl *)refresh {
-//    if (self.isNetworkReachable) {
-//        [self loadStickerPacks];
-//        self.errorView.hidden = YES;
-//    } else {
-//        [refresh endRefreshing];
-//    }
-//}
-
 - (void)handleError:(NSError *)error {
     
     self.errorView.hidden = NO;
@@ -487,12 +488,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)collectionsButtonAction:(UIButton*)collectionsButton {
     
     _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[self getResourceBundle]];
+    _settingsViewController.stickerController = self;
     [self showModalViewController:_settingsViewController];
 }
 
 - (void)stickersShopButtonAction:(id)sender {
     
     _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    _shopViewController.stickerController = self;
     self.stickersService.hasNewModifiedPacks = NO;
     [self showModalViewController:_shopViewController];
     
@@ -541,7 +544,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self.stickersHeaderCollectionView selectItemAtIndexPath:selectedIndexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
 }
 
-- (void)reloadStickers {
+- (void)reloadStickers { //17
     [self setupInternalStickersView];
     
     NSArray *stickerPacks = self.stickersService.stickersArray;
@@ -557,7 +560,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Selection
 
-- (void)setPackSelectedAtIndex:(NSInteger)index {
+- (void)setPackSelectedAtIndex:(NSInteger)index { //18
     
     if ([self.stickersHeaderCollectionView numberOfItemsInSection:0] - 1 >= index) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
@@ -629,7 +632,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Checks
 
--(BOOL)isStickerPackDownloaded:(NSString *)packMessage {
+-(BOOL)isStickerPackDownloaded:(NSString *)packMessage { //24 //25 //26 //27 //32 //33 //34 //35 //37 //38 //39 //40
     NSString *packName = [NSString new];
     if ([STKStickersManager isOldFormatStickerMessage:packMessage]) {
         NSArray *packNames = [STKUtility trimmedPackNameAndStickerNameWithMessage:packMessage];
@@ -653,9 +656,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Property
 
-- (BOOL)isStickerViewShowed {
+- (BOOL)isStickerViewShowed { //42
     
     BOOL isShowed = self.internalStickersView.superview != nil;
+    
+    startstart = YES;
     
     return isShowed;
 }
@@ -667,7 +672,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     return _internalStickersView;
 }
 
-- (void)setTextInputView:(UITextView *)textInputView {
+- (void)setTextInputView:(UITextView *)textInputView { //19
     _textInputView = textInputView;
     [self initKeyBoardButton];
 }
@@ -696,7 +701,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self reloadStickersInputViews];
 }
 
-- (void) reloadStickersInputViews {
+- (void)reloadStickersInputViews {
     [self.textInputView reloadInputViews];
     if (!self.isKeyboardShowed) {
         [self.textInputView becomeFirstResponder];
@@ -713,7 +718,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.isKeyboardShowed = NO;
 }
 
-- (void)storageUpdated:(NSNotification*)notification {
+- (void)storageUpdated:(NSNotification*)notification { //31 //36
     self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
 }
 
@@ -731,7 +736,8 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
 }
 
-- (NSBundle *)getResourceBundle {
+- (NSBundle *)getResourceBundle { //3 //13
+    
     NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
     

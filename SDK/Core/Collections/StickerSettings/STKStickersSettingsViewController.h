@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+@class STKStickerController;
 
 @interface STKStickersSettingsViewController : UIViewController
+
+@property (nonatomic, strong) STKStickerController *stickerController;
 
 @end

@@ -33,7 +33,6 @@ static NSPersistentStoreCoordinator *defaultCoordinator;
             NSURL *documentsURL = [[fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
             NSURL *storeURL = [documentsURL URLByAppendingPathComponent:@"StickerModel.sqlite"];
             
-            
             NSError *error = nil;
             
             // Adding the journalling mode recommended by apple

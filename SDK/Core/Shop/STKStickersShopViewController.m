@@ -79,10 +79,6 @@ static NSUInteger const productsCount = 2;
     [STKStickersPurchaseService sharedInstance].delegate = self;
     
     self.apiService = [STKStickersApiService new];
-    
-//    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-//    [refreshControl addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
-//    [self.stickersShopWebView.scrollView addSubview:refreshControl];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -122,14 +118,6 @@ static NSUInteger const productsCount = 2;
     self.errorView.hidden = NO;
     self.errorLabel.text = (error.code == NSURLErrorNotConnectedToInternet) ? NSLocalizedString(@"No internet connection", nil) : NSLocalizedString(@"Oops... something went wrong", nil);
 }
-
-//- (void)handleRefresh:(UIRefreshControl *)refresh {
-//    if (self.isNetworkReachable) {
-//        [self checkNetwork];
-//        self.errorView.hidden = YES;
-//    }
-//    [refresh endRefreshing];
-//}
 
 - (void)packDownloaded {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -281,16 +269,18 @@ static NSUInteger const productsCount = 2;
     if ([currentURL isEqualToString:[self shopUrlString]] || [currentURL isEqualToString:@"about:blank"]) {
         [self dismissViewControllerAnimated:YES completion:^{
             [[NSNotificationCenter defaultCenter] postNotificationName:STKCloseModalViewNotification object:self];
+            
+            NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+            [userDefaults setObject:@"currentVC" forKey:@"viewController"];
+            [userDefaults synchronize];
+            
+            [self.stickerController showStickersView];
         }];
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.JsInterface.goBack()"];
         });
     }
-    
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:@"currentVC" forKey:@"viewController"];
-    [userDefaults synchronize];
 }
 
 - (IBAction)showCollections:(id)sender {

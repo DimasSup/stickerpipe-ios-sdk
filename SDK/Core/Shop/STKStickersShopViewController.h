@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+@class STKStickerController;
 
 @interface STKStickersShopViewController : UIViewController
 
@@ -14,4 +15,7 @@
 @property (nonatomic, weak) IBOutlet UIActivityIndicatorView *activity;
 
 @property (nonatomic, strong) NSString *packName;
+
+@property (nonatomic, strong) STKStickerController *stickerController;
+
 @end

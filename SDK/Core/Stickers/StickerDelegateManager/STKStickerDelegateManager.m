@@ -12,6 +12,8 @@
 #import "STKStickerPackObject.h"
 #import "STKStickerObject.h"
 
+#import "STKEmptyRecentCell.h"
+
 typedef enum {
     
     STKStickerPanelScrollDirectionTop,
@@ -73,11 +75,20 @@ typedef enum {
     if (stickerPack.stickers.count == 0 && [stickerPack.packName isEqualToString:@"Recent"]) {
         
         cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"STKEmptyRecentCell" forIndexPath:indexPath];
+        NSString *textForResentCell;
+        if (self.stickerPacks.count > 1) {
+            textForResentCell = NSLocalizedString(@"Send emotions with Stickers", nil);
+        } else {
+            textForResentCell = NSLocalizedString(@"LOADING...", nil);
+        }
+        
+        [cell configureWithText:textForResentCell];
+        
     } else {
         cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"STKStickerViewCell" forIndexPath:indexPath];
         
         STKStickerObject *sticker = stickerPack.stickers[indexPath.item];
-        [cell configureWithStickerMessage:sticker.stickerMessage placeholder:self.stickerPlaceholderImage placeholderColor:self.placeholderColor];
+        [cell configureWithStickerMessage:sticker.stickerMessage placeholder:self.stickerPlaceholderImage placeholderColor:self.placeholderColor collectionView:collectionView cellForItemAtIndexPath:indexPath];
     }
     
     return cell;
@@ -168,12 +179,6 @@ typedef enum {
     }
     
     self.lastContentOffset = scrollView.contentOffset.y;
- 
-//    if (scrollView.frame.size.height < 250 && scrollView.contentOffset.y < -50) {
-//        if (self.refreshBlock) {
-//            self.refreshBlock();
-//        }
-//    }
 }
 
 #pragma mark - Properties

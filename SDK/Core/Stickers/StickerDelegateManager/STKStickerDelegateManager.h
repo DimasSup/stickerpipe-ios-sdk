@@ -17,16 +17,14 @@
 @property (nonatomic, copy) void(^didChangeDisplayedSection)(NSInteger displayedSection);
 @property (nonatomic, copy) void(^didSelectSticker)(STKStickerObject* sticker);
 
-//@property (nonatomic, copy) void(^refreshBlock)(void);
-
 @property (nonatomic, weak) UICollectionView *collectionView;
 
 @property (assign, nonatomic) NSInteger currentDisplayedSection;
 
 @property (strong, nonatomic) UIColor *placeholderColor;
 
-- (void) setStickerPacksArray:(NSArray*)stickerPacks;
+- (void)setStickerPacksArray:(NSArray*)stickerPacks;
 
-- (void) setStickerPlaceholder:(UIImage*)stickerPlaceholder;
+- (void)setStickerPlaceholder:(UIImage*)stickerPlaceholder;
 
 @end

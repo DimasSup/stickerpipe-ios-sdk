@@ -304,7 +304,7 @@ static NSString *const recentName = @"Recent";
 }
 
 
-- (STKStickerPackObject*)recentStickerPack {
+- (STKStickerPackObject *)recentStickerPack {
     
     //     __block STKStickerPackObject *object = nil;
     //    [self.mainContext performBlock:^{

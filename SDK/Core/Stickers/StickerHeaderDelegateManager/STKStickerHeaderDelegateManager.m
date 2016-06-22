@@ -33,10 +33,13 @@
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     STKStickerHeaderCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"STKStickerPanelHeaderCell" forIndexPath:indexPath];
     
+    cell.layer.shouldRasterize = YES;
+    cell.layer.rasterizationScale = [UIScreen mainScreen].scale;
+    
     if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
         STKStickerPackObject *stickerPack = self.stickerPacksArray[indexPath.item];
         
-        [cell configWithStickerPack:stickerPack placeholder:self.placeholderImage placeholderTintColor:self.placeholderHeadercolor];
+        [cell configWithStickerPack:stickerPack placeholder:self.placeholderImage placeholderTintColor:self.placeholderHeadercolor collectionView:collectionView cellForItemAtIndexPath:indexPath];
     } else {
         [cell configureSettingsCell];
     }

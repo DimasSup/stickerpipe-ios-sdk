@@ -66,8 +66,9 @@
     self.backgroundColor = [UIColor clearColor];
 }
 
-- (void)configWithStickerPack:(STKStickerPackObject *)stickerPack placeholder:(UIImage *)placeholder placeholderTintColor:(UIColor *)placeholderTintColor {
+- (void)configWithStickerPack:(STKStickerPackObject *)stickerPack placeholder:(UIImage *)placeholder placeholderTintColor:(UIColor *)placeholderTintColor collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     //TODO:Refactoring
+    
     if ([stickerPack.packName isEqualToString:@"Recent"]) {
         
         self.originalImage = [UIImage imageNamedInCustomBundle:@"STKRecentSelectedIcon"];
@@ -102,11 +103,16 @@
         self.imageTask =[[DFImageManager sharedManager] imageTaskForRequest:request completion:^(UIImage *image, NSDictionary *info) {
             
             if (image) {
-                weakSelf.grayImage = [UIImage convertImageToGrayScale:image];
-                weakSelf.originalImage = image;
-                UIImage *resultImage = weakSelf.selected ? image : [UIImage convertImageToGrayScale:image];
-                weakSelf.imageView.image = resultImage;
-                [weakSelf setNeedsLayout];
+                NSIndexPath *currentIndexPath = [collectionView indexPathForCell:weakSelf];
+                
+                if ([currentIndexPath compare:indexPath] == NSOrderedSame) {
+                    
+                    weakSelf.grayImage = [UIImage convertImageToGrayScale:image];
+                    weakSelf.originalImage = image;
+                    UIImage *resultImage = weakSelf.selected ? image : [UIImage convertImageToGrayScale:image];
+                    weakSelf.imageView.image = resultImage;
+                    [weakSelf setNeedsLayout];
+                }
             } else {
                 NSError *error = info[DFImageInfoErrorKey];
                 if (error.code != -1) {
@@ -116,9 +122,7 @@
         }];
         
         [self.imageTask resume];
-        
     }
-    
 }
 
 - (void)configureSettingsCell {
@@ -126,7 +130,7 @@
     self.grayImage = [UIImage imageNamedInCustomBundle:@"STKSettingsIcon"];
     self.imageView.image = self.grayImage;
     self.imageView.tintColor = [UIColor colorWithRed:4/255.0 green:122/255.0 blue:1 alpha:1];
-    self.dotView.hidden = YES;
+//    self.dotView.hidden = YES;
 }
 
 @end
