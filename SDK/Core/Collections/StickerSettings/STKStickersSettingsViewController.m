@@ -57,8 +57,16 @@
     
     self.dataSource.deleteBlock = ^(NSIndexPath *indexPath,STKStickerPackObject* item) {
         [wself.apiService deleteStickerPackWithName:item.packName success:^(id response) {
-            [wself.service togglePackDisabling:item];
-            [wself updateStickerPacks];
+           
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [wself.service togglePackDisabling:item];
+
+                [wself.dataSource.dataSource removeObject:item];
+                //      [wself updateStickerPacks];
+                
+                [wself.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            });
+            
         } failure:^(NSError *error) {
             
         }];
@@ -140,6 +148,7 @@
     STKStickerPackObject *stickerPack = [self.dataSource itemAtIndexPath:indexPath];
     
     STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    shopViewController.stickerController = self.stickerController;
     shopViewController.packName = stickerPack.packName;
     [self.navigationController pushViewController:shopViewController animated:YES];
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];

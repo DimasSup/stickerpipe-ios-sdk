@@ -63,7 +63,6 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         self.deleteBlock(indexPath ,self.dataSource[indexPath.row]);
-        
     }
 }
 
