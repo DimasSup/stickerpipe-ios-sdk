@@ -249,8 +249,11 @@ static NSUInteger const productsCount = 2;
     
     [self.apiService loadStickerPackWithName:packName andPricePoint:packPrice success:^(id response) {
         [wself.entityService downloadNewPack:response[@"data"] onSuccess:^{
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:STKNewPackDownloadedNotification object:self userInfo:@{@"packName": packName}];
+            
             [wself dismissViewControllerAnimated:YES completion:^{
-                [[NSNotificationCenter defaultCenter] postNotificationName:STKNewPackDownloadedNotification object:self userInfo:@{@"packName": packName}];
+                [wself.stickerController showKeyboard];
             }];
         }];
         
@@ -274,7 +277,7 @@ static NSUInteger const productsCount = 2;
             [userDefaults setObject:@"currentVC" forKey:@"viewController"];
             [userDefaults synchronize];
             
-            [self.stickerController showStickersView];
+            [self.stickerController showKeyboard];
         }];
     } else {
         dispatch_async(dispatch_get_main_queue(), ^{

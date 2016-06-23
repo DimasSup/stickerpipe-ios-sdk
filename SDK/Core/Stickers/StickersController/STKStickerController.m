@@ -248,7 +248,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *stickerPacks) {
         dispatch_async(dispatch_get_main_queue(), ^{
             
-            
             self.stickersService.stickersArray = stickerPacks;
             self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
             self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
@@ -261,7 +260,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
             [self.stickersHeaderCollectionView reloadData];
             [self.stickersCollectionView reloadData];
             
-            [self showStickersView];
+        //    [self showStickersView];
             [self setPackSelectedAtIndex:stickerIndex];
             [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:stickerIndex inSection:0]];
         });
@@ -416,24 +415,61 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.keyboardButton.tintColor = [UIColor grayColor];
     self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
     
-    CGRect frame = CGRectMake(self.textInputView.frame.size.width - kKeyboardButtonHeight, 0, kKeyboardButtonHeight, kKeyboardButtonHeight);
-    UIView *view = [[UIView alloc]initWithFrame:frame];
-    [view addSubview:self.keyboardButton];
-    [self.textInputView addSubview:view];
-    [self addKeyboardButtonConstraintsToView:view];
-    self.keyboardButtonSuperView = view;
+    [self.textInputView.superview addSubview:self.keyboardButton];
+
+    self.keyboardButtonSuperView = self.keyboardButton;
+    
+    self.keyboardButton.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    NSLayoutConstraint *width = [NSLayoutConstraint constraintWithItem:self.keyboardButton
+                                                             attribute:NSLayoutAttributeWidth
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:nil
+                                                             attribute:NSLayoutAttributeNotAnAttribute
+                                                            multiplier:1
+                                                              constant:kKeyboardButtonHeight];
+    
+    NSLayoutConstraint *height = [NSLayoutConstraint constraintWithItem:self.keyboardButton
+                                                              attribute:NSLayoutAttributeHeight
+                                                              relatedBy:NSLayoutRelationEqual
+                                                                 toItem:nil
+                                                              attribute:NSLayoutAttributeNotAnAttribute
+                                                             multiplier:1
+                                                               constant:kKeyboardButtonHeight];
+    
+    NSLayoutConstraint *right = [NSLayoutConstraint constraintWithItem:self.keyboardButton
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.textInputView
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0];
+    
+    NSLayoutConstraint *top = [NSLayoutConstraint constraintWithItem:self.keyboardButton
+                                                           attribute:NSLayoutAttributeTop
+                                                           relatedBy:NSLayoutRelationEqual
+                                                              toItem:self.textInputView
+                                                           attribute:NSLayoutAttributeTop
+                                                          multiplier:1
+                                                            constant:0];
+    
+    [self.textInputView.superview addConstraints:@[right,top]];
+    [self.keyboardButton addConstraints:@[width, height]];
+    
+    [self.textInputView.superview layoutSubviews];
+    
+    [self textResizeForButton];
+
 }
 
 - (void)updateFrames { //22 //28
-    CGRect frame = CGRectMake(self.textInputView.frame.size.width - kKeyboardButtonHeight, 0, kKeyboardButtonHeight, kKeyboardButtonHeight);
-    self.keyboardButtonSuperView.frame = frame;
-    [self.keyboardButton layoutIfNeeded];
-    
-    [self textResizeForButton];
+
 }
+
 
 - (void)textResizeForButton { //23 //29
     CGRect viewFrame = self.keyboardButtonSuperView.frame;
+    viewFrame.size.height = CGFLOAT_MAX;
     UIBezierPath *exclusivePath = [UIBezierPath bezierPathWithRect:viewFrame];
     self.textInputView.textContainer.exclusionPaths = @[exclusivePath];
 }
@@ -686,7 +722,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
     
     self.textInputView.inputView = self.stickersView;
+    
     [self reloadStickersInputViews];
+}
+
+- (void)showKeyboard {
+    
+    [self.textInputView becomeFirstResponder];
+
 }
 
 - (void)hideStickersView {
@@ -710,7 +753,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - keyboard notifications
 
-- (void) didShowKeyboard:(NSNotification*)notification {
+- (void)didShowKeyboard:(NSNotification*)notification {
     self.isKeyboardShowed = YES;
 }
 

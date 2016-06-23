@@ -78,4 +78,6 @@
 
 - (void)setupInternalStickersView;
 
+- (void)showKeyboard;
+
 @end

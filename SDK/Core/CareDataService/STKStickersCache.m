@@ -34,7 +34,7 @@ static NSString *const recentName = @"Recent";
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)didUpdateStorage:(NSNotification*) notification {
+- (void)didUpdateStorage:(NSNotification *)notification {
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:STKStickersCacheDidUpdateStickersNotification object:nil];
     });
