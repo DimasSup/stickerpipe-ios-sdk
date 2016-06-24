@@ -788,11 +788,24 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 #pragma mark - keyboard notifications
 
 - (void) didShowKeyboard:(NSNotification*)notification {
-    self.isKeyboardShowed = YES;
+	if(self.textInputView.showSmileButton)
+	{
+		self.isKeyboardShowed = YES;
+	}
 }
 
 - (void)willHideKeyboard:(NSNotification*)notification {
     self.isKeyboardShowed = NO;
+	
+	UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowStickersIcon"];
+	
+	[self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
+	[self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
+	
+	self.textInputView.inputView = nil;
+	
+	
+	
 }
 
 - (void)storageUpdated:(NSNotification*)notification {
