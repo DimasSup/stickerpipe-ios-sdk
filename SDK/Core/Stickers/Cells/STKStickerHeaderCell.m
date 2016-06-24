@@ -130,7 +130,7 @@
     self.grayImage = [UIImage imageNamedInCustomBundle:@"STKSettingsIcon"];
     self.imageView.image = self.grayImage;
     self.imageView.tintColor = [UIColor colorWithRed:4/255.0 green:122/255.0 blue:1 alpha:1];
-//    self.dotView.hidden = YES;
+    self.dotView.hidden = YES;
 }
 
 @end

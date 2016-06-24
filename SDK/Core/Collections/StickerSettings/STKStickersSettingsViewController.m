@@ -61,10 +61,12 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 [wself.service togglePackDisabling:item];
 
+                [wself.tableView setEditing:NO animated:NO];
                 [wself.dataSource.dataSource removeObject:item];
                 //      [wself updateStickerPacks];
                 
-                [wself.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+                [wself.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
+                [wself.tableView setEditing:YES animated:NO];
             });
             
         } failure:^(NSError *error) {
