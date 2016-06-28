@@ -51,7 +51,7 @@
     
     [self setUpButtons];
     
-    [self.navigationController.navigationBar setBarTintColor: [UIColor colorWithRed:250/255.0 green:250/255.0 blue:250/255.0 alpha:1.0]];
+//    [self.navigationController.navigationBar setBarTintColor: [UIColor colorWithRed:250/255.0 green:250/255.0 blue:250/255.0 alpha:1.0]];
     self.navigationController.navigationBar.translucent = NO;
     
     __weak typeof(self) wself = self;
