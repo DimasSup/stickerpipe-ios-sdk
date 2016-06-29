@@ -37,7 +37,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 static const CGFloat kKeyboardButtonHeight = 33.0;
 
 @interface STKStickerController() {
-    BOOL startstart;
+    BOOL isStartShow;
 }
 
 @property (strong, nonatomic) UIView *keyboardButtonSuperView;
@@ -72,7 +72,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Inits
 
-- (void)loadStickerPacks { //30 //43
+- (void)loadStickerPacks {
     
     [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *stickerPacks) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -88,28 +88,22 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     } failure:nil];
 }
 
-- (void)loadStartPacks { //8 //41
-    NSLog(@"STAaaaaaaaaaaAAAAaaAaaaaaAAAAAAAAaaaaaaAAAAaaaAAAARTTTT!!");
+- (void)loadStartPacks {
     [self.stickersService getStickerPacksWithType:nil completion:^(NSArray *stickerPacks) {
         
         self.stickersService.stickersArray = stickerPacks;
         self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
         self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
-//        if (self.isStickerViewShowed) {
-//            [self showStickersView];
-//        }
         
-        if (!startstart && self.isStickerViewShowed) {
+        if (!isStartShow && self.isStickerViewShowed) {
             [self showStickersView];
-           // startstart = NO;
         } else {
             [self.stickersCollectionView reloadData];
         }
-        NSLog(@"FIIIIINIIIIIIIIINININININIININIINNIIINISSSSSHHHHHHHHHHH");
     } failure:nil];
 }
 
-- (instancetype)init { //1
+- (instancetype)init {
     
     self = [super init];
     if (self) {
@@ -153,9 +147,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removePack:) name:STKPackRemovedNotification object:nil];
         
-   //     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [self reloadRecentAtStart];
-  //      });
+        [self reloadRecentAtStart];
         
         [self.stickersHeaderCollectionView reloadData];
         [self.stickersCollectionView reloadData];
@@ -165,7 +157,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     return self;
 }
 
-- (void)checkNetwork { //7
+- (void)checkNetwork {
     
     __weak typeof(self) wself = self;
     
@@ -260,14 +252,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
             [self.stickersHeaderCollectionView reloadData];
             [self.stickersCollectionView reloadData];
             
-        //    [self showStickersView];
             [self setPackSelectedAtIndex:stickerIndex];
             [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:stickerIndex inSection:0]];
+            
         });
     } failure:nil];
 }
 
-- (void)initStickersCollectionView { //5 //10 //15
+- (void)initStickersCollectionView {
     
     //    self.stickersDelegateManager = [STKStickerDelegateManager new];
     
@@ -295,12 +287,12 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.stickersDelegateManager.collectionView = self.stickersCollectionView;
 }
 
-- (void)initHeaderButton:(UIButton *)button { //6 //11 //16
+- (void)initHeaderButton:(UIButton *)button {
     [button setTintColor:[STKUtility defaultBlueColor]];
     button.backgroundColor = self.headerBackgroundColor ? self.headerBackgroundColor : [STKUtility defaultGreyColor];
 }
 
-- (void)initStickerHeader { //4 //9 //14
+- (void)initStickerHeader {
     //    self.stickersHeaderDelegateManager = [STKStickerHeaderDelegateManager new];
     __weak typeof(self) weakSelf = self;
     [self.stickersHeaderDelegateManager setDidSelectRow:^(NSIndexPath *indexPath, STKStickerPackObject *stickerPack, BOOL animated) {
@@ -310,11 +302,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
             [weakSelf reloadHeaderItemAtIndexPath:indexPath];
         }
         
- //       NSInteger sectionsCount = [weakSelf.stickersCollectionView numberOfSections];
-        
         NSInteger numberOfItems = [weakSelf.stickersCollectionView numberOfItemsInSection:indexPath.item];
-        
- //       NSInteger section = indexPath.item;
         
         if (numberOfItems != 0) {
             NSIndexPath *newIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.item];
@@ -341,7 +329,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
 }
 
-- (void)setupInternalStickersView { //2 //12
+- (void)setupInternalStickersView {
     
     self.stickersShopButton.badgeBorderColor = [STKUtility defaultGreyColor];
     
@@ -366,7 +354,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self initHeaderButton:self.stickersShopButton];
 }
 
-- (void)addKeyboardButtonConstraintsToView:(UIView *)view { //21
+- (void)addKeyboardButtonConstraintsToView:(UIView *)view {
     
     self.keyboardButton.translatesAutoresizingMaskIntoConstraints = NO;
     
@@ -405,7 +393,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
                            ]];
 }
 
-- (void)initKeyBoardButton { //20
+- (void)initKeyBoardButton {
     
     self.keyboardButton = [STKShowStickerButton buttonWithType:UIButtonTypeSystem];
     
@@ -462,12 +450,12 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 }
 
-- (void)updateFrames { //22 //28
+- (void)updateFrames {
 
 }
 
 
-- (void)textResizeForButton { //23 //29
+- (void)textResizeForButton {
     CGRect viewFrame = self.keyboardButtonSuperView.frame;
     viewFrame.size.height = CGFLOAT_MAX;
     UIBezierPath *exclusivePath = [UIBezierPath bezierPathWithRect:viewFrame];
@@ -596,7 +584,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Selection
 
-- (void)setPackSelectedAtIndex:(NSInteger)index { //18
+- (void)setPackSelectedAtIndex:(NSInteger)index {
     
     if ([self.stickersHeaderCollectionView numberOfItemsInSection:0] - 1 >= index) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
@@ -668,7 +656,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Checks
 
--(BOOL)isStickerPackDownloaded:(NSString *)packMessage { //24 //25 //26 //27 //32 //33 //34 //35 //37 //38 //39 //40
+-(BOOL)isStickerPackDownloaded:(NSString *)packMessage {
     NSString *packName = [NSString new];
     if ([STKStickersManager isOldFormatStickerMessage:packMessage]) {
         NSArray *packNames = [STKUtility trimmedPackNameAndStickerNameWithMessage:packMessage];
@@ -692,11 +680,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Property
 
-- (BOOL)isStickerViewShowed { //42
+- (BOOL)isStickerViewShowed {
     
     BOOL isShowed = self.internalStickersView.superview != nil;
     
-    startstart = YES;
+    isStartShow = YES;
     
     return isShowed;
 }
@@ -708,7 +696,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     return _internalStickersView;
 }
 
-- (void)setTextInputView:(UITextView *)textInputView { //19
+- (void)setTextInputView:(UITextView *)textInputView {
     _textInputView = textInputView;
     [self initKeyBoardButton];
 }
@@ -724,6 +712,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.textInputView.inputView = self.stickersView;
     
     [self reloadStickersInputViews];
+ 
 }
 
 - (void)showKeyboard {
@@ -761,7 +750,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.isKeyboardShowed = NO;
 }
 
-- (void)storageUpdated:(NSNotification*)notification { //31 //36
+- (void)storageUpdated:(NSNotification*)notification {
     self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
 }
 
@@ -779,7 +768,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
 }
 
-- (NSBundle *)getResourceBundle { //3 //13
+- (NSBundle *)getResourceBundle {
     
     NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
