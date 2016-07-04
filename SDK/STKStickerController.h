@@ -10,6 +10,12 @@
 #import <UIKit/UIKit.h>
 #import "STKStickersConstants.h"
 
+#define STK_TEXTBUTTON_KEYBOARD @"iconChatKeyboard"
+#define STK_TEXTBUTTON_STICKERS @"iconChatSmileyBtn"
+
+
+
+
 @class STKStickerController;
 @class STKShowStickerButton;
 

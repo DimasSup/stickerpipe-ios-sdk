@@ -481,8 +481,10 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     
     self.keyboardButton = [STKShowStickerButton buttonWithType:UIButtonTypeSystem];
     
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowStickersIcon"];
+    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:STK_TEXTBUTTON_STICKERS];
+	
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
+	[self.keyboardButton.imageView setContentMode:UIViewContentModeScaleAspectFit];
     [self.keyboardButton addTarget:self action:@selector(keyboardButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     self.keyboardButton.tintColor = [UIColor grayColor];
     self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
@@ -756,7 +758,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 #pragma mark - Show/hide stickers
 
 - (void)showStickersView {
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowKeyboadIcon"];
+    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:STK_TEXTBUTTON_KEYBOARD];
     
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
     [self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
@@ -767,7 +769,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 
 - (void)hideStickersView {
     
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowStickersIcon"];
+    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:STK_TEXTBUTTON_STICKERS];
     
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
     [self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
@@ -797,7 +799,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 - (void)willHideKeyboard:(NSNotification*)notification {
     self.isKeyboardShowed = NO;
 	
-	UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowStickersIcon"];
+	UIImage *buttonImage = [UIImage imageNamedInCustomBundle:STK_TEXTBUTTON_STICKERS];
 	
 	[self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
 	[self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
