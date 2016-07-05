@@ -42,6 +42,7 @@
 
 - (void)stickerControllerReloadView;
 
+-(void)stickerController:(STKStickerController*)stickerController didSelectPack:(NSString*)packId;
 
 @end
 

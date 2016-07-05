@@ -133,7 +133,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     
     self = [super init];
     if (self) {
-        
+		self.showRecents = YES;
         self.stickersService = [STKStickersEntityService new];
         self.stickersDelegateManager = [STKStickerDelegateManager new];
         self.stickersHeaderDelegateManager = [STKStickerHeaderDelegateManager new];
@@ -311,7 +311,8 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
             
             [self showStickersView];
             [self setPackSelectedAtIndex:stickerIndex];
-            [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:stickerIndex inSection:1]];
+			
+            [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[self selectedIndexHeaderForSavedValue:stickerIndex]];
         });
     } failure:nil];
 }
@@ -382,8 +383,15 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
             [weakSelf.stickersService updateStickerPackInCache:stickerPack];
             [weakSelf reloadHeaderItemAtIndexPath:indexPath];
         }
+		
+		[weakSelf setLastSelectedStickerPack:indexPath.row];
         NSIndexPath *newIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.item];
         CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath:newIndexPath].frame;
+		
+		if( [weakSelf.delegate respondsToSelector:@selector(stickerController:didSelectPack:)])
+		{
+			[weakSelf.delegate stickerController:weakSelf didSelectPack:stickerPack.packName];
+		}
         if (stickerPack.stickers.count > 0 || indexPath.item == 0) {
             [weakSelf.stickersCollectionView setContentOffset:CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y  - kStickersSectionPaddingTopBottom) animated:YES];
             weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
@@ -394,6 +402,12 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 	}];
 	[self.stickersHeaderDelegateManager setDidSelectCustomSmilesRow:^{
 		[weakSelf showCustomSmiles];
+		[weakSelf setLastSelectedStickerPack:-1];
+		
+		if( [weakSelf.delegate respondsToSelector:@selector(stickerController:didSelectPack:)])
+		{
+			[weakSelf.delegate stickerController:weakSelf didSelectPack:@"custom_smiles"];
+		}
 	}];
 	
     [self.stickersHeaderDelegateManager setDidSelectSettingsRow:^{
@@ -624,25 +638,56 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
     [self.stickersHeaderCollectionView reloadData];
     self.stickersCollectionView.contentOffset = CGPointZero;
     self.stickersDelegateManager.currentDisplayedSection = 0;
-    
-    [self setPackSelectedAtIndex:0];
+	int value = [self getLastSelectedStickerPack];
+	[self setPackSelectedAtIndex:value>0?0:value];
 }
+#pragma mark - save/load
+-(NSIndexPath*)selectedIndexHeaderForSavedValue:(int)value
+{
+	if(value==-1)
+	{
+		return [NSIndexPath indexPathForItem:0 inSection:0];
+	}
+	else
+	{
+		return [NSIndexPath indexPathForItem:value inSection:1];
+	}
+}
+-(int)getLastSelectedStickerPack
+{
+	return [[NSUserDefaults standardUserDefaults] integerForKey:@"stk_lastselected_header"];
 
+}
+-(void)setLastSelectedStickerPack:(int)value
+{
+	[[NSUserDefaults standardUserDefaults] setInteger:value forKey:@"stk_lastselected_header"];
+}
 #pragma mark - Selection
 
+
+
 - (void)setPackSelectedAtIndex:(NSInteger)index {
-    
-    if ([self.stickersHeaderCollectionView numberOfItemsInSection:1] - 1 >= index) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:1];
-        
-        STKStickerPackObject *stickerPack = [self.stickersHeaderDelegateManager itemAtIndexPath:indexPath];
-        if (stickerPack.isNew.boolValue) {
-            stickerPack.isNew = @NO;
-            [self.stickersService updateStickerPackInCache:stickerPack];
-            [self reloadHeaderItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:1]];
-        }
-        [self.stickersHeaderCollectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
-    }
+	if(index>0)
+	{
+		
+		if ([self.stickersHeaderCollectionView numberOfItemsInSection:1] - 1 >= index) {
+			NSIndexPath *indexPath = [self selectedIndexHeaderForSavedValue:index];
+			
+			STKStickerPackObject *stickerPack = [self.stickersHeaderDelegateManager itemAtIndexPath:indexPath];
+			if (stickerPack.isNew.boolValue) {
+				stickerPack.isNew = @NO;
+				[self.stickersService updateStickerPackInCache:stickerPack];
+				[self reloadHeaderItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:1]];
+			}
+			[self.stickersHeaderCollectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
+		}
+	}
+	else
+	{
+		NSIndexPath *indexPath = [self selectedIndexHeaderForSavedValue:index];
+		[self.stickersHeaderCollectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
+		[self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:indexPath];
+	}
 }
 
 #pragma mark - Presenting
@@ -692,7 +737,7 @@ static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 
 - (void)selectPack:(NSUInteger)index {
     [self setPackSelectedAtIndex:index];
-    [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:1]];
+    [self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[self selectedIndexHeaderForSavedValue:index]];
 }
 
 #pragma mark - Checks
