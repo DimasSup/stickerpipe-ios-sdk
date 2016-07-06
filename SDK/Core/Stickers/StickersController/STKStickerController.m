@@ -151,6 +151,10 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
         
         [self.stickersHeaderCollectionView reloadData];
         [self.stickersCollectionView reloadData];
+        
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setObject:@"currentVC" forKey:@"viewController"];
+        [userDefaults synchronize];
        
         
     }
@@ -625,7 +629,9 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)showPackInfoControllerWithName:(NSString *)packName {
     STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    vc.stickerController = self;
     vc.packName = packName;
+    [vc.stickerController showStickersView];
     [self showModalViewController:vc];
 }
 

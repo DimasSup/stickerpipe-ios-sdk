@@ -170,6 +170,7 @@ static BOOL downloadMaxIm = NO;
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:@"yes" forKey:@"isNotification"];
     [userDefaults synchronize];
+    
     [stickerController showPackInfoControllerWithName:packName];
 }
 
