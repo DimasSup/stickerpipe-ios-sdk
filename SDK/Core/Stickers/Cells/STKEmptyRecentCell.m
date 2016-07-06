@@ -7,7 +7,6 @@
 //
 
 #import "STKEmptyRecentCell.h"
-#import "UIImage+CustomBundle.h"
 
 @interface STKEmptyRecentCell ()
 
@@ -22,7 +21,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         
-        UIImageView *introImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKIntroImage"]];
+        UIImageView *introImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"STKIntroImage"]];
         
         introImageView.translatesAutoresizingMaskIntoConstraints = NO;
         

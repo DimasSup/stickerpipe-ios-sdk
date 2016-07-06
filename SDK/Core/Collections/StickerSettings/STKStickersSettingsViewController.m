@@ -17,8 +17,6 @@
 #import "STKStickersShopViewController.h"
 #import "STKStickersConstants.h"
 
-#import "UIImage+CustomBundle.h"
-
 #import "STKStickerController.h"
 
 @interface STKStickersSettingsViewController () <UITableViewDelegate>
@@ -36,7 +34,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self.tableView registerNib:[UINib nibWithNibName:@"STKStickerSettingsCell" bundle:[self getResourceBundle]] forCellReuseIdentifier:@"STKStickerSettingsCell"];
+    [self.tableView registerNib:[UINib nibWithNibName:@"STKStickerSettingsCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"STKStickerSettingsCell"];
     
     
     self.dataSource = [[STKTableViewDataSource alloc] initWithItems:nil cellIdentifier:@"STKStickerSettingsCell" configureBlock:^(STKStickerSettingsCell *cell, STKStickerPackObject *item) {
@@ -115,7 +113,7 @@
 
 - (void)setUpButtons {
     
-    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
+    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
     
     self.navigationItem.leftBarButtonItem = closeBarButton;
     
@@ -149,7 +147,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     STKStickerPackObject *stickerPack = [self.dataSource itemAtIndexPath:indexPath];
     
-    STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
     shopViewController.stickerController = self.stickerController;
     shopViewController.packName = stickerPack.packName;
     [self.navigationController pushViewController:shopViewController animated:YES];
@@ -176,13 +174,6 @@
         
         [self.stickerController showStickersView];
     }];
-}
-
-- (NSBundle *)getResourceBundle {
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-    
-    return bundle;
 }
 
 @end

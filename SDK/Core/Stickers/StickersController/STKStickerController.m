@@ -28,8 +28,6 @@
 
 #import <AFNetworking/AFNetworking.h>
 
-#import "UIImage+CustomBundle.h"
-
 
 //SIZES
 
@@ -337,7 +335,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
     self.stickersShopButton.badgeBorderColor = [STKUtility defaultGreyColor];
     
-    self.internalStickersView = [[[self getResourceBundle] loadNibNamed:@"STKStickersView" owner:self options:nil] firstObject];
+    self.internalStickersView = [[[NSBundle mainBundle] loadNibNamed:@"STKStickersView" owner:self options:nil] firstObject];
     
     if (self.stickersViewFrame.size.height > 0) {
         self.internalStickersView.autoresizingMask = UIViewAutoresizingNone;
@@ -401,7 +399,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
     self.keyboardButton = [STKShowStickerButton buttonWithType:UIButtonTypeSystem];
     
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowStickersIcon"];
+    UIImage *buttonImage = [UIImage imageNamed:@"STKShowStickersIcon"];
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
     [self.keyboardButton addTarget:self action:@selector(keyboardButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     self.keyboardButton.tintColor = [UIColor grayColor];
@@ -515,14 +513,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)collectionsButtonAction:(UIButton*)collectionsButton {
     
-    _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[self getResourceBundle]];
+    _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[NSBundle mainBundle]];
     _settingsViewController.stickerController = self;
     [self showModalViewController:_settingsViewController];
 }
 
 - (void)stickersShopButtonAction:(id)sender {
     
-    _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
     _shopViewController.stickerController = self;
     self.stickersService.hasNewModifiedPacks = NO;
     [self showModalViewController:_shopViewController];
@@ -608,7 +606,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)showPackInfoControllerWithStickerMessage:(NSString*)message {
     
     [self hideStickersView];
-    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
     
     if ([self isStickerPackDownloaded:message]) {
         vc.packName = [self.stickersService packNameForStickerId:[STKUtility stickerIdWithMessage:message]];
@@ -628,7 +626,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 - (void)showPackInfoControllerWithName:(NSString *)packName {
-    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
     vc.stickerController = self;
     vc.packName = packName;
     [vc.stickerController showStickersView];
@@ -710,7 +708,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 #pragma mark - Show/hide stickers
 
 - (void)showStickersView {
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowKeyboadIcon"];
+    UIImage *buttonImage = [UIImage imageNamed:@"STKShowKeyboadIcon"];
     
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
     [self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
@@ -729,7 +727,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)hideStickersView {
     
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowStickersIcon"];
+    UIImage *buttonImage = [UIImage imageNamed:@"STKShowStickersIcon"];
     
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
     [self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
@@ -772,14 +770,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)textMessageSent:(NSString *)message {
     [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageTextLabel value:nil];
     
-}
-
-- (NSBundle *)getResourceBundle {
-    
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-    
-    return bundle;
 }
 
 @end
