@@ -34,8 +34,10 @@
         
 //        UILabel *introLabel = [[UILabel alloc] init];
         self.introLabel = [[UILabel alloc] init];
+		self.introLabel.numberOfLines= 0;
         self.introLabel.font = [UIFont fontWithName:@"Helvetica-Neue-Regular" size:14.0];
         self.introLabel.translatesAutoresizingMaskIntoConstraints = NO;
+		self.introLabel.textAlignment = NSTextAlignmentCenter;
  //       introLabel.text = NSLocalizedString(@"Send emotions with Stickers", nil);
         self.introLabel.textColor = [UIColor colorWithRed:151.0/255.0 green:151.0/255.0 blue:151.0/255.0 alpha:1];
         [self.contentView addSubview:self.introLabel];
@@ -43,6 +45,7 @@
         [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.introLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:introImageView attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0]];
         
         [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.introLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0]];
+		[self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.introLabel attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeWidth multiplier:1 constant:0]];
     }
     return self;
 }

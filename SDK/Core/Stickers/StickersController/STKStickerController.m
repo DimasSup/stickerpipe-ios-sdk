@@ -445,16 +445,8 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
     self.stickersShopButton.badgeBorderColor = [STKUtility defaultGreyColor];
 	
-	@try {
-		
-		self.internalStickersView = [[[self getResourceBundle] loadNibNamed:@"STKStickersViewCustom" owner:self options:nil] firstObject];
-	} @catch (NSException *exception) {
-		if(self.internalStickersView==nil)
-		{
-			self.internalStickersView=[[[NSBundle mainBundle] loadNibNamed:@"STKStickersViewCustom" owner:self options:nil] firstObject];
-		}
-	}
-	
+	self.internalStickersView = [[[NSBundle mainBundle] loadNibNamed:@"STKStickersViewCustom" owner:self options:nil] firstObject];
+
 	if (self.stickersViewFrame.size.height > 0) {
 		self.internalStickersView.autoresizingMask = UIViewAutoresizingNone;
 		self.internalStickersView.frame = self.stickersViewFrame;

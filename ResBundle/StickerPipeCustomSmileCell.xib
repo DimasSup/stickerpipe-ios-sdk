@@ -28,7 +28,7 @@
             <connections>
                 <outlet property="imageView" destination="kSt-Ru-XtS" id="ao9-bF-SVs"/>
             </connections>
-            <point key="canvasLocation" x="417" y="340"/>
+            <point key="canvasLocation" x="312" y="386"/>
         </collectionViewCell>
     </objects>
 </document>
