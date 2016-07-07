@@ -17,8 +17,12 @@ static NSPersistentStoreCoordinator *defaultCoordinator;
     if (!defaultCoordinator) {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            
-            NSURL *urlForDataModel = [[NSBundle mainBundle] URLForResource:@"StickerModel" withExtension:@"momd"];
+			
+			NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
+			NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
+			
+			
+            NSURL *urlForDataModel = [bundle URLForResource:@"StickerModel" withExtension:@"momd"];
             
             NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:urlForDataModel];
             
