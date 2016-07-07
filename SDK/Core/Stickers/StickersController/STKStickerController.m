@@ -28,7 +28,6 @@
 
 #import <AFNetworking/AFNetworking.h>
 
-#import "UIImage+CustomBundle.h"
 
 #import "UITextView+StickerButtonControl.h"
 
@@ -521,8 +520,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
     self.keyboardButton = [STKShowStickerButton buttonWithType:UIButtonTypeSystem];
     
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:STK_TEXTBUTTON_STICKERS];
-	
+    UIImage *buttonImage = [UIImage imageNamed:STK_TEXTBUTTON_STICKERS];
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
 	[self.keyboardButton.imageView setContentMode:UIViewContentModeScaleAspectFit];
     [self.keyboardButton addTarget:self action:@selector(keyboardButtonAction:) forControlEvents:UIControlEventTouchUpInside];
@@ -596,14 +594,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)collectionsButtonAction:(UIButton*)collectionsButton {
     
-    _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[self getResourceBundle]];
+    _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[NSBundle mainBundle]];
     _settingsViewController.stickerController = self;
     [self showModalViewController:_settingsViewController];
 }
 
 - (void)stickersShopButtonAction:(id)sender {
     
-    _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
     _shopViewController.stickerController = self;
     self.stickersService.hasNewModifiedPacks = NO;
     [self showModalViewController:_shopViewController];
@@ -718,7 +716,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)showPackInfoControllerWithStickerMessage:(NSString*)message {
     
     [self hideStickersView];
-    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
     
     if ([self isStickerPackDownloaded:message]) {
         vc.packName = [self.stickersService packNameForStickerId:[STKUtility stickerIdWithMessage:message]];
@@ -738,7 +736,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 - (void)showPackInfoControllerWithName:(NSString *)packName {
-    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
     vc.stickerController = self;
     vc.packName = packName;
     [vc.stickerController showStickersView];
@@ -827,7 +825,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 #pragma mark - Show/hide stickers
 
 - (void)showStickersView {
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:STK_TEXTBUTTON_KEYBOARD];
+    UIImage *buttonImage = [UIImage imageNamed:STK_TEXTBUTTON_KEYBOARD];
     
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
     [self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
@@ -844,7 +842,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)hideStickersView {
     
-    UIImage *buttonImage = [UIImage imageNamedInCustomBundle:STK_TEXTBUTTON_STICKERS];
+    UIImage *buttonImage = [UIImage imageNamed:STK_TEXTBUTTON_STICKERS];
     
     [self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
     [self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
@@ -873,7 +871,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)willHideKeyboard:(NSNotification*)notification {
     self.isKeyboardShowed = NO;
 	
-	UIImage *buttonImage = [UIImage imageNamedInCustomBundle:STK_TEXTBUTTON_STICKERS];
+	UIImage *buttonImage = [UIImage imageNamed:STK_TEXTBUTTON_STICKERS];
 	
 	[self.keyboardButton setImage:buttonImage forState:UIControlStateNormal];
 	[self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
@@ -900,13 +898,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)textMessageSent:(NSString *)message {
     [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageTextLabel value:nil];
     
-}
-
-- (NSBundle *)getResourceBundle {
-	NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-	NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-	
-    return bundle;
 }
 
 @end

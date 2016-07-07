@@ -13,7 +13,6 @@
 #import "STKStickerPackObject.h"
 #import "STKBadgeView.h"
 
-#import "UIImage+CustomBundle.h"
 
 @interface STKStickerHeaderCell()
 
@@ -71,8 +70,7 @@
     
     if ([stickerPack.packName isEqualToString:@"Recent"]) {
         
-        self.originalImage = [UIImage imageNamedInCustomBundle:@"STKRecentSelectedIcon"];
-//        self.grayImage = [UIImage imageNamedInCustomBundle:@"STKRecentIcon"];
+        self.originalImage = [UIImage imageNamed:@"STKRecentSelectedIcon"];
         self.imageView.image = self.originalImage;
         self.dotView.hidden = YES;
     } else {
@@ -80,7 +78,7 @@
         
         NSURL *iconUrl = [STKUtility tabImageUrlForPackName:stickerPack.packName];
         
-        UIImage *resultPlaceholder = placeholder ? placeholder : [UIImage imageNamedInCustomBundle:@"STKStikerTabPlaceholder"];
+        UIImage *resultPlaceholder = placeholder ? placeholder : [UIImage imageNamed:@"STKStikerTabPlaceholder"];
         
         UIColor *colorForPlaceholder = placeholderTintColor && !placeholder ? placeholderTintColor : [STKUtility defaultPlaceholderGrayColor];
         
@@ -126,9 +124,8 @@
 }
 
 - (void)configureSettingsCell {
-    self.originalImage = [UIImage imageNamedInCustomBundle:@"STKSettingsSelectedIcon"];
-    self.grayImage = [UIImage imageNamedInCustomBundle:@"STKSettingsIcon"];
-	self.imageView.image = self.grayImage?:self.originalImage;
+    self.originalImage = [UIImage imageNamed:@"STKSettingsSelectedIcon"];
+    self.imageView.image = self.grayImage?:self.originalImage;
     self.imageView.tintColor = [UIColor colorWithRed:4/255.0 green:122/255.0 blue:1 alpha:1];
     self.dotView.hidden = YES;
 }

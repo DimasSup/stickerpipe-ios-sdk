@@ -27,8 +27,6 @@
 #import <StoreKit/StoreKit.h>
 #import <AFNetworking/AFNetworking.h>
 
-#import "UIImage+CustomBundle.h"
-
 //static NSString * const mainUrl = @"http://work.stk.908.vc/api/v2/web?";
 static NSString * const mainUrl = @"http://api.stickerpipe.com/api/v2/web?";
 
@@ -225,11 +223,11 @@ static NSUInteger const productsCount = 2;
 
 - (void)setUpButtons {
     
-    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
+    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
     
     self.navigationItem.leftBarButtonItem = closeBarButton;
 
-    UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKSettingsIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(showCollections:)];
+    UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"STKSettingsIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(showCollections:)];
     self.navigationItem.rightBarButtonItem = settingsButton;
 }
 

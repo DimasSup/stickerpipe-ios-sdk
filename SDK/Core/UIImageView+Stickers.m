@@ -14,8 +14,6 @@
 #import "STKImageManager.h"
 #import "UIImageView+WebCache.h"
 
-#import "UIImage+CustomBundle.h"
-
 @interface UIImageView()
 
 @property (strong, nonatomic) STKImageManager *imageManager;
@@ -53,7 +51,7 @@
     
     UIImage *placeholderImage = nil;
     if (!placeholder) {
-        UIImage *defaultPlaceholder = [UIImage imageNamedInCustomBundle:@"STKStickerPlaceholder"];
+        UIImage *defaultPlaceholder = [UIImage imageNamed:@"STKStickerPlaceholder"];
         if (placeholderColor) {
             defaultPlaceholder = [defaultPlaceholder imageWithImageTintColor:placeholderColor];
         } else {
