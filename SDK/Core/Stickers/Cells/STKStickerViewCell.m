@@ -17,6 +17,8 @@
 #import "UIImageView+WebCache.h"
 #import "STKStickersApiService.h"
 
+#import "UIImage+CustomBundle.h"
+
 @interface STKStickerViewCell()
 
 @property (strong, nonatomic) UIImageView *stickerImageView;
@@ -58,6 +60,11 @@
                 cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     
     UIImage *resultPlaceholder = placeholder ? placeholder : [UIImage imageNamed:@"STKStickerPanelPlaceholder"];
+    
+    /**
+     *  For framework
+     */
+    //    UIImage *resultPlaceholder = placeholder ? placeholder : [UIImage imageNamedInCustomBundle:@"STKStickerPanelPlaceholder"];
     
     UIColor *colorForPlaceholder = placeholderColor && !placeholder ? placeholderColor : [STKUtility defaultPlaceholderGrayColor];
     

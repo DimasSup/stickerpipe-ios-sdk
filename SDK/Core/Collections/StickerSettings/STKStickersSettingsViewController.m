@@ -17,6 +17,8 @@
 #import "STKStickersShopViewController.h"
 #import "STKStickersConstants.h"
 
+#import "UIImage+CustomBundle.h"
+
 #import "STKStickerController.h"
 
 @interface STKStickersSettingsViewController () <UITableViewDelegate>
@@ -35,6 +37,10 @@
     [super viewDidLoad];
     
     [self.tableView registerNib:[UINib nibWithNibName:@"STKStickerSettingsCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"STKStickerSettingsCell"];
+    /**
+     *  For framework
+     */
+    //    [self.tableView registerNib:[UINib nibWithNibName:@"STKStickerSettingsCell" bundle:[self getResourceBundle]] forCellReuseIdentifier:@"STKStickerSettingsCell"];
     
     
     self.dataSource = [[STKTableViewDataSource alloc] initWithItems:nil cellIdentifier:@"STKStickerSettingsCell" configureBlock:^(STKStickerSettingsCell *cell, STKStickerPackObject *item) {
@@ -115,6 +121,11 @@
     
     UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
     
+    /**
+     *  For framework
+     */
+    //    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
+    
     self.navigationItem.leftBarButtonItem = closeBarButton;
     
     self.editBarButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Edit", nil) style:UIBarButtonItemStylePlain target:self action:@selector(editAction:)];
@@ -148,6 +159,11 @@
     STKStickerPackObject *stickerPack = [self.dataSource itemAtIndexPath:indexPath];
     
     STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
+    /**
+     *  For framework
+     */
+    //    STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+    
     shopViewController.stickerController = self.stickerController;
     shopViewController.packName = stickerPack.packName;
     [self.navigationController pushViewController:shopViewController animated:YES];
@@ -174,6 +190,13 @@
         
         [self.stickerController showStickersView];
     }];
+}
+
+- (NSBundle *)getResourceBundle {
+    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
+    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
+    
+    return bundle;
 }
 
 @end
