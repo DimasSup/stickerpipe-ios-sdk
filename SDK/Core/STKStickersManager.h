@@ -52,4 +52,6 @@
 
 + (void)getUserInfo:(NSDictionary *)info stickerController:(STKStickerController *)stickerController;
 
++ (void)setShopContentColor:(UIColor *)color;
+
 @end

@@ -608,6 +608,9 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self hideStickersView];
     STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
     
+    vc.stickerController = self;
+    [vc.stickerController showStickersView];
+    
     if ([self isStickerPackDownloaded:message]) {
         vc.packName = [self.stickersService packNameForStickerId:[STKUtility stickerIdWithMessage:message]];
         [self showModalViewController:vc];
@@ -644,7 +647,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)showPack:(NSNotification *)notification {
     NSString *packName = notification.userInfo[@"packName"];
     NSUInteger stickerIndex = [self.stickersService indexOfPackWithName:packName];
-    [self showStickersView];
+//    [self showStickersView];
     [self setPackSelectedAtIndex:stickerIndex];
     
     if ([self.stickersHeaderCollectionView numberOfItemsInSection:0] - 1 >= stickerIndex) {
@@ -714,6 +717,8 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self.keyboardButton setImage:buttonImage forState:UIControlStateHighlighted];
     
     self.textInputView.inputView = self.stickersView;
+    
+    self.isKeyboardShowed = NO;
     
     [self reloadStickersInputViews];
  

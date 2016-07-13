@@ -163,20 +163,29 @@ static NSUInteger const productsCount = 2;
     
     NSString *language = [[lang componentsSeparatedByString:@"-"] objectAtIndex:0];
     
-    UIColor *navigationBarColor = self.navigationController.navigationBar.backgroundColor;
+    NSString *color = [[NSUserDefaults standardUserDefaults] stringForKey:kShopColor];
+    if (color == nil || [color isEqualToString:@""]) {
+        color = @"047aff";
+    }
     
-    CGFloat red = 0.0, green = 0.0, blue = 0.0, alpha =0.0;
-    [navigationBarColor getRed:&red green:&green blue:&blue alpha:&alpha];
-    
-    int r,g,b,a;
-    
-    r = (int)(255.0 * red);
-    g = (int)(255.0 * green);
-    b = (int)(255.0 * blue);
-    a = (int)(255.0 * alpha);
-    
-   NSString *color = [NSString stringWithFormat:@"%02x%02x%02x", r, g, b];
-    
+    /**
+     *  Shop content color from navigation controller
+     
+     UIColor *navigationBarColor = self.navigationController.navigationBar.backgroundColor;
+     
+     CGFloat red = 0.0, green = 0.0, blue = 0.0, alpha =0.0;
+     [navigationBarColor getRed:&red green:&green blue:&blue alpha:&alpha];
+     
+     int r,g,b,a;
+     
+     r = (int)(255.0 * red);
+     g = (int)(255.0 * green);
+     b = (int)(255.0 * blue);
+     a = (int)(255.0 * alpha);
+     
+     NSString *color = [NSString stringWithFormat:@"%02x%02x%02x", r, g, b];
+     */
+
     NSMutableString *urlstr = [NSMutableString stringWithFormat:@"%@&apiKey=%@&platform=IOS&userId=%@&density=%@&is_subscriber=%d&primaryColor=%@&localization=%@", mainUrl, [STKApiKeyManager apiKey], [STKStickersManager userKey], [STKUtility scaleString], [STKStickersManager isSubscriber], color, language];
     
     if (self.prices.count > 0) {
@@ -371,6 +380,8 @@ static NSUInteger const productsCount = 2;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self dismissViewControllerAnimated:YES completion:^{
             [[NSNotificationCenter defaultCenter] postNotificationName:STKShowPackNotification object:self userInfo:@{@"packName": packName}];
+            
+            [self.stickerController showKeyboard];
         }];
     });
 }

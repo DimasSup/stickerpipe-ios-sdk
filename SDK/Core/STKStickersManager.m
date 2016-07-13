@@ -23,7 +23,6 @@ static BOOL downloadMaxIm = NO;
 
 @interface STKStickersManager()
 
-
 @end
 
 @implementation STKStickersManager
@@ -173,5 +172,20 @@ static BOOL downloadMaxIm = NO;
     
     [stickerController showPackInfoControllerWithName:packName];
 }
+
++ (void)setShopContentColor:(UIColor *)color {
+    CGFloat red = 0.0, green = 0.0, blue = 0.0, alpha =0.0;
+    [color getRed:&red green:&green blue:&blue alpha:&alpha];
+    
+    int r,g,b,a;
+    
+    r = (int)(255.0 * red);
+    g = (int)(255.0 * green);
+    b = (int)(255.0 * blue);
+    a = (int)(255.0 * alpha);
+    NSString *colorForShop = [NSString stringWithFormat:@"%02x%02x%02x", r, g, b];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:colorForShop forKey:kShopColor];
+ }
 
 @end

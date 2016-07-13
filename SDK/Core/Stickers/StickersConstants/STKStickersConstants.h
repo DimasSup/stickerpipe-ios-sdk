@@ -50,6 +50,8 @@ extern NSString *const kPriceCValue;
 
 extern NSString *const kIsSubscriber;
 
+extern NSString *const kShopColor;
+
 
 @interface STKStickersConstants : NSObject
 

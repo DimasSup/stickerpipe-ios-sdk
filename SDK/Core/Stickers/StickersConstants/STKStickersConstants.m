@@ -71,6 +71,9 @@ NSString *const kPriceCValue =
 NSString *const kIsSubscriber =
     @"kIsSubscriber";
 
+NSString *const kShopColor =
+    @"kShopColor";
+
 
 @implementation STKStickersConstants
 
