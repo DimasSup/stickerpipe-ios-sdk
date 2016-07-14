@@ -460,13 +460,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self.textInputView.superview layoutSubviews];
     
     [self textResizeForButton];
-
 }
-
-- (void)updateFrames {
-
-}
-
 
 - (void)textResizeForButton {
     CGRect viewFrame = self.keyboardButtonSuperView.frame;
@@ -816,9 +810,8 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark -------
 
-- (void)textMessageSent:(NSString *)message {
-    [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageTextLabel value:nil];
-    
+- (void)userMessageSent {
+    [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageTextLabel value:nil];    
 }
 
 - (NSBundle *)getResourceBundle {

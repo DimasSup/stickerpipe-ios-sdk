@@ -50,8 +50,6 @@
 
 //@property (nonatomic, strong) UIColor *stickersShopTintColor;
 
-- (void)updateFrames;
-
 - (void)reloadStickersView;
 
 - (void)showStickersView;
@@ -70,7 +68,7 @@
 
 - (void)setColorForStickersHeaderPlaceholderColor:(UIColor*) color;
 
-- (void)textMessageSent:(NSString *)message;
+- (void)userMessageSent;
 
 - (void)handleError:(NSError *)error;
 
