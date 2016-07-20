@@ -183,15 +183,17 @@ static NSString *const packsURL = @"shop/my";
 }
 
 - (void)sendDeviceToken:(NSString *)token
-                failure:(void (^)(NSError *))failure {
-    
-    [self.sessionManager POST:@"token" parameters:@{@"token":token} success:nil
-     
-                      failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                          if (failure) {
-                              failure(error);
-                          }
-                      }];
+				failure:(void (^)(NSError *))failure {
+	if(token)
+	{
+		[self.sessionManager POST:@"token" parameters:@{@"token":token} success:nil
+		 
+						  failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+							  if (failure) {
+								  failure(error);
+							  }
+						  }];
+	}
 }
-     
+
 @end

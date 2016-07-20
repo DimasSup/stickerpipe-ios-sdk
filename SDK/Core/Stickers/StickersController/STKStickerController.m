@@ -263,7 +263,10 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)updateStickers:(NSNotification *)notification {
     
     NSMutableArray *stickers = notification.userInfo[@"packs"];
-    [stickers insertObject:self.stickersService.stickersArray[0] atIndex:0];
+	if(self.stickersService.stickersArray.count)
+	{
+		[stickers insertObject:self.stickersService.stickersArray[0] atIndex:0];
+	}
 	stickers = [self prepareStickerPacks:stickers];
     self.stickersService.stickersArray = stickers;
     [self.stickersHeaderDelegateManager setStickerPacks:stickers];
@@ -395,8 +398,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
         }
 		
 		[weakSelf setLastSelectedStickerPack:indexPath.row];
-        NSIndexPath *newIndexPath = [NSIndexPath indexPathForItem:0 inSection:indexPath.item];
-        CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath:newIndexPath].frame;
+        
 		
 		if( [weakSelf.delegate respondsToSelector:@selector(stickerController:didSelectPack:)])
 		{
