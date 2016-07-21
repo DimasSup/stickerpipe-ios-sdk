@@ -19,6 +19,8 @@
 
 #import "UIImage+CustomBundle.h"
 
+static CGFloat imageWidth;
+
 @interface STKStickerViewCell()
 
 @property (strong, nonatomic) UIImageView *stickerImageView;
@@ -32,13 +34,23 @@
     
     self = [super initWithFrame:frame];
     if (self) {
-        self.stickerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.0, 0.0, 80.0, 80.0)];
+        imageWidth = frame.size.height;
+        self.stickerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0.0, 0.0, imageWidth, imageWidth)];
         self.stickerImageView.center = CGPointMake(self.contentView.bounds.size.width/2,self.contentView.bounds.size.height/2);
         self.stickerImageView.contentMode = UIViewContentModeRedraw;
         [self addSubview:self.stickerImageView];
         self.backgroundColor = [UIColor clearColor];
     }
     return self;
+}
+
+- (void)setImageInset:(CGFloat)imageInset {
+    _imageInset = imageInset;
+    
+    CGFloat imageWidthWithInset = imageWidth - imageInset * 2;
+    self.stickerImageView.frame = CGRectMake(imageInset, imageInset, imageWidthWithInset, imageWidthWithInset);
+    
+    [self layoutSubviews];
 }
 
 - (void)layoutSubviews {
@@ -57,7 +69,8 @@
                          placeholder:(UIImage*)placeholder
                     placeholderColor:(UIColor*)placeholderColor
                       collectionView:(UICollectionView *)collectionView
-                cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+                cellForItemAtIndexPath:(NSIndexPath *)indexPath
+                           isSuggest:(BOOL)isSuggest {
     
     UIImage *resultPlaceholder = placeholder ? placeholder : [UIImage imageNamed:@"STKStickerPanelPlaceholder"];
     
@@ -75,7 +88,12 @@
     DFImageRequestOptions *options = [DFImageRequestOptions new];
     options.priority = DFImageRequestPriorityNormal;
     
-    self.stickerImageView.image = coloredPlaceholder;
+    if (isSuggest) {
+        self.stickerImageView.image = [self imageWithColor:[UIColor clearColor]];
+    } else {
+        self.stickerImageView.image = coloredPlaceholder;
+    }
+    
     [self setNeedsLayout];
     
     __weak typeof(self) weakSelf = self;
@@ -122,6 +140,20 @@
     
     [self.imageTask resume];
     
+}
+
+- (UIImage *)imageWithColor:(UIColor *)color {
+    CGRect rect = CGRectMake(0.0f, 0.0f, 64.0f, 64.0f);
+    UIGraphicsBeginImageContext(rect.size);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextSetFillColorWithColor(context, [color CGColor]);
+    CGContextFillRect(context, rect);
+    
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return image;
 }
 
 @end

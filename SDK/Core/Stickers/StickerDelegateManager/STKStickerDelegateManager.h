@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 
 @class STKStickerObject;
+@class STKStickersEntityService;
 
 @interface STKStickerDelegateManager : NSObject <UICollectionViewDataSource, UICollectionViewDelegate, UIScrollViewDelegate>
 
@@ -23,8 +24,12 @@
 
 @property (strong, nonatomic) UIColor *placeholderColor;
 
+@property (strong, nonatomic) STKStickersEntityService *stickersService;
+
 - (void)setStickerPacksArray:(NSArray*)stickerPacks;
 
 - (void)setStickerPlaceholder:(UIImage*)stickerPlaceholder;
+
+- (void)addRecentSticker:(STKStickerObject*)sticker forSection:(NSInteger)section;
 
 @end

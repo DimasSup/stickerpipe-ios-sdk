@@ -29,8 +29,8 @@
 
 #import "UIImage+CustomBundle.h"
 
-//static NSString * const mainUrl = @"http://work.stk.908.vc/api/v2/web?";
-static NSString * const mainUrl = @"http://api.stickerpipe.com/api/v2/web?";
+static NSString * const mainUrl = @"http://work.stk.908.vc/api/v2/web?";
+//static NSString * const mainUrl = @"http://api.stickerpipe.com/api/v2/web?";
 
 static NSString * const uri = @"http://demo.stickerpipe.com/work/libs/store/js/stickerPipeStore.js";
 
@@ -288,6 +288,10 @@ static NSUInteger const productsCount = 2;
             
             [[NSNotificationCenter defaultCenter] postNotificationName:STKNewPackDownloadedNotification object:self userInfo:@{@"packName": packName}];
             
+            if (self.stickerController.isSuggestArrayNotEmpty) {
+                [self.stickerController hideSuggestCollectionView];
+            }
+            
             [wself dismissViewControllerAnimated:YES completion:^{
                 [wself.stickerController showKeyboard];
             }];
@@ -306,6 +310,11 @@ static NSUInteger const productsCount = 2;
     
     NSString *currentURL = [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.location.href"];
     if ([currentURL isEqualToString:[self shopUrlString]] || [currentURL isEqualToString:@"about:blank"]) {
+        
+        if (self.stickerController.isSuggestArrayNotEmpty) {
+            [self.stickerController hideSuggestCollectionView];
+        }
+        
         [self dismissViewControllerAnimated:YES completion:^{
             [[NSNotificationCenter defaultCenter] postNotificationName:STKCloseModalViewNotification object:self];
             
@@ -389,6 +398,11 @@ static NSUInteger const productsCount = 2;
 
 - (void)showPack:(NSString *)packName {
     dispatch_async(dispatch_get_main_queue(), ^{
+        
+        if (self.stickerController.isSuggestArrayNotEmpty) {
+            [self.stickerController hideSuggestCollectionView];
+        }
+        
         [self dismissViewControllerAnimated:YES completion:^{
             [[NSNotificationCenter defaultCenter] postNotificationName:STKShowPackNotification object:self userInfo:@{@"packName": packName}];
             

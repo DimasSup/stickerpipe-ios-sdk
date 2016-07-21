@@ -48,6 +48,13 @@
 
 @property (nonatomic) BOOL isNetworkReachable;
 
+
+@property (weak, nonatomic) IBOutlet UICollectionView *stickersCollectionView;
+
+
+@property (strong, nonatomic) UICollectionView *suggestCollectionView;
+@property (assign, nonatomic) BOOL isSuggestArrayNotEmpty;
+
 //@property (nonatomic, strong) UIColor *stickersShopTintColor;
 
 - (void)reloadStickersView;
@@ -77,5 +84,8 @@
 - (void)setupInternalStickersView;
 
 - (void)showKeyboard;
+
+- (void)showSuggestCollectionView;
+- (void)hideSuggestCollectionView;
 
 @end

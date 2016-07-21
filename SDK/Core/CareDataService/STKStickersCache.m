@@ -375,7 +375,12 @@ static NSString *const recentName = @"Recent";
         sticker.usedCount = @(usedCount);
         sticker.usedDate = [NSDate date];
         
-        [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticStickerCategory action:sticker.packName label:sticker.stickerName value:nil];
+//        NSUserDefaults *defaults=[NSUserDefaults standardUserDefaults];
+//        NSString *userMessageSent = [defaults objectForKey:@"userMessageSent"];
+//        [defaults synchronize];
+//        if ([userMessageSent isEqualToString:@"yes"]) {
+//            [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticStickerCategory action:sticker.packName label:sticker.stickerName value:nil];
+//        }
         
         [weakSelf.backgroundContext save:nil];
         

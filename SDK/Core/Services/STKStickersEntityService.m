@@ -380,5 +380,4 @@ static const NSTimeInterval kUpdatesDelay = 900.0; //15 min
     return [self.cacheEntity hasPackWithName:packName];
 }
 
-
 @end

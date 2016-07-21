@@ -30,13 +30,19 @@
 
 #import "UIImage+CustomBundle.h"
 
+#import "STKSearchManager.h"
+#import "STKSearchModel.h"
+#import "STKSearchDelegateManager.h"
+
 //SIZES
 
 static const CGFloat kStickersSectionPaddingTopBottom = 12.0;
 static const CGFloat kKeyboardButtonHeight = 33.0;
 
-@interface STKStickerController() {
+@interface STKStickerController() <UITextViewDelegate> {
     BOOL isStartShow;
+    
+    NSString *oldText;
 }
 
 @property (strong, nonatomic) UIView *keyboardButtonSuperView;
@@ -46,7 +52,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 @property (weak, nonatomic) IBOutlet UICollectionView *stickersHeaderCollectionView;
 
 @property (weak, nonatomic) IBOutlet STKShowStickerButton *stickersShopButton;
-@property (weak, nonatomic) IBOutlet UICollectionView *stickersCollectionView;
 
 @property (strong, nonatomic) STKStickerDelegateManager *stickersDelegateManager;
 @property (strong, nonatomic) STKStickerHeaderDelegateManager *stickersHeaderDelegateManager;
@@ -60,6 +65,9 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 @property (strong, nonatomic) STKStickersShopViewController *shopViewController;
 @property (strong, nonatomic) STKStickersSettingsViewController *settingsViewController;
+
+@property (strong, nonatomic) STKSearchManager *searchManager;
+@property (strong, nonatomic) STKSearchDelegateManager *searchDelegateManager;
 
 - (IBAction)collectionsButtonAction:(id)sender;
 - (IBAction)stickersShopButtonAction:(id)sender;
@@ -111,6 +119,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
         self.stickersDelegateManager = [STKStickerDelegateManager new];
         self.stickersHeaderDelegateManager = [STKStickerHeaderDelegateManager new];
         
+        self.stickersDelegateManager.stickersService = self.stickersService;
         
         [self setupInternalStickersView];
         
@@ -154,7 +163,12 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
         [userDefaults setObject:@"currentVC" forKey:@"viewController"];
         [userDefaults synchronize];
-       
+        
+        self.searchManager = [STKSearchManager new];
+        self.searchDelegateManager = [STKSearchDelegateManager new];
+        self.searchDelegateManager.stickerDelegateManager = self.stickersDelegateManager;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldDidChange:) name:UITextViewTextDidChangeNotification object:self.textInputView];
         
     }
     return self;
@@ -332,6 +346,46 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     self.stickersHeaderCollectionView.backgroundColor = self.headerBackgroundColor ? self.headerBackgroundColor : [STKUtility defaultGreyColor];
     
     self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
+}
+
+- (void)initSuggestCollectionViewWithStickersArray:(NSArray *)stickers {
+    
+    UICollectionViewFlowLayout *aFlowLayout = [[UICollectionViewFlowLayout alloc] init];
+    [aFlowLayout setItemSize:CGSizeMake(320, 80)];
+    [aFlowLayout setScrollDirection:UICollectionViewScrollDirectionHorizontal];
+    
+    [self.suggestCollectionView setCollectionViewLayout:aFlowLayout];
+    
+    self.suggestCollectionView.backgroundColor = [UIColor colorWithRed:(255.0f/255.0f) green:(255.0f/255.0f) blue:(255.0f/255.0f) alpha:0.6];
+    
+    [self.suggestCollectionView setShowsHorizontalScrollIndicator:NO];
+    [self.suggestCollectionView setShowsVerticalScrollIndicator:NO];
+    
+    [self.searchDelegateManager setStickerPacksArray:stickers];
+    
+    __weak typeof(self) weakSelf = self;
+    
+    [self.searchDelegateManager setDidSelectSticker:^(STKStickerObject *sticker) {
+        [weakSelf hideSuggestCollectionView];
+        
+        [weakSelf.stickersService incrementStickerUsedCountWithID:sticker.stickerID];
+        
+        [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticStickerCategory action:STKAnalyticActionSend label:[NSString stringWithFormat:@"%@",sticker.stickerID] value:nil];
+        
+        if ([weakSelf.delegate respondsToSelector:@selector(stickerController:didSelectStickerWithMessage:)]) {
+            [weakSelf.delegate stickerController:weakSelf didSelectStickerWithMessage:sticker.stickerMessage];
+        }
+    }];
+    
+    self.suggestCollectionView.dataSource = self.searchDelegateManager;
+    self.suggestCollectionView.delegate = self.searchDelegateManager;
+    self.searchDelegateManager.collectionView = self.suggestCollectionView;
+    [self.suggestCollectionView registerClass:[STKStickerViewCell class] forCellWithReuseIdentifier:@"STKStickerViewCell"];
+    
+    [self.suggestCollectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"UICollectionReusableView"];
+    
+    self.searchDelegateManager.collectionView = self.suggestCollectionView;
+
 }
 
 - (void)setupInternalStickersView {
@@ -551,8 +605,17 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     if (self.textInputView.inputView) {
         [self hideStickersView];
         
+        if (self.isSuggestArrayNotEmpty) {
+            [self showSuggestCollectionView];
+        }
+        
     } else {
         [self showStickersView];
+        
+        if (self.isSuggestArrayNotEmpty) {
+            [self hideSuggestCollectionView];
+        }
+        
     }
 }
 
@@ -738,6 +801,13 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     [self initKeyBoardButton];
 }
 
+- (void)setSuggestCollectionView:(UICollectionView *)suggestCollectionView {
+    _suggestCollectionView = suggestCollectionView;
+    
+    self.suggestCollectionView.alpha = 0;
+    self.suggestCollectionView.hidden = YES;
+}
+
 #pragma mark - Show/hide stickers
 
 - (void)showStickersView {
@@ -753,7 +823,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
     self.textInputView.inputView = self.stickersView;
     
-    self.isKeyboardShowed = NO;
+//    self.isKeyboardShowed = NO;
     
     [self reloadStickersInputViews];
  
@@ -804,17 +874,29 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 #pragma mark - user defaults
+
 - (void)setUserDefaultsValue {
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:@"no" forKey:@"isNotification"];
     [userDefaults synchronize];
 }
 
-#pragma mark -------
+#pragma mark - statistics
 
 - (void)userMessageSent {
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *userMessageSent = [userDefaults objectForKey:@"userMessageSent"];
+    [userDefaults synchronize];
+    if (![userMessageSent isEqualToString:@"yes"]) {
+        [userDefaults setObject:@"yes" forKey:@"userMessageSent"];
+        [userDefaults synchronize];
+    }
+    
     [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageTextLabel value:nil];    
 }
+
+#pragma mark - resource bundle
 
 - (NSBundle *)getResourceBundle {
     
@@ -822,6 +904,78 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
     
     return bundle;
+}
+
+#pragma mark - text view notification
+
+- (void)textFieldDidChange:(NSNotification *)notification {
+ 
+    UITextView *tv = notification.object;
+    
+    if (tv.text.length != 0) {
+        
+        STKSearchModel *model = [STKSearchModel new];
+        
+        model.q = [self lastWordFromText:tv.text];;
+        model.isSuggest = YES;
+        
+        if (model.q != nil || ![model.q isEqualToString:@""]) {
+            [self.searchManager searchStickersWithSearchModel:model completion:^(NSArray *stickers) {
+                
+                if (stickers.count != 0) {
+                    
+                    [self initSuggestCollectionViewWithStickersArray:stickers];
+                    
+                    [self.suggestCollectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]
+                                                       atScrollPosition:UICollectionViewScrollPositionLeft
+                                                               animated:NO];
+                    
+                    [self.suggestCollectionView reloadData];
+                    
+                    [self showSuggestCollectionView];
+                    
+                    self.isSuggestArrayNotEmpty = YES;
+                    
+                } else {
+                    
+                    [self hideSuggestCollectionView];
+                    
+                    self.isSuggestArrayNotEmpty = NO;
+                }
+            }];
+        }
+    }
+
+}
+
+#pragma mark - suggest view
+
+- (void)showSuggestCollectionView {
+    self.suggestCollectionView.hidden = NO;
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        self.suggestCollectionView.alpha = 1.0;
+    }];
+}
+
+- (void)hideSuggestCollectionView {
+    [UIView animateWithDuration:0.3 animations:^{
+        self.suggestCollectionView.alpha = 0.0;
+    } completion:^(BOOL finished) {
+        self.suggestCollectionView.hidden = YES;
+    }];
+}
+
+- (NSString *)lastWordFromText:(NSString *)text {
+    
+    __block NSString *lastWord = nil;
+    
+    [text enumerateSubstringsInRange:NSMakeRange(0, [text length]) options:NSStringEnumerationByWords | NSStringEnumerationReverse usingBlock:^(NSString *substring, NSRange subrange, NSRange enclosingRange, BOOL *stop) {
+        lastWord = substring;
+        *stop = YES;
+    }];
+    
+    return lastWord;
 }
 
 @end

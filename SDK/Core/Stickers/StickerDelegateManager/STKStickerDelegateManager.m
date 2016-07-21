@@ -14,6 +14,8 @@
 
 #import "STKEmptyRecentCell.h"
 
+#import "STKStickersEntityService.h"
+
 typedef enum {
     
     STKStickerPanelScrollDirectionTop,
@@ -29,7 +31,6 @@ typedef enum {
 
 //Common
 @property (strong, nonatomic) NSArray *stickerPacks;
-
 
 @property (strong, nonatomic) UIImage *stickerPlaceholderImage;
 
@@ -88,7 +89,7 @@ typedef enum {
         cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"STKStickerViewCell" forIndexPath:indexPath];
         
         STKStickerObject *sticker = stickerPack.stickers[indexPath.item];
-        [cell configureWithStickerMessage:sticker.stickerMessage placeholder:self.stickerPlaceholderImage placeholderColor:self.placeholderColor collectionView:collectionView cellForItemAtIndexPath:indexPath];
+        [cell configureWithStickerMessage:sticker.stickerMessage placeholder:self.stickerPlaceholderImage placeholderColor:self.placeholderColor collectionView:collectionView cellForItemAtIndexPath:indexPath isSuggest:NO];
     }
     
     return cell;
@@ -143,7 +144,10 @@ typedef enum {
         if (recentPack.stickers.count > 12) {
             [recentPack.stickers removeObjectAtIndex:12];
         }
-        [self.collectionView reloadData];
+        
+        [self.stickersService updateStickerPackInCache:recentPack];
+        
+       [self.collectionView reloadData];
 //        [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:0]];
     }
 }
