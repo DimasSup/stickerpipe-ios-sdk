@@ -273,7 +273,9 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     
     [self.stickersDelegateManager setDidSelectSticker:^(STKStickerObject *sticker) {
         [weakSelf.stickersService incrementStickerUsedCountWithID:sticker.stickerID];
-        [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageStickerLabel value:nil];
+        
+        [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticStickerCategory action:STKAnalyticActionSend label:[NSString stringWithFormat:@"%@",sticker.stickerID] value:nil];
+        
         if ([weakSelf.delegate respondsToSelector:@selector(stickerController:didSelectStickerWithMessage:)]) {
             [weakSelf.delegate stickerController:weakSelf didSelectStickerWithMessage:sticker.stickerMessage];
         }

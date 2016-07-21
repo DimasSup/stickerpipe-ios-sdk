@@ -129,8 +129,6 @@ static const NSInteger kMemoryCacheObjectsCount = 20;
         }
         
         
-        
-        
         //TODO: REFACTORING
 
         statistic.category = category;
@@ -138,13 +136,10 @@ static const NSInteger kMemoryCacheObjectsCount = 20;
         statistic.timeValue = ((NSInteger)[[NSDate date] timeIntervalSince1970]);
         
         if ([statistic.category isEqualToString:STKAnalyticStickerCategory]) {
-            statistic.label = [NSString stringWithFormat:@"[[%@_%@]]", action, label];
-            statistic.action = @"use";
-            
-        } else {
-            statistic.action = action;
             statistic.label = label;
+            statistic.action = @"use";
         }
+        
         NSError *error = nil;
         weakSelf.objectCounter++;
         if (weakSelf.objectCounter == kMemoryCacheObjectsCount) {
