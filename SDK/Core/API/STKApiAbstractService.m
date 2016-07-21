@@ -65,11 +65,11 @@ NSString *const STKBaseApiUrl = @"https://api.stickerpipe.com/api";
 }
 
 - (NSString *)localization {
-    NSString *locale = [[NSUserDefaults standardUserDefaults]
-                        stringForKey:kLocalizationDefaultsKey];
+	
     NSString * language = [[NSLocale preferredLanguages] objectAtIndex:0];
-    
-    return (locale) ? locale : language;
+	language = ([[([STKStickersManager localization]?:language) componentsSeparatedByString:@"-"] objectAtIndex:0]);
+ 
+    return language;
 }
 
 @end
