@@ -605,7 +605,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     if (self.textInputView.inputView) {
         [self hideStickersView];
         
-        if (self.isSuggestArrayNotEmpty) {
+        if (self.isSuggestArrayNotEmpty && ![self.textInputView.text isEqualToString:@""]) {
             [self showSuggestCollectionView];
         }
         
@@ -883,17 +883,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - statistics
 
-- (void)userMessageSent {
+- (void)textMessageSendStatistic {
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString *userMessageSent = [userDefaults objectForKey:@"userMessageSent"];
-    [userDefaults synchronize];
-    if (![userMessageSent isEqualToString:@"yes"]) {
-        [userDefaults setObject:@"yes" forKey:@"userMessageSent"];
-        [userDefaults synchronize];
-    }
+    [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageTextLabel value:nil];
+}
+
+- (void)stickerMessageSendStatistic {
     
-    [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageTextLabel value:nil];    
+    [[STKAnalyticService sharedService] sendEventWithCategory:STKAnalyticMessageCategory action:STKAnalyticActionSend label:STKMessageStickerLabel value:nil];
 }
 
 #pragma mark - resource bundle
@@ -945,7 +942,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
             }];
         }
     }
-
 }
 
 #pragma mark - suggest view

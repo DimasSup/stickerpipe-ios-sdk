@@ -75,7 +75,8 @@
 
 - (void)setColorForStickersHeaderPlaceholderColor:(UIColor*) color;
 
-- (void)userMessageSent;
+- (void)textMessageSendStatistic;
+- (void)stickerMessageSendStatistic;
 
 - (void)handleError:(NSError *)error;
 

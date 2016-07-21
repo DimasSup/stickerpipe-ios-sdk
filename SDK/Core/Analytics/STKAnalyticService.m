@@ -104,32 +104,29 @@ static const NSInteger kMemoryCacheObjectsCount = 20;
         
         STKStatistic *statistic = nil;
         
-        if ([category isEqualToString:STKAnalyticMessageCategory]) {
-            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:[STKStatistic entityName]];
-            request.fetchLimit = 1;
-            
-            NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:STKStatisticAttributes.label ascending:YES];
-            request.sortDescriptors = @[sortDescriptor];
-            
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"label == %@", label];
-            request.predicate = predicate;
-            
-            NSArray *objects = [weakSelf.backgroundContext executeFetchRequest:request error:nil];
-            
-            statistic = objects.firstObject;
-            
-            NSInteger tempValue = statistic.value.integerValue;
-            tempValue += value.integerValue;
-            statistic.value = @(tempValue);
-        }
+//        if ([category isEqualToString:STKAnalyticMessageCategory]) {
+//            NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:[STKStatistic entityName]];
+//            request.fetchLimit = 1;
+//            
+//            NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:STKStatisticAttributes.label ascending:YES];
+//            request.sortDescriptors = @[sortDescriptor];
+//            
+//            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"label == %@", label];
+//            request.predicate = predicate;
+//            
+//            NSArray *objects = [weakSelf.backgroundContext executeFetchRequest:request error:nil];
+//            
+//            statistic = objects.firstObject;
+//            
+//            NSInteger tempValue = statistic.value.integerValue;
+//            tempValue += value.integerValue;
+//            statistic.value = @(tempValue);
+//        }
         
         if (!statistic) {
             statistic = [NSEntityDescription insertNewObjectForEntityForName:[STKStatistic entityName] inManagedObjectContext:weakSelf.backgroundContext];
             statistic.value = value;
         }
-        
-        
-        //TODO: REFACTORING
 
         statistic.category = category;
 
@@ -138,6 +135,9 @@ static const NSInteger kMemoryCacheObjectsCount = 20;
         if ([statistic.category isEqualToString:STKAnalyticStickerCategory]) {
             statistic.label = label;
             statistic.action = @"use";
+        } else {
+            statistic.label = label;
+            statistic.action = action;
         }
         
         NSError *error = nil;
