@@ -390,9 +390,10 @@ static NSUInteger const productsCount = 2;
 - (void)showPack:(NSString *)packName {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self dismissViewControllerAnimated:YES completion:^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:STKShowPackNotification object:self userInfo:@{@"packName": packName}];
-            
-            [self.stickerController showKeyboard];
+			[self.stickerController showStickersView];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				[[NSNotificationCenter defaultCenter] postNotificationName:STKShowPackNotification object:self userInfo:@{@"packName": packName}];
+			});
         }];
     });
 }

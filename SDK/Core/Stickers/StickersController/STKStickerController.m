@@ -776,6 +776,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
     NSUInteger stickerIndex = [self.stickersService indexOfPackWithName:packName];
 //    [self showStickersView];
     [self setPackSelectedAtIndex:stickerIndex];
+	[self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[self selectedIndexHeaderForSavedValue:stickerIndex]];
 }
 
 - (void)selectPack:(NSUInteger)index {
