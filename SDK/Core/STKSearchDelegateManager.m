@@ -66,17 +66,26 @@
         NSDictionary *dict = self.searchStickerPacks[indexPath.item];
         NSString *str = [NSString stringWithFormat:@"[[%@]]", dict[@"content_id"]];
         
-        STKStickerObject *sticker = [STKStickerObject new];
+        STKStickerObject *stickerObject = [STKStickerObject new];
         
-        sticker.stickerMessage = str;
-        sticker.stickerID = dict[@"content_id"];
-        sticker.stickerName = [NSString stringWithFormat:@"%@",sticker.stickerID];
+        stickerObject.stickerMessage = str;
+        stickerObject.stickerID = dict[@"content_id"];
+        stickerObject.stickerName = [NSString stringWithFormat:@"%@",stickerObject.stickerID];
+        stickerObject.usedDate = [NSDate date];
+        stickerObject.packName = dict[@"pack"];
         
-        self.didSelectSticker(sticker);
+        [self.stickerDelegateManager.stickersService stickerWithStickerID:stickerObject.stickerID completion:^(STKSticker *sticker) {
+            if (!sticker) {
+                [self.stickerDelegateManager.stickersService saveSticker:stickerObject];
+            }
+        }];
+        
+        
+        self.didSelectSticker(stickerObject);
         
         [self.stickerDelegateManager setStickerPacksArray:self.stickerDelegateManager.stickersService.stickersArray];
         
-        [self.stickerDelegateManager addRecentSticker:sticker forSection:1];
+        [self.stickerDelegateManager addRecentSticker:stickerObject forSection:100];
     }
 }
 

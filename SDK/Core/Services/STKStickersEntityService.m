@@ -289,6 +289,10 @@ static const NSTimeInterval kUpdatesDelay = 900.0; //15 min
     [self.cacheEntity incrementUsedCountWithStickerID:stickerID];
 }
 
+- (void)stickerWithStickerID:(NSNumber *)stickerID completion:(void (^)(STKSticker *sticker))completion {
+    [self.cacheEntity stickerWithStickerID:stickerID completion:completion];
+}
+
 
 - (void)togglePackDisabling:(STKStickerPackObject *)pack {
     BOOL status = pack.disabled.boolValue;
@@ -378,6 +382,10 @@ static const NSTimeInterval kUpdatesDelay = 900.0; //15 min
 - (BOOL)hasPackWithName:(NSString *)packName {
 
     return [self.cacheEntity hasPackWithName:packName];
+}
+
+- (void)saveSticker:(STKStickerObject *)stickerObject {
+    [self.cacheEntity saveSticker:stickerObject];
 }
 
 @end

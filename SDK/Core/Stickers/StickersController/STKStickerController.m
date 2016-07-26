@@ -798,6 +798,12 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)setTextInputView:(UITextView *)textInputView {
     _textInputView = textInputView;
+    
+    [self.textInputView addObserver:self
+                         forKeyPath:@"text"
+                            options:NSKeyValueObservingOptionNew
+                            context:nil];
+    
     [self initKeyBoardButton];
 }
 
@@ -941,6 +947,15 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
                 }
             }];
         }
+    }
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath
+                     ofObject:(id)object
+                       change:(NSDictionary *)change
+                      context:(void *)context {
+    if ([change[@"new"] isEqualToString:@""]) {
+        [self hideSuggestCollectionView];
     }
 }
 

@@ -13,7 +13,7 @@
 
 @implementation STKStickerObject
 
-- (instancetype)initWithSticker:(STKSticker*) sticker {
+- (instancetype)initWithSticker:(STKSticker *)sticker {
     
     self = [super init];
     if (self) {

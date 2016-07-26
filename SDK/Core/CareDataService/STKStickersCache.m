@@ -85,6 +85,21 @@ static NSString *const recentName = @"Recent";
     [self.backgroundContext save:nil];
 }
 
+- (void)saveSticker:(STKStickerObject *)stickerObject {
+    
+    if (stickerObject) {
+   
+        STKSticker *sticker = [self stickerModelWithID:stickerObject.stickerID context:self.backgroundContext];
+        sticker.stickerName = stickerObject.stickerName;
+        sticker.stickerID = stickerObject.stickerID;
+        sticker.stickerMessage = stickerObject.stickerMessage;
+        sticker.usedCount = stickerObject.usedCount;
+        sticker.usedDate = stickerObject.usedDate;
+        
+        [self.backgroundContext save:nil];
+    }
+}
+
 - (void)saveDisabledStickerPack:(STKStickerPackObject *)stickerPack {
     
     STKStickerPack *stickerModel = [self stickerModelFormStickerObject:stickerPack context:self.backgroundContext];
@@ -323,6 +338,7 @@ static NSString *const recentName = @"Recent";
     recentPack.packName = recentName;
     recentPack.packTitle = recentName;
     recentPack.isNew = @NO;
+ //   recentPack.packID = @100000;
     NSMutableArray *stickerObjects = [NSMutableArray new];
     for (STKSticker *sticker in stickers) {
         STKStickerObject *stickerObject = [[STKStickerObject alloc] initWithSticker:sticker];
@@ -383,6 +399,20 @@ static NSString *const recentName = @"Recent";
 //        }
         
         [weakSelf.backgroundContext save:nil];
+        
+    }];
+}
+
+- (void)stickerWithStickerID:(NSNumber *)stickerID completion:(void (^)(STKSticker *sticker))completion {
+    
+    [self.backgroundContext performBlock:^{
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",STKStickerAttributes.stickerID , stickerID];
+        NSArray *stickers = [STKSticker stk_findWithPredicate:predicate sortDescriptors:nil fetchLimit:1 context:self.backgroundContext];
+        STKSticker *sticker = stickers.firstObject;
+        
+        if (completion) {
+            completion(sticker);
+        }
         
     }];
 }

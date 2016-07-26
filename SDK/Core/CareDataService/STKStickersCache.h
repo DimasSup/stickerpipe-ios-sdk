@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class STKStickerObject, STKStickerPackObject;
+@class STKStickerObject, STKStickerPackObject, STKSticker;
 
 
 @interface STKStickersCache : NSObject
@@ -50,4 +50,8 @@
 - (void)markStickerPack:(STKStickerPackObject*)pack disabled:(BOOL)disabled;
 
 - (BOOL)hasPackWithName:(NSString *)packName;
+
+- (void)stickerWithStickerID:(NSNumber *)stickerID completion:(void (^)(STKSticker *sticker))completion;
+- (void)saveSticker:(STKStickerObject *)stickerObject;
+
 @end

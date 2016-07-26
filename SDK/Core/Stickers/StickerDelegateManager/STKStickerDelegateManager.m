@@ -144,8 +144,8 @@ typedef enum {
         if (recentPack.stickers.count > 12) {
             [recentPack.stickers removeObjectAtIndex:12];
         }
+
         
-        [self.stickersService updateStickerPackInCache:recentPack];
         
        [self.collectionView reloadData];
 //        [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:0]];

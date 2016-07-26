@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class STKStickerPackObject;
+@class STKStickerPackObject, STKSticker, STKStickerObject;
 
 @interface STKStickersEntityService : NSObject
 
@@ -57,5 +57,9 @@
 
 - (BOOL)hasPackWithName:(NSString *)packName;
 - (NSInteger)indexOfPackWithName:(NSString *)packName;
+
+- (void)stickerWithStickerID:(NSNumber *)stickerID completion:(void (^)(STKSticker *sticker))completion;
+
+- (void)saveSticker:(STKStickerObject *)stickerObject;
 
 @end
