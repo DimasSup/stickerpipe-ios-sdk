@@ -29,8 +29,8 @@
 
 #import "UIImage+CustomBundle.h"
 
-static NSString * const mainUrl = @"http://work.stk.908.vc/api/v2/web?";
-//static NSString * const mainUrl = @"http://api.stickerpipe.com/api/v2/web?";
+//static NSString * const mainUrl = @"http://work.stk.908.vc/api/v2/web?";
+static NSString * const mainUrl = @"http://api.stickerpipe.com/api/v2/web?";
 
 static NSString * const uri = @"http://demo.stickerpipe.com/work/libs/store/js/stickerPipeStore.js";
 

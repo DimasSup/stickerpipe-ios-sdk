@@ -10,8 +10,8 @@
 #import "STKAnalyticService.h"
 
 
-//NSString *const STKUtilityAPIUrl = @"https://api.stickerpipe.com/stk/";
-NSString *const STKUtilityAPIUrl = @"http://work.stk.908.vc/stk/";
+NSString *const STKUtilityAPIUrl = @"https://api.stickerpipe.com/stk/";
+//NSString *const STKUtilityAPIUrl = @"http://work.stk.908.vc/stk/";
 
 @implementation STKUtility
 

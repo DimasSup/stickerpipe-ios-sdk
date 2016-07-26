@@ -16,8 +16,8 @@
 
 
 NSString *const STKApiVersion = @"v2";
-//NSString *const STKBaseApiUrl = @"https://api.stickerpipe.com/api";
-NSString *const STKBaseApiUrl = @"http://work.stk.908.vc/api";
+NSString *const STKBaseApiUrl = @"https://api.stickerpipe.com/api";
+//NSString *const STKBaseApiUrl = @"http://work.stk.908.vc/api";
 
 @implementation STKApiAbstractService
 
