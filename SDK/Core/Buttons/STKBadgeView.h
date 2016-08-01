@@ -10,6 +10,6 @@
 
 @interface STKBadgeView : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame lineWidth:(CGFloat)lineWidth dotSize:(CGSize)dotSize andBorderColor:(UIColor *)borderColor;
+- (instancetype)initWithFrame: (CGRect)frame lineWidth: (CGFloat)lineWidth dotSize: (CGSize)dotSize andBorderColor: (UIColor*)borderColor;
 
 @end

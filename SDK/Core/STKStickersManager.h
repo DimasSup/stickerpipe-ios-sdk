@@ -13,45 +13,45 @@
 
 @interface STKStickersManager : NSObject
 
-+ (void) initWithApiKey:(NSString*) apiKey;
++ (void)initWithApiKey: (NSString*)apiKey;
 
-+ (void)setUserKey:(NSString *)userKey;
-+ (NSString *)userKey;
++ (void)setUserKey: (NSString*)userKey;
++ (NSString*)userKey;
 
-+ (void)setLocalization:(NSString *)localization;
-+ (NSString *)localization;
++ (void)setLocalization: (NSString*)localization;
++ (NSString*)localization;
 
-+ (BOOL)isStickerMessage:(NSString *)message;
++ (BOOL)isStickerMessage: (NSString*)message;
 
-+ (BOOL)isOldFormatStickerMessage:(NSString *)message;
++ (BOOL)isOldFormatStickerMessage: (NSString*)message;
 
 + (void)setStartTimeInterval;
 
-+ (void)setPriceBWithLabel:(NSString *)priceLabel
-                  andValue:(CGFloat)priceValue;
++ (void)setPriceBWithLabel: (NSString*)priceLabel
+				  andValue: (CGFloat)priceValue;
 
-+ (NSString *)priceBLabel;
++ (NSString*)priceBLabel;
 + (CGFloat)priceBValue;
 
-+ (void)setPriceCwithLabel:(NSString *)priceLabel
-                  andValue:( CGFloat)priceValue;
++ (void)setPriceCwithLabel: (NSString*)priceLabel
+				  andValue: (CGFloat)priceValue;
 
-+ (NSString *)priceCLabel;
++ (NSString*)priceCLabel;
 + (CGFloat)priceCValue;
 
-+ (void)setUserAsSubscriber:(BOOL)subscriber;
++ (void)setUserAsSubscriber: (BOOL)subscriber;
 + (BOOL)isSubscriber;
 
-+ (void)setPriceBProductId:(NSString *)priceBProductId andPriceCProductId:(NSString *)priceCProductId;
++ (void)setPriceBProductId: (NSString*)priceBProductId andPriceCProductId: (NSString*)priceCProductId;
 
-+ (void)setDownloadMaxImages:(BOOL)downloadMaxImages;
++ (void)setDownloadMaxImages: (BOOL)downloadMaxImages;
 + (BOOL)downloadMaxImages;
 
-+ (void)sendDeviceToken:(NSData *)deviceToken
-                failure:(void (^)(NSError *))failure;
++ (void)sendDeviceToken: (NSData*)deviceToken
+				failure: (void (^)(NSError*))failure;
 
-+ (void)getUserInfo:(NSDictionary *)info stickerController:(STKStickerController *)stickerController;
++ (void)getUserInfo: (NSDictionary*)info stickerController: (STKStickerController*)stickerController;
 
-+ (void)setShopContentColor:(UIColor *)color;
++ (void)setShopContentColor: (UIColor*)color;
 
 @end

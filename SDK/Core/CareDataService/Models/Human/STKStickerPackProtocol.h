@@ -10,30 +10,30 @@
 
 @protocol STKStickerPackProtocol <NSObject>
 
-@property (nonatomic, strong) NSString *artist;
+@property (nonatomic, strong) NSString* artist;
 
-@property (nonatomic, strong) NSString *packName;
+@property (nonatomic, strong) NSString* packName;
 
-@property (nonatomic, strong) NSString *packTitle;
+@property (nonatomic, strong) NSString* packTitle;
 
-@property (nonatomic, strong) NSNumber *packID;
+@property (nonatomic, strong) NSNumber* packID;
 
-@property (nonatomic, strong) NSNumber *price;
+@property (nonatomic, strong) NSNumber* price;
 
-@property (nonatomic, strong) NSString *pricePoint;
+@property (nonatomic, strong) NSString* pricePoint;
 
-@property (nonatomic, strong) NSArray *stickers;
+@property (nonatomic, strong) NSArray* stickers;
 
-@property (nonatomic, strong) NSNumber *disabled;
+@property (nonatomic, strong) NSNumber* disabled;
 
-@property (nonatomic, strong) NSNumber *order;
+@property (nonatomic, strong) NSNumber* order;
 
-@property (nonatomic, strong) NSString *packDescription;
+@property (nonatomic, strong) NSString* packDescription;
 
-@property (nonatomic, strong) NSNumber *isNew;
+@property (nonatomic, strong) NSNumber* isNew;
 
-@property (nonatomic, strong) NSString *bannerUrl;
+@property (nonatomic, strong) NSString* bannerUrl;
 
-@property (nonatomic, strong) NSString *productID;
+@property (nonatomic, strong) NSString* productID;
 
 @end

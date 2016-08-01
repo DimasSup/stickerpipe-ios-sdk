@@ -10,71 +10,67 @@
 #import "STKStickerHeaderCell.h"
 #import "STKStickerPackObject.h"
 
-@interface STKStickerHeaderDelegateManager()
-
-@property (strong, nonatomic) NSArray *stickerPacksArray;
-
-@end
 
 @implementation STKStickerHeaderDelegateManager
 
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
-    return (self.stickerPacksArray.count > 0) ? 2 : 1;
+- (void)setStickerPacks: (NSArray*)stickerPacks {
+	self.stickerPacksArray = stickerPacks;
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (section == 0 && self.stickerPacksArray.count > 0) {
-        return self.stickerPacksArray.count;
-    } else {
-        return 1;
-    }
+- (STKStickerPackObject*)itemAtIndexPath: (NSIndexPath*)indexPath {
+	return self.stickerPacksArray[(NSUInteger) indexPath.item];
 }
 
-- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    STKStickerHeaderCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"STKStickerPanelHeaderCell" forIndexPath:indexPath];
-    
-    cell.layer.shouldRasterize = YES;
-    cell.layer.rasterizationScale = [UIScreen mainScreen].scale;
-    
-    if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
-        STKStickerPackObject *stickerPack = self.stickerPacksArray[indexPath.item];
-        
-        [cell configWithStickerPack:stickerPack placeholder:self.placeholderImage placeholderTintColor:self.placeholderHeadercolor collectionView:collectionView cellForItemAtIndexPath:indexPath];
-    } else {
-        [cell configureSettingsCell];
-    }
-    
-    return cell;
-}
 
 #pragma mark - UICollectionViewDelegate
 
-- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
-        STKStickerPackObject *stickerPackObject = self.stickerPacksArray[indexPath.item];
-        self.didSelectRow(indexPath, stickerPackObject, YES);
-    } else {
-        self.didSelectSettingsRow();
-    }
+- (NSInteger)numberOfSectionsInCollectionView: (UICollectionView*)collectionView {
+	return self.stickerPacksArray.count > 0 ? 2 : 1;
 }
 
-- (void)scrollToIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated {
-    if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
-        STKStickerPackObject *stickerPackObject = self.stickerPacksArray[indexPath.item];
-        self.didSelectRow(indexPath, stickerPackObject, animated);
-    } else {
-        self.didSelectSettingsRow();
-    }
+- (NSInteger)collectionView: (UICollectionView*)collectionView numberOfItemsInSection: (NSInteger)section {
+	if (section == 0 && self.stickerPacksArray.count > 0) {
+		return self.stickerPacksArray.count;
+	} else {
+		return 1;
+	}
 }
 
-- (void)setStickerPacks:(NSArray *)stickerPacks {
-    self.stickerPacksArray = stickerPacks;
+- (UICollectionViewCell*)collectionView: (UICollectionView*)collectionView cellForItemAtIndexPath: (NSIndexPath*)indexPath {
+	STKStickerHeaderCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier: @"STKStickerPanelHeaderCell" forIndexPath: indexPath];
+
+	cell.layer.shouldRasterize = YES;
+	cell.layer.rasterizationScale = [UIScreen mainScreen].scale;
+
+	if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
+		STKStickerPackObject* stickerPack = self.stickerPacksArray[(NSUInteger) indexPath.item];
+
+		[cell configWithStickerPack: stickerPack placeholder: self.placeholderImage placeholderTintColor: self.placeholderHeaderColor collectionView: collectionView cellForItemAtIndexPath: indexPath];
+	} else {
+		[cell configureSettingsCell];
+	}
+
+	return cell;
 }
 
-#pragma mark - Common
 
-- (STKStickerPackObject *)itemAtIndexPath:(NSIndexPath *)indexPath {
-    return self.stickerPacksArray[indexPath.item];
+#pragma mark - UICollectionViewDelegate
+
+- (void)collectionView: (UICollectionView*)collectionView didSelectItemAtIndexPath: (NSIndexPath*)indexPath {
+	if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
+		self.didSelectRow(indexPath, self.stickerPacksArray[(NSUInteger) indexPath.item], YES);
+	} else {
+		self.didSelectSettingsRow();
+	}
 }
+
+- (void)scrollToIndexPath: (NSIndexPath*)indexPath animated: (BOOL)animated {
+	if (indexPath.section == 0 && self.stickerPacksArray.count > 0) {
+		self.didSelectRow(indexPath, self.stickerPacksArray[(NSUInteger) indexPath.item], animated);
+	} else {
+		self.didSelectSettingsRow();
+	}
+}
+
 
 @end

@@ -8,195 +8,184 @@
 
 #import "STKStickersSettingsViewController.h"
 #import "STKStickersEntityService.h"
-#import "STKStickersApiService.h"
 #import "STKTableViewDataSource.h"
 #import "STKStickerPackObject.h"
-#import "STKUtility.h"
 #import "STKStickerSettingsCell.h"
-
 #import "STKStickersShopViewController.h"
-#import "STKStickersConstants.h"
-
-#import "UIImage+CustomBundle.h"
-
 #import "STKStickerController.h"
+#import "STKWebserviceManager.h"
 
 @interface STKStickersSettingsViewController () <UITableViewDelegate>
 
-@property (weak, nonatomic) IBOutlet UITableView *tableView;
-@property (strong, nonatomic) STKStickersEntityService *service;
-@property (strong, nonatomic) STKStickersApiService *apiService;
-@property (strong, nonatomic) STKTableViewDataSource *dataSource;
-@property (strong, nonatomic) UIBarButtonItem *editBarButton;
+@property (nonatomic, weak) IBOutlet UITableView* tableView;
+@property (nonatomic) STKStickersEntityService* service;
+@property (nonatomic) STKTableViewDataSource* dataSource;
+@property (nonatomic) UIBarButtonItem* editBarButton;
 
 @end
 
 @implementation STKStickersSettingsViewController
 
 - (void)viewDidLoad {
-    [super viewDidLoad];
-    
-    [self.tableView registerNib:[UINib nibWithNibName:@"STKStickerSettingsCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"STKStickerSettingsCell"];
-    /**
-     *  For framework
-     */
-    //    [self.tableView registerNib:[UINib nibWithNibName:@"STKStickerSettingsCell" bundle:[self getResourceBundle]] forCellReuseIdentifier:@"STKStickerSettingsCell"];
-    
-    
-    self.dataSource = [[STKTableViewDataSource alloc] initWithItems:nil cellIdentifier:@"STKStickerSettingsCell" configureBlock:^(STKStickerSettingsCell *cell, STKStickerPackObject *item) {
-        [cell configureWithStickerPack:item];
-    }];
-    
-    self.service = [STKStickersEntityService new];
-    self.apiService = [STKStickersApiService new];
-    
-    self.tableView.dataSource = self.dataSource;
-    self.tableView.delegate = self;
-    
-    self.navigationItem.title = NSLocalizedString(@"Settings", nil);
-    
-    [self setUpButtons];
-    
-    __weak typeof(self) wself = self;
-    
-    self.dataSource.deleteBlock = ^(NSIndexPath *indexPath,STKStickerPackObject* item) {
-        [wself.apiService deleteStickerPackWithName:item.packName success:^(id response) {
-           
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [wself.service togglePackDisabling:item];
+	[super viewDidLoad];
 
-                [wself.tableView setEditing:NO animated:NO];
-                [wself.dataSource.dataSource removeObject:item];
-                //      [wself updateStickerPacks];
-                
-                [wself.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
-                [wself.tableView setEditing:YES animated:NO];
-            });
-            
-        } failure:^(NSError *error) {
-            
-        }];
-    };
-    
-    self.dataSource.moveBlock = ^(NSIndexPath *fromIndexPath, NSIndexPath *toIndexPath) {
-        
-        [wself reorderPacks];
-    };
+	[self.tableView registerNib: [UINib nibWithNibName: @"STKStickerSettingsCell" bundle: [NSBundle mainBundle]] forCellReuseIdentifier: @"STKStickerSettingsCell"];
+	/**
+	 *  For framework
+	 */
+	//    [self.tableView registerNib:[UINib nibWithNibName:@"STKStickerSettingsCell" bundle:[self getResourceBundle]] forCellReuseIdentifier:@"STKStickerSettingsCell"];
+
+
+	self.dataSource = [[STKTableViewDataSource alloc] initWithItems: nil cellIdentifier: @"STKStickerSettingsCell" configureBlock: ^ (STKStickerSettingsCell* cell, STKStickerPackObject* item) {
+		[cell configureWithStickerPack: item];
+	}];
+
+	self.service = [STKStickersEntityService new];
+
+	self.tableView.dataSource = self.dataSource;
+	self.tableView.delegate = self;
+
+	self.navigationItem.title = NSLocalizedString(@"Settings", nil);
+
+	[self setUpButtons];
+
+	typeof(self) __weak weakSelf = self;
+
+	self.dataSource.deleteBlock = ^ (NSIndexPath* indexPath, STKStickerPackObject* item) {
+		[[STKWebserviceManager sharedInstance] deleteStickerPackWithName: item.packName success: ^ (id response) {
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				[weakSelf.service togglePackDisabling: item];
+
+				[weakSelf.tableView setEditing: NO animated: NO];
+				[weakSelf.dataSource.dataSource removeObject: item];
+
+				[weakSelf.tableView deleteRowsAtIndexPaths: @[indexPath] withRowAnimation: UITableViewRowAnimationTop];
+				[weakSelf.tableView setEditing: YES animated: NO];
+			});
+		}                                   failure: nil];
+	};
+
+	self.dataSource.moveBlock = ^ (NSIndexPath* fromIndexPath, NSIndexPath* toIndexPath) {
+		[weakSelf reorderPacks];
+	};
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:@"settings" forKey:@"viewController"];
-    [userDefaults synchronize];
-    
-    [self updateStickerPacks];
+- (void)viewWillAppear: (BOOL)animated {
+	[super viewWillAppear: animated];
+
+	NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+	[userDefaults setObject: @"settings" forKey: @"viewController"];
+	[userDefaults synchronize];
+
+	[self updateStickerPacks];
 }
 
-- (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:@"currentVC" forKey:@"viewController"];
-    [userDefaults synchronize];
+- (void)viewDidDisappear: (BOOL)animated {
+	[super viewDidDisappear: animated];
+
+	NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+	[userDefaults setObject: @"currentVC" forKey: @"viewController"];
+	[userDefaults synchronize];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskPortrait;
+	return UIInterfaceOrientationMaskPortrait;
 }
 
 - (BOOL)shouldAutorotate {
-    return YES;
+	return YES;
 }
 
-- (NSString *)getImageName:(NSString *)imName {
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    NSString *imageName = [[NSBundle bundleWithPath:bundlePath] pathForResource:imName ofType:@"png"];
-    
-    return imageName;
+- (NSString*)getImageName: (NSString*)imName {
+	NSString* bundlePath = [[NSBundle mainBundle] pathForResource: @"ResBundle" ofType: @"bundle"];
+	NSString* imageName = [[NSBundle bundleWithPath: bundlePath] pathForResource: imName ofType: @"png"];
+
+	return imageName;
 }
 
 - (void)setUpButtons {
-    
-    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
-    
-    /**
-     *  For framework
-     */
-    //    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
-    
-    self.navigationItem.leftBarButtonItem = closeBarButton;
-    
-    self.editBarButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Edit", nil) style:UIBarButtonItemStylePlain target:self action:@selector(editAction:)];
-    
-    self.navigationItem.rightBarButtonItem = self.editBarButton;
-    
+
+	UIBarButtonItem* closeBarButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKBackIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(closeAction:)];
+
+	/**
+	 *  For framework
+	 */
+	//    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
+
+	self.navigationItem.leftBarButtonItem = closeBarButton;
+
+	self.editBarButton = [[UIBarButtonItem alloc] initWithTitle: NSLocalizedString(@"Edit", nil) style: UIBarButtonItemStylePlain target: self action: @selector(editAction:)];
+
+	self.navigationItem.rightBarButtonItem = self.editBarButton;
+
 }
 
 - (void)reorderPacks {
-    NSMutableArray *dataSoruce = [self.dataSource dataSource];
-    [dataSoruce enumerateObjectsUsingBlock:^(STKStickerPackObject* obj, NSUInteger idx, BOOL *stop) {
-        obj.order = @(idx);
-    }];
-    NSArray *reorderedPacks = [NSArray arrayWithArray:dataSoruce];
-    self.service.stickersArray = reorderedPacks;
-    [self.service saveStickerPacks:reorderedPacks];
+	NSMutableArray* dataSource = [self.dataSource dataSource];
+	[dataSource enumerateObjectsUsingBlock: ^ (STKStickerPackObject* obj, NSUInteger idx, BOOL* stop) {
+		obj.order = @(idx);
+	}];
+	NSArray* reorderedPacks = [NSArray arrayWithArray: dataSource];
+	self.service.stickersArray = reorderedPacks;
+	[self.service saveStickerPacks: reorderedPacks];
 }
 
-- (void) updateStickerPacks {
-    __weak typeof(self) wself = self;
-    
-    [self.service getStickerPacksIgnoringRecentWithType:nil completion:^(NSArray *stickerPacks) {
-        [wself.dataSource setDataSourceArray:stickerPacks];
-        [wself.tableView reloadData];
-    } failure:nil];
+- (void)updateStickerPacks {
+	typeof(self) __weak weakSelf = self;
+
+	[self.service getStickerPacksIgnoringRecentWithType: nil completion: ^ (NSArray* stickerPacks) {
+		[weakSelf.dataSource setDataSourceArray: stickerPacks];
+		[weakSelf.tableView reloadData];
+	}                                           failure: nil];
 }
+
 
 #pragma mark - UITableViewDelegate
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    STKStickerPackObject *stickerPack = [self.dataSource itemAtIndexPath:indexPath];
-    
-    STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[NSBundle mainBundle]];
-    /**
-     *  For framework
-     */
-    //    STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
-    
-    shopViewController.stickerController = self.stickerController;
-    shopViewController.packName = stickerPack.packName;
-    [self.navigationController pushViewController:shopViewController animated:YES];
-    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
+- (void)tableView: (UITableView*)tableView didSelectRowAtIndexPath: (NSIndexPath*)indexPath {
+	STKStickerPackObject* stickerPack = [self.dataSource itemAtIndexPath: indexPath];
+
+	STKStickersShopViewController* shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
+	/**
+	 *  For framework
+	 */
+	//    STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+
+	shopViewController.delegate = self.delegate;
+    [self.delegate showStickersView];
+	shopViewController.packName = stickerPack.packName;
+	[self.navigationController pushViewController: shopViewController animated: YES];
+	[self.tableView deselectRowAtIndexPath: indexPath animated: YES];
 }
+
 
 #pragma mark - Actions
 
-- (IBAction)editAction:(id)sender {
-    [self.tableView setEditing:!self.tableView.editing animated:YES];
-    self.editBarButton.title = (self.tableView.editing) ? NSLocalizedString(@"Done", nil) : NSLocalizedString(@"Edit", nil);
+- (IBAction)editAction: (id)sender {
+	[self.tableView setEditing: !self.tableView.editing animated: YES];
+	self.editBarButton.title = (self.tableView.editing) ? NSLocalizedString(@"Done", nil) : NSLocalizedString(@"Edit", nil);
 }
 
-- (IBAction)closeAction:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:^{
-        
-        [[NSNotificationCenter defaultCenter]postNotificationName:STKStickersReorderStickersNotification object:self userInfo:@{@"packs": self.dataSource.dataSource}];
-        [[NSNotificationCenter defaultCenter] postNotificationName:STKCloseModalViewNotification object:self];
-        
-        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-        [userDefaults setObject:@"currentVC" forKey:@"viewController"];
-        [userDefaults synchronize];
-        
-        [self.stickerController showStickersView];
-    }];
+- (IBAction)closeAction: (id)sender {
+	[self dismissViewControllerAnimated: YES completion: ^ {
+		[[NSNotificationCenter defaultCenter] postNotificationName: STKStickersReorderStickersNotification object: self userInfo: @{@"packs" : self.dataSource.dataSource}];
+		[[NSNotificationCenter defaultCenter] postNotificationName: STKCloseModalViewNotification object: self];
+
+		[self.delegate stickersReorder: self packs: self.dataSource.dataSource];
+
+		NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+		[userDefaults setObject: @"currentVC" forKey: @"viewController"];
+		[userDefaults synchronize];
+
+		[self.delegate showStickersView];
+	}];
 }
 
-- (NSBundle *)getResourceBundle {
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    NSBundle *bundle = [NSBundle bundleWithPath:bundlePath];
-    
-    return bundle;
+- (NSBundle*)getResourceBundle {
+	NSString* bundlePath = [[NSBundle mainBundle] pathForResource: @"ResBundle" ofType: @"bundle"];
+	NSBundle* bundle = [NSBundle bundleWithPath: bundlePath];
+
+	return bundle;
 }
 
 @end

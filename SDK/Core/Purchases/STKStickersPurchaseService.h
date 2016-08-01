@@ -6,36 +6,33 @@
 //  Copyright © 2016 908 Inc. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
 
 @protocol STKStickersPurchaseDelegate <NSObject>
 
-- (void)purchaseSucceededWithPackName:(NSString *)packName
-                        andPackPrice:(NSString *)packPrice;
+- (void)purchaseSucceededWithPackName: (NSString*)packName
+						 andPackPrice: (NSString*)packPrice;
 
-- (void)purchaseFailedWithError:(NSError *)error;
-
+- (void)purchaseFailedWithError: (NSError*)error;
 
 @end
 
+
 @interface STKStickersPurchaseService : NSObject
++ (STKStickersPurchaseService*)sharedInstance;
 
-@property (nonatomic, strong) id<STKStickersPurchaseDelegate> delegate;
+@property (nonatomic, strong) id <STKStickersPurchaseDelegate> delegate;
 
-+ (STKStickersPurchaseService *) sharedInstance;
+@property (nonatomic, copy) void (^purchaseFailed)(NSError* error);
 
-@property (nonatomic, copy) void(^purchaseFailed)(NSError* error);
+- (void)requestProductsWithIdentifier: (NSArray*)productIds
+						   completion: (void (^)(NSArray*))completion
+							  failure: (void (^)(NSError* error))failre;
 
+- (void)purchaseProductWithPackName: (NSString*)packName
+					   andPackPrice: (NSString*)packPrice;
 
-- (void)requestProductsWithIdentifier:(NSArray *)productIds
-                           completion:(void(^) (NSArray *))completion
-                              failure:(void(^)(NSError *error))failre;
+- (void)purchaseInternalPackName: (NSString*)packName
+					andPackPrice: (NSString*)packPrice;
 
-- (void)purchaseProductWithPackName:(NSString *)packName
-                         andPackPrice:(NSString *)packPrice;
-
-- (void)purchasInternalPackName:(NSString *)packName
-                   andPackPrice:(NSString *)packPrice;
-
-- (void)purchaseFailedError:(NSError *)error;
+- (void)purchaseFailedError: (NSError*)error;
 @end

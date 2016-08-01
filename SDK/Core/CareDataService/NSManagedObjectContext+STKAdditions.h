@@ -10,12 +10,12 @@
 
 @interface NSManagedObjectContext (STKAdditions)
 
-+ (NSManagedObjectContext*) stk_defaultContext;
++ (NSManagedObjectContext*)stk_defaultContext;
 
-+ (NSManagedObjectContext*) stk_backgroundContext;
++ (NSManagedObjectContext*)stk_backgroundContext;
 
-+ (NSManagedObjectContext*) stk_analyticsContext;
++ (NSManagedObjectContext*)stk_analyticsContext;
 
-+ (void)stk_setupContextStackWithPersistanceStore:(NSPersistentStoreCoordinator*) coordinator;
++ (void)stk_setupContextStackWithPersistanceStore: (NSPersistentStoreCoordinator*)coordinator;
 
 @end

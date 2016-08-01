@@ -8,49 +8,49 @@
 
 #import "STKInAppProductsManager.h"
 
-static NSString *priceBProductIdentifier;
-static NSString *priceCProductIdentifier;
+static NSString* priceBProductIdentifier;
+static NSString* priceCProductIdentifier;
 
 @implementation STKInAppProductsManager
 
-+ (void)setPriceBproductId:(NSString *)priceBproductId {
-   
-    priceBProductIdentifier = priceBproductId;
++ (void)setPriceBproductId: (NSString*)priceBproductId {
+
+	priceBProductIdentifier = priceBproductId;
 }
 
-+ (NSString *)priceBProductId {
++ (NSString*)priceBProductId {
 
-    return priceBProductIdentifier;
+	return priceBProductIdentifier;
 }
 
-+ (void)setPriceCproductId:(NSString *)priceCproductId {
-    
-    priceCProductIdentifier = priceCproductId;
++ (void)setPriceCproductId: (NSString*)priceCproductId {
+
+	priceCProductIdentifier = priceCproductId;
 }
 
-+ (NSString *)priceCProductId {
-    
-    return priceCProductIdentifier;
++ (NSString*)priceCProductId {
+
+	return priceCProductIdentifier;
 }
 
-+ (NSString *)productIdWithPackPrice:(NSString *)packPrice {
-   
-    if ([packPrice isEqualToString:@"B"]) {
-        return priceBProductIdentifier;
-    } else if ([packPrice isEqualToString:@"C"]) {
-        return priceCProductIdentifier;
-    }
-    return @"";
++ (NSString*)productIdWithPackPrice: (NSString*)packPrice {
+
+	if ([packPrice isEqualToString: @"B"]) {
+		return priceBProductIdentifier;
+	} else if ([packPrice isEqualToString: @"C"]) {
+		return priceCProductIdentifier;
+	}
+	return @"";
 }
 
 + (BOOL)hasProductIds {
- 
-    return priceBProductIdentifier.length > 0 && priceCProductIdentifier.length > 0;
+
+	return priceBProductIdentifier.length > 0 && priceCProductIdentifier.length > 0;
 }
 
-+ (NSArray *)productIds {
++ (NSArray*)productIds {
 
-    return @[priceBProductIdentifier, priceCProductIdentifier];
+	return @[priceBProductIdentifier, priceCProductIdentifier];
 }
 
 @end

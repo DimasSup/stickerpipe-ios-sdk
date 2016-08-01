@@ -9,9 +9,9 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-typedef void (^TableViewCellConfigureBlock)(id cell, id item);
-typedef void (^TableViewDeleteItemBlock)(NSIndexPath *indexPath,id item);
-typedef void (^TableViewMoveItemBlock)(NSIndexPath *fromIndexPath,NSIndexPath *toIndexPath);
+typedef void (^ TableViewCellConfigureBlock)(id cell, id item);
+typedef void (^ TableViewDeleteItemBlock)(NSIndexPath* indexPath, id item);
+typedef void (^ TableViewMoveItemBlock)(NSIndexPath* fromIndexPath, NSIndexPath* toIndexPath);
 
 @interface STKTableViewDataSource : NSObject <UITableViewDataSource>
 
@@ -19,14 +19,14 @@ typedef void (^TableViewMoveItemBlock)(NSIndexPath *fromIndexPath,NSIndexPath *t
 
 @property (copy, nonatomic) TableViewMoveItemBlock moveBlock;
 
-@property (strong, nonatomic, readonly) NSMutableArray *dataSource;
+@property (strong, nonatomic, readonly) NSMutableArray* dataSource;
 
-- (instancetype)initWithItems:(NSArray*)items
-        cellIdentifier:(NSString*)identifier
-        configureBlock:(TableViewCellConfigureBlock)configureBlock;
+- (instancetype)initWithItems: (NSArray*)items
+			   cellIdentifier: (NSString*)identifier
+			   configureBlock: (TableViewCellConfigureBlock)configureBlock;
 
-- (id)itemAtIndexPath:(NSIndexPath*)indexPath;
+- (id)itemAtIndexPath: (NSIndexPath*)indexPath;
 
-- (void)setDataSourceArray:(NSArray*)array;
+- (void)setDataSourceArray: (NSArray*)array;
 
 @end

@@ -8,22 +8,22 @@
 
 #import "STKUUIDManager.h"
 
-static NSString *const kUDIDKey = @"kUDIDKey";
+static NSString* const kUDIDKey = @"kUDIDKey";
 
 
 @implementation STKUUIDManager
 
-+ (NSString *)generatedDeviceToken {
-    NSUserDefaults *defaults  = [NSUserDefaults standardUserDefaults];
-    
-    NSString *key = [defaults stringForKey:kUDIDKey];
-    
-    if (!key) {
-        NSUUID *uuid = [NSUUID UUID];
-        key = uuid.UUIDString;
-        [defaults setObject:key forKey:kUDIDKey];
-    }
-    return key;
++ (NSString*)generatedDeviceToken {
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+
+	NSString* key = [defaults stringForKey: kUDIDKey];
+
+	if (!key) {
+		NSUUID* uuid = [NSUUID UUID];
+		key = uuid.UUIDString;
+		[defaults setObject: key forKey: kUDIDKey];
+	}
+	return key;
 }
 
 @end

@@ -6,12 +6,9 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
 #import "STKStickersConstants.h"
 
-@class STKStickerController;
-@class STKShowStickerButton;
+@class STKStickerController, STKShowStickerButton, STKStickerPackObject, STKImageManager;
 
 @protocol STKStickerControllerDelegate <NSObject>
 
@@ -22,40 +19,50 @@
 
 @optional
 
-- (void)stickerController:(STKStickerController*)stickerController didSelectStickerWithMessage:(NSString*)message;
+- (void)stickerController: (STKStickerController*)stickerController didSelectStickerWithMessage: (NSString*)message;
 
-- (void)stickerControllerErrorHandle:(NSError *)error;
+- (void)didUpdateStickerCache;
 
+- (void)stickerControllerErrorHandle: (NSError*)error;
+
+- (void)packRemoved: (STKStickerPackObject*)packObject;
+
+- (void)stickersReordered;
+
+- (void)showStickersCollection;
+
+- (void)newPackShown;
+
+- (void)newPackDownloaded;
+
+- (void)packPurchasedWithName: (NSString*)packName price: (NSString*)packPrice;
+
+- (void)shopOpened;
 @end
 
 @interface STKStickerController : NSObject
+@property (nonatomic, weak) id <STKStickerControllerDelegate> delegate;
 
-@property (weak, nonatomic) id<STKStickerControllerDelegate> delegate;
+@property (nonatomic, readonly) UIView* stickersView;
 
-@property (nonatomic, strong, readonly) UIView *stickersView;
+@property (nonatomic, readonly) BOOL isStickerViewShowed;
 
-@property (nonatomic, assign, readonly) BOOL isStickerViewShowed;
+@property (nonatomic) UIColor* headerBackgroundColor;
 
-@property (nonatomic, strong) UIColor *headerBackgroundColor;
+@property (nonatomic) UITextView* textInputView;
 
-@property (nonatomic, strong) UITextView *textInputView;
-
-@property (strong, nonatomic) STKShowStickerButton *keyboardButton;
+@property (nonatomic) STKShowStickerButton* keyboardButton;
 
 @property (nonatomic) CGRect stickersViewFrame;
 
 @property (nonatomic) BOOL showStickersOnStart;
 
-@property (nonatomic) BOOL isNetworkReachable;
+@property (nonatomic, weak) IBOutlet UICollectionView* stickersCollectionView;
 
+@property (nonatomic) STKImageManager* imageManager;
 
-@property (weak, nonatomic) IBOutlet UICollectionView *stickersCollectionView;
-
-
-@property (strong, nonatomic) UICollectionView *suggestCollectionView;
-@property (assign, nonatomic) BOOL isSuggestArrayNotEmpty;
-
-//@property (nonatomic, strong) UIColor *stickersShopTintColor;
+@property (nonatomic) UICollectionView* suggestCollectionView;
+@property (nonatomic) BOOL isSuggestArrayNotEmpty;
 
 - (void)reloadStickersView;
 
@@ -63,24 +70,24 @@
 
 - (void)hideStickersView;
 
-- (BOOL)isStickerPackDownloaded:(NSString*)packMessage;
+- (BOOL)isStickerPackDownloaded: (NSString*)packMessage;
 
-- (void)showPackInfoControllerWithStickerMessage:(NSString*)message;
+- (void)showPackInfoControllerWithStickerMessage: (NSString*)message;
 
-- (void)showPackInfoControllerWithName:(NSString *)packName;
+- (void)showPackInfoControllerWithName: (NSString*)packName;
 
 //Color settings. Default is light gray
 
-- (void)setColorForStickersPlaceholder:(UIColor*) color;
+- (void)setColorForStickersPlaceholder: (UIColor*)color;
 
-- (void)setColorForStickersHeaderPlaceholderColor:(UIColor*) color;
+- (void)setColorForStickersHeaderPlaceholderColor: (UIColor*)color;
 
 - (void)textMessageSendStatistic;
 - (void)stickerMessageSendStatistic;
 
-- (void)handleError:(NSError *)error;
+- (void)handleError: (NSError*)error;
 
-- (void)selectPack:(NSUInteger)index;
+- (void)selectPack: (NSUInteger)index;
 
 - (void)setupInternalStickersView;
 

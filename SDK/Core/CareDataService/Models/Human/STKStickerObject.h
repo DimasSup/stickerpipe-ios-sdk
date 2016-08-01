@@ -6,24 +6,25 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
 #import "STKStickerProtocol.h"
-#import <SDWebImage/SDWebImageManager.h>
 
-@class STKSticker, STKStickerPackObject;
+@class STKSticker, STKStickerPackObject, STKStickerObject;
+
+typedef void(^STKStickerObjectBlock)(STKStickerObject* stickerObject);
 
 @interface STKStickerObject : NSObject <STKStickerProtocol>
 
-@property (strong, nonatomic) NSString *stickerName;
-@property (strong, nonatomic) NSNumber *stickerID;
-@property (strong, nonatomic) NSString *stickerMessage;
-@property (assign, nonatomic) NSNumber *usedCount;
-@property (nonatomic, strong) NSDate *usedDate;
-@property (nonatomic, strong) NSString *stickerURL;
-@property (nonatomic, strong) NSString *packName;
+@property (nonatomic) NSString* stickerName;
+@property (nonatomic) NSNumber* stickerID;
+@property (nonatomic) NSString* stickerMessage;
+@property (nonatomic, assign) NSNumber* usedCount;
+@property (nonatomic) NSDate* usedDate;
+@property (nonatomic) NSString* stickerURL;
+@property (nonatomic) NSString* packName;
 
-- (instancetype) initWithSticker:(STKSticker*) sticker;
+- (instancetype)initWithSticker: (STKSticker*)sticker;
 
+- (instancetype)initWithDictionary: (NSDictionary*)dictionary;
 - (void)loadStickerImage;
 
 @end

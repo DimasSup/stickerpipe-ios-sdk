@@ -8,24 +8,10 @@
 
 #import "STKOrientationNavigationController.h"
 
-@interface STKOrientationNavigationController ()
-
-@end
-
 @implementation STKOrientationNavigationController
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
-}
-
-- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    [super pushViewController:viewController animated:animated];
-    
-}
-
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return self.topViewController.supportedInterfaceOrientations;
+	return [self.topViewController supportedInterfaceOrientations];
 }
 
 @end

@@ -10,6 +10,6 @@
 
 @interface STKUUIDManager : NSObject
 
-+ (NSString*) generatedDeviceToken;
++ (NSString*)generatedDeviceToken;
 
 @end

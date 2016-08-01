@@ -8,16 +8,17 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+
 @class DFImageTask;
 
-typedef void(^STKCompletionBlock)(NSError *error, UIImage *stickerImage);
-typedef void(^STKDownloadingProgressBlock)(NSTimeInterval progress);
+typedef void(^ STKCompletionBlock)(NSError* error, UIImage* stickerImage);
+typedef void(^ STKDownloadingProgressBlock)(NSTimeInterval progress);
 
 @interface STKImageManager : NSObject
 
-@property (strong, nonatomic) DFImageTask *imageTask;
+@property (nonatomic) DFImageTask* imageTask;
 
-- (void)getImageForStickerMessage:(NSString *)stickerMessage andDensity:(NSString *)density withProgress:(STKDownloadingProgressBlock)progressBlock andCompletion:(STKCompletionBlock)completion;
+- (void)getImageForStickerMessage: (NSString*)stickerMessage withProgress: (STKDownloadingProgressBlock)progressBlock andCompletion: (STKCompletionBlock)completion;
 
 - (void)cancelLoading;
 

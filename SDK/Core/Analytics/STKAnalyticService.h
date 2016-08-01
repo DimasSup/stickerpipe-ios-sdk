@@ -10,31 +10,31 @@
 
 
 //Categories
-extern NSString *const STKAnalyticMessageCategory;
-extern NSString *const STKAnalyticStickerCategory;
-extern NSString *const STKAnalyticPackCategory;
-extern NSString *const STKAnalyticDevCategory;
+extern NSString* const STKAnalyticMessageCategory;
+extern NSString* const STKAnalyticStickerCategory;
+extern NSString* const STKAnalyticPackCategory;
+extern NSString* const STKAnalyticDevCategory;
 
 //Actions
-extern NSString *const STKAnalyticActionCheck;
-extern NSString *const STKAnalyticActionInstall;
-extern NSString *const STKAnalyticActionError;
-extern NSString *const STKAnalyticActionSend;
+extern NSString* const STKAnalyticActionCheck;
+extern NSString* const STKAnalyticActionInstall;
+extern NSString* const STKAnalyticActionError;
+extern NSString* const STKAnalyticActionSend;
 
 //Labels
-extern NSString *const STKStickersCountLabel;
-extern NSString *const STKEventsCountLabel;
-extern NSString *const STKMessageTextLabel;
-extern NSString *const STKMessageStickerLabel;
+extern NSString* const STKStickersCountLabel;
+extern NSString* const STKEventsCountLabel;
+extern NSString* const STKMessageTextLabel;
+extern NSString* const STKMessageStickerLabel;
 
 
 @interface STKAnalyticService : NSObject
 
-+ (instancetype) sharedService;
++ (instancetype)sharedService;
 
-- (void)sendEventWithCategory:(NSString*)category
-                       action:(NSString*)action
-                        label:(NSString*)label
-                        value:(NSNumber*)value;
+- (void)sendEventWithCategory: (NSString*)category
+					   action: (NSString*)action
+						label: (NSString*)label
+						value: (NSNumber*)value;
 
 @end

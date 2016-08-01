@@ -10,11 +10,11 @@
 
 @interface STKSearchModel : NSObject
 
-@property (nonatomic, strong) NSString *q;
-@property (nonatomic, strong) NSString *topIfEmpty;
-@property (nonatomic, strong) NSString *wholeWord;
-@property (nonatomic, strong) NSString *limit;
+@property (nonatomic) NSString* q;
+@property (nonatomic) NSString* topIfEmpty;
+@property (nonatomic) NSString* wholeWord;
+@property (nonatomic) NSString* limit;
 
-@property (nonatomic, assign) BOOL isSuggest;
+@property (nonatomic) BOOL isSuggest;
 
 @end

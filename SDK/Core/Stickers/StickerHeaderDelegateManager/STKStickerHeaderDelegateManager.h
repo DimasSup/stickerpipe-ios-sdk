@@ -12,20 +12,19 @@
 @class STKStickerPackObject;
 
 @protocol STKStickerHeaderCollectionViewDelegate <NSObject>
-
-- (void)scrollToIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated;
-
+- (void)scrollToIndexPath: (NSIndexPath*)indexPath animated: (BOOL)animated;
 @end
 
 @interface STKStickerHeaderDelegateManager : NSObject <UICollectionViewDataSource, UICollectionViewDelegate, STKStickerHeaderCollectionViewDelegate>
 
-@property (copy, nonatomic) void(^didSelectRow)(NSIndexPath *indexPath, STKStickerPackObject *stickerPackObject, BOOL animated);
-@property (copy, nonatomic) void(^didSelectSettingsRow)(void);
-@property (strong, nonatomic) UIImage *placeholderImage;
-@property (strong, nonatomic) UIColor *placeholderHeadercolor;
+@property (nonatomic, copy) void (^didSelectRow)(NSIndexPath* indexPath, STKStickerPackObject* stickerPackObject, BOOL animated);
+@property (nonatomic, copy) void (^didSelectSettingsRow)(void);
+@property (nonatomic) UIImage* placeholderImage;
+@property (nonatomic) UIColor* placeholderHeaderColor;
+@property (nonatomic) NSArray<STKStickerPackObject*>* stickerPacksArray;
 
-
-- (void)setStickerPacks:(NSArray *)stickerPacks;
-- (STKStickerPackObject*)itemAtIndexPath:(NSIndexPath*)indexPath;
+#warning -add deprecated later; use stickerPacksArray directly instead
+- (STKStickerPackObject*)itemAtIndexPath: (NSIndexPath*)indexPath;
+- (void)setStickerPacks: (NSArray*)stickerPacks;
 
 @end

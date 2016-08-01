@@ -10,6 +10,6 @@
 
 @interface NSPersistentStoreCoordinator (STKAdditions)
 
-+ (NSPersistentStoreCoordinator *)stk_defaultPersistentsStoreCoordinator;
++ (NSPersistentStoreCoordinator*)stk_defaultPersistentsStoreCoordinator;
 
 @end
