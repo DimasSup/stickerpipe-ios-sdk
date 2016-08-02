@@ -193,6 +193,7 @@ static const CGFloat kStickerImageHeight = 80.0;
 #pragma mark - Gesture Recognizer
 
 - (void)initZoomStickerPreviewView {
+	return;
     UILongPressGestureRecognizer* longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action: @selector(handleLongPress:)];
     longPressGestureRecognizer.delegate = self;
     longPressGestureRecognizer.delaysTouchesBegan = YES;

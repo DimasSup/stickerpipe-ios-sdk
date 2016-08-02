@@ -386,7 +386,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 - (void)showModalViewController: (UIViewController*)viewController {
-	[self.textInputView resignFirstResponder];
+	[self hideStickersView];;
 	STKOrientationNavigationController* navigationController = [[STKOrientationNavigationController alloc] initWithRootViewController: viewController];
 
 	UIViewController* presenter = [self.delegate stickerControllerViewControllerForPresentingModalView];
@@ -948,8 +948,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 			
 			[self.stickersHeaderCollectionView reloadData];
 			[self.stickersCollectionView reloadData];
-			dispatch_async(dispatch_get_main_queue(), ^{
-				
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 				[self showStickersView];
 				[self setPackSelectedAtIndex: stickerIndex];
 				[self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:[self selectedIndexHeaderForSavedValue:stickerIndex]];
