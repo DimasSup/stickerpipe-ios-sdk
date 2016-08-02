@@ -8,462 +8,396 @@
 
 #import "STKStickersShopViewController.h"
 #import "UIWebView+AFNetworking.h"
-#import "STKUtility.h"
 #import "STKStickersManager.h"
-#import "STKApiKeyManager.h"
 #import "STKInAppProductsManager.h"
-#import "STKUUIDManager.h"
+#import "STKStickerPackObject.h"
 #import "STKStickersConstants.h"
-#import "STKStickersApiService.h"
 #import "STKStickersPurchaseService.h"
 #import "STKStickersEntityService.h"
 #import "SKProduct+STKStickerSKProduct.h"
-#import "STKStickerPackObject.h"
-#import "STKStickerController.h"
-
 #import "STKStickersShopJsInterface.h"
+#import "STKWebserviceManager.h"
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <StoreKit/StoreKit.h>
-#import <AFNetworking/AFNetworking.h>
 
-#import "UIImage+CustomBundle.h"
-
-//static NSString * const mainUrl = @"http://work.stk.908.vc/api/v2/web?";
-static NSString * const mainUrl = @"http://api.stickerpipe.com/api/v2/web?";
-
-static NSString * const uri = @"http://demo.stickerpipe.com/work/libs/store/js/stickerPipeStore.js";
-
+static NSString* const uri = @"http://demo.stickerpipe.com/work/libs/store/js/stickerPipeStore.js";
 static NSUInteger const productsCount = 2;
 
 @interface STKStickersShopViewController () <UIWebViewDelegate, STKStickersShopJsInterfaceDelegate, STKStickersPurchaseDelegate>
 
-@property(nonatomic, strong) STKStickersShopJsInterface *jsInterface;
-@property(nonatomic, strong) STKStickersApiService *apiService;
-@property(nonatomic, strong) STKStickersEntityService *entityService;
+@property (nonatomic) STKStickersShopJsInterface* jsInterface;
+@property (nonatomic) STKStickersEntityService* entityService;
 
-@property(nonatomic, weak) IBOutlet UIView *errorView;
-@property(nonatomic, weak) IBOutlet UILabel *errorLabel;
+@property (nonatomic, weak) IBOutlet UIView* errorView;
+@property (nonatomic, weak) IBOutlet UILabel* errorLabel;
 
-@property(nonatomic, strong) NSMutableArray *prices;
+@property (nonatomic) NSMutableArray* prices;
 
-@property BOOL isNetworkReachable;
-
-- (IBAction)closeErrorClicked:(id)sender;
+- (IBAction)closeErrorClicked: (id)sender;
 
 @end
 
 @implementation STKStickersShopViewController
 
 - (void)viewDidLoad {
-    [super viewDidLoad];
-    
-    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-    [self checkNetwork];
-    
-    self.prices = [NSMutableArray new];
-    
-    //    if (self.isNetworkReachable) {
-    //        [self loadShopPrices];
-    //    } else {
-    //        [self handleError:nil];
-    //    }
-    
-    
-    [self setUpButtons];
-    
-    self.navigationItem.title = NSLocalizedString(@"Store", nil);
-    
-    self.jsInterface.delegate = self;
-    
-    [STKStickersPurchaseService sharedInstance].delegate = self;
-    
-    self.apiService = [STKStickersApiService new];
+	[super viewDidLoad];
+
+	self.prices = [NSMutableArray new];
+
+	[self setUpButtons];
+
+	self.navigationItem.title = NSLocalizedString(@"Store", nil);
+
+	self.jsInterface = [STKStickersShopJsInterface new];
+	self.jsInterface.delegate = self;
+
+	[STKStickersPurchaseService sharedInstance].delegate = self;
+
+	//
+	// subscribe to internet status and process current
+	[[STKWebserviceManager sharedInstance] addObserver: self
+											forKeyPath: @"networkReachable"
+											   options: NSKeyValueObservingOptionNew
+											   context: nil];
+
+	[[STKWebserviceManager sharedInstance] startCheckingNetwork];
+	//
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:@"shop" forKey:@"viewController"];
-    [userDefaults synchronize];
+- (void)viewWillAppear: (BOOL)animated {
+	[super viewWillAppear: animated];
+
+	[self processInternetStatus];
+	self.stickersShopWebView.scrollView.contentOffset = CGPointMake(0, -64);
+
+	NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+	[userDefaults setObject: @"shop" forKey: @"viewController"];
+	[userDefaults synchronize];
 }
 
-- (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:@"currentVC" forKey:@"viewController"];
-    [userDefaults synchronize];
+- (void)viewDidDisappear: (BOOL)animated {
+	[super viewDidDisappear: animated];
+
+	NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+	[userDefaults setObject: @"currentVC" forKey: @"viewController"];
+	[userDefaults synchronize];
 }
 
-- (void)checkNetwork {
-    __weak typeof(self) wself = self;
-    
-    [[AFNetworkReachabilityManager sharedManager]setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status){
-        if ((status == AFNetworkReachabilityStatusReachableViaWWAN ||
-             status ==  AFNetworkReachabilityStatusReachableViaWiFi)) {
-            wself.isNetworkReachable = YES;
-            wself.errorView.hidden = YES;
-            [wself loadShopPrices];
-        } else {
-            wself.isNetworkReachable = NO;
-            [wself handleError: [NSError errorWithDomain:NSCocoaErrorDomain code:NSURLErrorNotConnectedToInternet userInfo:nil]];
-        }
-    }];
-}
-
-- (void)handleError:(NSError *)error {
-    [self.activity stopAnimating];
-    self.errorView.hidden = NO;
-    self.errorLabel.text = (error.code == NSURLErrorNotConnectedToInternet) ? NSLocalizedString(@"No internet connection", nil) : NSLocalizedString(@"Oops... something went wrong", nil);
+- (void)handleError: (NSError*)error {
+	[self.activity stopAnimating];
+	self.errorView.hidden = NO;
+	self.errorLabel.text = (error.code == NSURLErrorNotConnectedToInternet) ? NSLocalizedString(@"No internet connection", nil) : NSLocalizedString(@"Oops... something went wrong", nil);
 }
 
 - (void)packDownloaded {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.JsInterface.onPackPurchaseSuccess()"];
-    });
+	dispatch_async(dispatch_get_main_queue(), ^ {
+		[self.stickersShopWebView stringByEvaluatingJavaScriptFromString: @"window.JsInterface.onPackPurchaseSuccess()"];
+	});
 }
 
 - (void)loadShopPrices {
-    
-    if ([STKInAppProductsManager hasProductIds]) {
-        __weak typeof(self) wself = self;
-        
-        [[STKStickersPurchaseService sharedInstance] requestProductsWithIdentifier:[STKInAppProductsManager productIds] completion:^(NSArray *stickerPacks) {
-            if (stickerPacks.count == productsCount) {
-                
-                for (SKProduct *product in stickerPacks) {
-                    [wself.prices addObject:[product currencyString]];
-                }
-                [wself loadStickersShop];
-                
-            } else {
-                //                [wself showErrorAlertWithMessage:@"Can't load products. Try again later" andOkAction:nil andCancelAction:^{
-                //                    [wself dismissViewControllerAnimated:YES completion:nil];
-                //                }];
-                [self handleError:nil];
-            }
-        } failure:^(NSError *error) {
-            //            [wself showErrorAlertWithMessage:error.localizedDescription andOkAction:nil andCancelAction:nil];
-            [self handleError:error];
-        }];
-        
-    }
-    else {
-        if ([STKStickersManager priceBLabel] && [STKStickersManager priceCLabel] ) {
-            
-            self.prices =  [[NSMutableArray alloc] initWithArray: @[[STKStickersManager priceBLabel], [STKStickersManager priceCLabel]]];
-        }
-        [self loadStickersShop];
-    }
+	if ([STKInAppProductsManager hasProductIds]) {
+		[[STKStickersPurchaseService sharedInstance] requestProductsWithIdentifier: [STKInAppProductsManager productIds] completion: ^ (NSArray* stickerPacks) {
+			if (stickerPacks.count == productsCount) {
+				for (SKProduct* product in stickerPacks) {
+					[self.prices addObject: [product currencyString]];
+				}
+
+				[self loadStickersShop];
+			} else {
+				[self handleError: nil];
+			}
+		}                                                                  failure: ^ (NSError* error) {
+			[self handleError: error];
+		}];
+	} else {
+		if ([STKStickersManager priceBLabel] && [STKStickersManager priceCLabel]) {
+			self.prices = [[NSMutableArray alloc] initWithArray: @[[STKStickersManager priceBLabel], [STKStickersManager priceCLabel]]];
+		}
+
+		[self loadStickersShop];
+	}
 }
 
-- (NSString *)shopUrlString {
-    
-    NSString *lang = [[NSLocale preferredLanguages] objectAtIndex:0];
-    
-	NSString *language = ([[([STKStickersManager localization]?:lang) componentsSeparatedByString:@"-"] objectAtIndex:0]);
-    
-    NSString *color = [[NSUserDefaults standardUserDefaults] stringForKey:kShopColor];
-    if (color == nil || [color isEqualToString:@""]) {
-        color = @"047aff";
-    }
-    
-    /**
-     *  Shop content color from navigation controller
-     
-     UIColor *navigationBarColor = self.navigationController.navigationBar.backgroundColor;
-     
-     CGFloat red = 0.0, green = 0.0, blue = 0.0, alpha =0.0;
-     [navigationBarColor getRed:&red green:&green blue:&blue alpha:&alpha];
-     
-     int r,g,b,a;
-     
-     r = (int)(255.0 * red);
-     g = (int)(255.0 * green);
-     b = (int)(255.0 * blue);
-     a = (int)(255.0 * alpha);
-     
-     NSString *color = [NSString stringWithFormat:@"%02x%02x%02x", r, g, b];
-     */
+- (NSString*)shopUrlString {
+	NSMutableString* URL = [[[STKWebserviceManager sharedInstance] stickerUrl] mutableCopy];
 
-    NSMutableString *urlstr = [NSMutableString stringWithFormat:@"%@&apiKey=%@&platform=IOS&userId=%@&density=%@&is_subscriber=%d&primaryColor=%@&localization=%@", mainUrl, [STKApiKeyManager apiKey], [STKStickersManager userKey], [STKUtility scaleString], [STKStickersManager isSubscriber], color, language];
-    
-    if (self.prices.count > 0) {
-        [urlstr appendString: [NSMutableString stringWithFormat:
-                               @"&priceB=%@&priceC=%@", [self.prices firstObject], [self.prices lastObject]]];
-    }
-    
-    NSMutableString *escapedPath = [NSMutableString stringWithString: [urlstr stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
-    
-    if (self.packName) {
-        [escapedPath appendString:[NSString stringWithFormat:@"#/packs/%@", self.packName]];
-    } else {
-        [escapedPath appendString:@"#/store"];
-    }
-    
-    return escapedPath;
+	if (self.prices.count > 0) {
+		[URL appendString: [NSMutableString stringWithFormat:
+				@"&priceB=%@&priceC=%@", [self.prices firstObject], [self.prices lastObject]]];
+	}
+
+	NSMutableString* escapedPath = [NSMutableString stringWithString: [URL stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]]];
+
+	if (self.packName) {
+		[escapedPath appendString: [NSString stringWithFormat: @"#/packs/%@", self.packName]];
+	} else {
+		[escapedPath appendString: @"#/store"];
+	}
+
+	return escapedPath;
 }
 
-- (NSURLRequest *)shopRequest {
-    NSURL *url =[NSURL URLWithString:[self shopUrlString]];
-    return [NSURLRequest requestWithURL:url];
+- (NSURLRequest*)shopRequest {
+	NSURL* url = [NSURL URLWithString: [self shopUrlString]];
+	return [NSURLRequest requestWithURL: url];
 }
 
 - (void)loadStickersShop {
-    [self setJSContext];
-    [self.stickersShopWebView loadRequest:[self shopRequest] progress:nil success:^NSString * _Nonnull(NSHTTPURLResponse * _Nonnull response, NSString * _Nonnull HTML) {
-        return HTML;
-    } failure:^(NSError * error) {
-        [self handleError:error];
-        //        [self showErrorAlertWithMessage:error.localizedDescription andOkAction:^{
-        //            [self loadStickersShop];
-        //        } andCancelAction:^{
-        //            [self dismissViewControllerAnimated:YES completion:^{
-        //                [[NSNotificationCenter defaultCenter] postNotificationName:STKCloseModalViewNotification object:self];
-        //            }];
-        //        }];
-    }];
+	[self setJSContext];
+	[self.stickersShopWebView loadRequest: [self shopRequest] progress: nil success: ^ NSString*(NSHTTPURLResponse* response, NSString* HTML) {
+		return HTML;
+	}                             failure: ^ (NSError* error) {
+		[self handleError: error];
+	}];
 }
 
-- (STKStickersShopJsInterface *)jsInterface {
-    if (!_jsInterface) {
-        _jsInterface = [STKStickersShopJsInterface new];
-    }
-    return _jsInterface;
-}
-
-- (STKStickersEntityService *)entityService {
-    if (!_entityService) {
-        _entityService = [STKStickersEntityService new];
-    }
-    return _entityService;
-}
-
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (STKStickersEntityService*)entityService {
+	if (!_entityService) {
+		_entityService = [STKStickersEntityService new];
+	}
+	return _entityService;
 }
 
 - (void)setUpButtons {
-    
-    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
-    
-    /**
-     *  For framework
-     */
-    //      UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
-    self.navigationItem.leftBarButtonItem = closeBarButton;
 
-    UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"STKSettingsIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(showCollections:)];
-    
-    /**
-     *  For framework
-     */
-    //    UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKSettingsIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(showCollections:)];
-    self.navigationItem.rightBarButtonItem = settingsButton;
+	UIBarButtonItem* closeBarButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKBackIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(closeAction:)];
+
+	/**
+	 *  For framework
+	 */
+	//      UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
+	self.navigationItem.leftBarButtonItem = closeBarButton;
+
+	UIBarButtonItem* settingsButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKSettingsIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(showCollections:)];
+
+	/**
+	 *  For framework
+	 */
+	//    UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKSettingsIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(showCollections:)];
+	self.navigationItem.rightBarButtonItem = settingsButton;
 }
 
 - (void)setJSContext {
-    
-    JSContext *context = [self.stickersShopWebView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-    
-    [context setExceptionHandler:^(JSContext *context, JSValue *value) {
-        NSLog(@"WEB JS: %@", value);
-    }];
-    
-    context[@"IosJsInterface"] = self.jsInterface;
+	JSContext* context = [self.stickersShopWebView valueForKeyPath: @"documentView.webView.mainFrame.javaScriptContext"];
+
+	[context setExceptionHandler: ^ (JSContext* jsContext, JSValue* value) {
+		NSLog(@"WEB JS: %@", value);
+	}];
+
+	context[@"IosJsInterface"] = self.jsInterface;
 }
 
-- (void)loadPackWithName:(NSString *)packName andPrice:(NSString *)packPrice {
-    __weak typeof(self) wself = self;
-    
-    [self.apiService loadStickerPackWithName:packName andPricePoint:packPrice success:^(id response) {
-        [wself.entityService downloadNewPack:response[@"data"] onSuccess:^{
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:STKNewPackDownloadedNotification object:self userInfo:@{@"packName": packName}];
-            
-            [wself dismissViewControllerAnimated:YES completion:^{
-                [wself.stickerController showKeyboard];
-            }];
-        }];
-        
-    } failure:^(NSError *error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.JsInterface.onPackPurchaseFail()"];
-        });
-    }];
+- (void)loadPackWithName: (NSString*)packName andPrice: (NSString*)packPrice {
+	[[STKWebserviceManager sharedInstance] loadStickerPackWithName: packName andPricePoint: packPrice success: ^ (id response) {
+		[self.entityService downloadNewPack: response[@"data"] onSuccess: ^ {
+			[self.delegate packWithName: packName downloadedFromController: self];
+
+			[[NSNotificationCenter defaultCenter] postNotificationName: STKNewPackDownloadedNotification object: self userInfo: @{@"packName" : packName}];
+
+			[self.delegate hideSuggestCollectionViewIfNeeded];
+
+			[self dismissViewControllerAnimated: YES completion: ^ {
+				[self.delegate showKeyboard];
+			}];
+		}];
+	}                                failure: ^ (NSError* error) {
+		dispatch_async(dispatch_get_main_queue(), ^ {
+			[self.stickersShopWebView stringByEvaluatingJavaScriptFromString: @"window.JsInterface.onPackPurchaseFail()"];
+		});
+	}];
 }
+
 
 #pragma mark - Actions
 
-- (IBAction)closeAction:(id)sender {
-    
-    NSString *currentURL = [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.location.href"];
-    if ([currentURL isEqualToString:[self shopUrlString]] || [currentURL isEqualToString:@"about:blank"]) {
-        [self dismissViewControllerAnimated:YES completion:^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:STKCloseModalViewNotification object:self];
-            
-            NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-            [userDefaults setObject:@"currentVC" forKey:@"viewController"];
-            [userDefaults synchronize];
-            
-            [self.stickerController showKeyboard];
-        }];
-    } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.JsInterface.goBack()"];
-        });
-    }
+- (IBAction)closeAction: (id)sender {
+	NSString* currentURL = [self.stickersShopWebView stringByEvaluatingJavaScriptFromString: @"window.location.href"];
+
+	if ([currentURL isEqualToString: [self shopUrlString]] || [currentURL isEqualToString: @"about:blank"]) {
+		[self.delegate hideSuggestCollectionViewIfNeeded];
+
+		[self dismissViewControllerAnimated: YES completion: ^ {
+			[[NSNotificationCenter defaultCenter] postNotificationName: STKCloseModalViewNotification object: self];
+
+			NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+			[userDefaults setObject: @"currentVC" forKey: @"viewController"];
+			[userDefaults synchronize];
+
+			[self.delegate showKeyboard];
+		}];
+	} else {
+		dispatch_async(dispatch_get_main_queue(), ^ {
+			[self.stickersShopWebView stringByEvaluatingJavaScriptFromString: @"window.JsInterface.goBack()"];
+		});
+	}
 }
 
-- (IBAction)showCollections:(id)sender {
-    [self showCollections];
+- (IBAction)showCollections: (id)sender {
+	[self showCollections];
 }
+
 
 #pragma mark - UIWebviewDelegate
 
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    
-    [self handleError:error];
-    //    [self showErrorAlertWithMessage:error.localizedDescription andOkAction:^{
-    //        [self loadStickersShop];
-    //    } andCancelAction:^{
-    //        [self dismissViewControllerAnimated:YES completion:^{
-    //            [[NSNotificationCenter defaultCenter] postNotificationName:STKCloseModalViewNotification object:self];
-    //        }];
-    //    }];
+- (void)webView: (UIWebView*)webView didFailLoadWithError: (NSError*)error {
+	[self handleError: error];
 }
+
 
 #pragma mark - STKStickersShopJsInterfaceDelegate
 
 - (void)showCollectionsView {
-    [self showCollections];
+	[self showCollections];
 }
 
-- (void)purchasePack:(NSString *)packTitle withName:(NSString *)packName
-            andPrice:(NSString *)packPrice {
-    
-    if ([packPrice isEqualToString:@"A"] || ([packPrice isEqualToString:@"B"] && [STKStickersManager isSubscriber]) || [self.entityService hasPackWithName:packName]) {
-        
-        [self loadPackWithName:packName andPrice:packPrice];
-        
-    } else {
-        
-        if ([STKInAppProductsManager hasProductIds]) {
-            //            [self.stickersPurchaseService purchaseProductWithPackName:packName andPackPrice:packPrice];
-            [[STKStickersPurchaseService sharedInstance] purchaseProductWithPackName:packName andPackPrice:packPrice];
-        } else {
-            [[NSNotificationCenter defaultCenter] postNotificationName:STKPurchasePackNotification object:self userInfo:@{@"packName":packName, @"packPrice":packPrice}];
-        }
-    }
+- (void)purchasePack: (NSString*)packTitle withName: (NSString*)packName andPrice: (NSString*)packPrice {
+	if ([packPrice isEqualToString: @"A"] || ([packPrice isEqualToString: @"B"] && [STKStickersManager isSubscriber]) || [self.entityService hasPackWithName: packName]) {
+		[self loadPackWithName: packName andPrice: packPrice];
+	} else {
+		if ([STKInAppProductsManager hasProductIds]) {
+			[[STKStickersPurchaseService sharedInstance] purchaseProductWithPackName: packName andPackPrice: packPrice];
+		} else {
+			[self.delegate packPurchasedWithName: packName price: packPrice fromController: self];
+
+			[[NSNotificationCenter defaultCenter] postNotificationName: STKPurchasePackNotification object: self userInfo: @{@"packName" : packName, @"packPrice" : packPrice}];
+		}
+	}
 }
 
-- (void)setInProgress:(BOOL)show {
-    self.activity.hidden = !show;
+- (void)setInProgress: (BOOL)show {
+	if (show) {
+		[self.activity startAnimating];
+	} else {
+		[self.activity stopAnimating];
+	}
 }
 
-- (void)removePack:(NSString *)packName {
-    
-    __weak typeof(self) wself = self;
-    
-    [self.apiService deleteStickerPackWithName:packName success:^(id response) {
-        STKStickerPackObject *stickerPack = [wself.entityService getStickerPackWithName:packName];
-        [wself.entityService togglePackDisabling:stickerPack];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            //            [[NSNotificationCenter defaultCenter]postNotificationName:STKStickersReorderStickersNotification object:self];
-            [[NSNotificationCenter defaultCenter] postNotificationName:STKPackRemovedNotification object:self userInfo:@{@"pack":stickerPack}];
-            [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.JsInterface.onPackRemoveSuccess()"];
-        });
-    } failure:^(NSError *error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.JsInterface.onPackRemoveFail()"];
-        });
-    }];
+- (void)removePack: (NSString*)packName {
+	[[STKWebserviceManager sharedInstance] deleteStickerPackWithName: packName success: ^ (id response) {
+		STKStickerPackObject* stickerPack = [self.entityService getStickerPackWithName: packName];
+		[self.entityService togglePackDisabling: stickerPack];
+		dispatch_async(dispatch_get_main_queue(), ^ {
+			[[NSNotificationCenter defaultCenter] postNotificationName: STKPackRemovedNotification object: self userInfo: @{@"pack" : stickerPack}];
+
+			[self.delegate packRemoved: stickerPack fromController: self];
+
+			[self.stickersShopWebView stringByEvaluatingJavaScriptFromString: @"window.JsInterface.onPackRemoveSuccess()"];
+		});
+	}                                                        failure: ^ (NSError* error) {
+		dispatch_async(dispatch_get_main_queue(), ^ {
+			[self.stickersShopWebView stringByEvaluatingJavaScriptFromString: @"window.JsInterface.onPackRemoveFail()"];
+		});
+	}];
 }
 
-- (void)showPack:(NSString *)packName {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self dismissViewControllerAnimated:YES completion:^{
-			[self.stickerController showStickersView];
-			dispatch_async(dispatch_get_main_queue(), ^{
-				[[NSNotificationCenter defaultCenter] postNotificationName:STKShowPackNotification object:self userInfo:@{@"packName": packName}];
-			});
-        }];
-    });
+- (void)showPack: (NSString*)packName {
+	dispatch_async(dispatch_get_main_queue(), ^ {
+
+		[self.delegate hideSuggestCollectionViewIfNeeded];
+
+		[self dismissViewControllerAnimated: YES completion: ^ {
+            [self.delegate showKeyboard];
+
+			[self.delegate showPackWithName: packName fromController: self];
+
+			[[NSNotificationCenter defaultCenter] postNotificationName: STKShowPackNotification object: self userInfo: @{@"packName" : packName}];
+		}];
+	});
 }
+
 
 #pragma mark - Purchase service delegate
 
-- (void)purchaseSucceededWithPackName:(NSString *)packName andPackPrice:(NSString *)packPrice {
-    [self loadPackWithName:packName andPrice:packPrice];
+- (void)purchaseSucceededWithPackName: (NSString*)packName andPackPrice: (NSString*)packPrice {
+	[self loadPackWithName: packName andPrice: packPrice];
 }
 
-- (void)purchaseFailedWithError:(NSError *)error {
-    [self purchaseFailedError:error];
+- (void)purchaseFailedWithError: (NSError*)error {
+	[self purchaseFailedError: error];
 }
+
 
 #pragma mark - Show views
 
-- (void)showErrorAlertWithMessage:(NSString *)errorMessage
-                      andOkAction:(void(^)(void))completion
-                  andCancelAction:(void(^)(void))cancel {
-    
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8) {
-        
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"" message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
-        
-        if (completion) {
-            
-            UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                completion();
-            }];
-            [alertController addAction:okAction];
-        }
-        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            if (cancel) {
-                cancel();
-            } else {
-                [alertController dismissViewControllerAnimated:YES completion:nil];
-            }
-        }];
-        [alertController addAction:cancelAction];
-        
-        [self presentViewController:alertController animated:YES completion:nil];
-    }
+- (void)showErrorAlertWithMessage: (NSString*)errorMessage
+					  andOkAction: (void (^)(void))completion
+				  andCancelAction: (void (^)(void))cancel {
+	if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8) {
+		UIAlertController* alertController = [UIAlertController alertControllerWithTitle: @"" message: errorMessage preferredStyle: UIAlertControllerStyleAlert];
+
+		if (completion) {
+			[alertController addAction: [UIAlertAction actionWithTitle: NSLocalizedString(@"OK", nil) style: UIAlertActionStyleDefault handler: ^ (UIAlertAction* _Nonnull action) {
+				completion();
+			}]];
+		}
+		[alertController addAction: [UIAlertAction actionWithTitle: NSLocalizedString(@"Cancel", nil) style: UIAlertActionStyleDefault handler: ^ (UIAlertAction* _Nonnull action) {
+			if (cancel) {
+				cancel();
+			} else {
+				[alertController dismissViewControllerAnimated: YES completion: nil];
+			}
+		}]];
+
+		[self presentViewController: alertController animated: YES completion: nil];
+	}
 }
 
 - (void)showCollections {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self dismissViewControllerAnimated:YES completion:^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:STKShowStickersCollectionsNotification object:self];
-        }];
-    });
+	dispatch_async(dispatch_get_main_queue(), ^ {
+		[self dismissViewControllerAnimated: YES completion: ^ {
+			[self.delegate showStickersCollection];
+
+			[[NSNotificationCenter defaultCenter] postNotificationName: STKShowStickersCollectionsNotification object: self];
+		}];
+	});
 }
 
-- (void)closeErrorClicked:(id)sender {
-    if (self.isNetworkReachable) {
-        self.errorView.hidden = YES;
-        [self loadShopPrices];
-    } else {
-        self.errorView.hidden = NO;
-    }
+- (void)closeErrorClicked: (id)sender {
+	if ([STKWebserviceManager sharedInstance].networkReachable) {
+		self.errorView.hidden = YES;
+		[self loadShopPrices];
+	} else {
+		self.errorView.hidden = NO;
+	}
 }
+
 
 #pragma mark - purchses
 
-- (void)purchaseFailedError:(NSError *)error {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (error) {
-            [self showErrorAlertWithMessage:error.localizedDescription andOkAction:nil andCancelAction:nil];
-        }
-        [self.stickersShopWebView stringByEvaluatingJavaScriptFromString:@"window.JsInterface.onPackPurchaseFail()"];
-    });
+- (void)purchaseFailedError: (NSError*)error {
+	dispatch_async(dispatch_get_main_queue(), ^ {
+		if (error) {
+			[self showErrorAlertWithMessage: error.localizedDescription andOkAction: nil andCancelAction: nil];
+		}
+		[self.stickersShopWebView stringByEvaluatingJavaScriptFromString: @"window.JsInterface.onPackPurchaseFail()"];
+	});
 }
+
+- (void)observeValueForKeyPath: (NSString*)keyPath
+					  ofObject: (id)object
+						change: (NSDictionary*)change
+					   context: (void*)context {
+	if (object == [STKWebserviceManager sharedInstance]) {
+		[self processInternetStatus];
+	}
+}
+
+- (void)processInternetStatus {
+	if ([STKWebserviceManager sharedInstance].networkReachable) {
+		self.errorView.hidden = YES;
+		[self loadShopPrices];
+	} else {
+		[self handleError: [NSError errorWithDomain: NSCocoaErrorDomain code: NSURLErrorNotConnectedToInternet userInfo: nil]];
+	}
+}
+
+- (void)dealloc {
+	[[NSNotificationCenter defaultCenter] removeObserver: self];
+
+	[[STKWebserviceManager sharedInstance] removeObserver: self
+											   forKeyPath: @"networkReachable"
+												  context: nil];
+}
+
 
 @end

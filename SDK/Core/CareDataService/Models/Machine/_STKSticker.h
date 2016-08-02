@@ -4,36 +4,38 @@
 #import <CoreData/CoreData.h>
 
 extern const struct STKStickerAttributes {
-	__unsafe_unretained NSString *stickerID;
-	__unsafe_unretained NSString *stickerMessage;
-	__unsafe_unretained NSString *stickerName;
-	__unsafe_unretained NSString *usedCount;
-    __unsafe_unretained NSString *usedDate;
-    __unsafe_unretained NSString *packName;
+	__unsafe_unretained NSString* stickerID;
+	__unsafe_unretained NSString* stickerMessage;
+	__unsafe_unretained NSString* stickerName;
+	__unsafe_unretained NSString* usedCount;
+	__unsafe_unretained NSString* usedDate;
+	__unsafe_unretained NSString* packName;
 
 
 } STKStickerAttributes;
 
 extern const struct STKStickerRelationships {
-	__unsafe_unretained NSString *stickerPack;
+	__unsafe_unretained NSString* stickerPack;
 } STKStickerRelationships;
 
 @class STKStickerPack;
 
-@interface STKStickerID : NSManagedObjectID {}
+@interface STKStickerID : NSManagedObjectID {
+}
 @end
 
-@interface _STKSticker : NSManagedObject {}
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext*)moc_;
+@interface _STKSticker : NSManagedObject {
+}
++ (id)insertInManagedObjectContext: (NSManagedObjectContext*)moc_;
 + (NSString*)entityName;
-+ (NSEntityDescription*)entityInManagedObjectContext:(NSManagedObjectContext*)moc_;
++ (NSEntityDescription*)entityInManagedObjectContext: (NSManagedObjectContext*)moc_;
 @property (nonatomic, readonly, strong) STKStickerID* objectID;
 
 @property (nonatomic, strong) NSNumber* stickerID;
 
 @property (atomic) int64_t stickerIDValue;
 - (int64_t)stickerIDValue;
-- (void)setStickerIDValue:(int64_t)value_;
+- (void)setStickerIDValue: (int64_t)value_;
 
 //- (BOOL)validateStickerID:(id*)value_ error:(NSError**)error_;
 
@@ -49,15 +51,15 @@ extern const struct STKStickerRelationships {
 
 @property (atomic) int64_t usedCountValue;
 - (int64_t)usedCountValue;
-- (void)setUsedCountValue:(int64_t)value_;
+- (void)setUsedCountValue: (int64_t)value_;
 
 //- (BOOL)validateUsedCount:(id*)value_ error:(NSError**)error_;
 
-@property (nonatomic, strong) STKStickerPack *stickerPack;
+@property (nonatomic, strong) STKStickerPack* stickerPack;
 
-@property (nonatomic, strong) NSDate *usedDate;
+@property (nonatomic, strong) NSDate* usedDate;
 
-@property (nonatomic, strong) NSString *packName;
+@property (nonatomic, strong) NSString* packName;
 
 //- (BOOL)validateStickerPack:(id*)value_ error:(NSError**)error_;
 
@@ -66,24 +68,24 @@ extern const struct STKStickerRelationships {
 @interface _STKSticker (CoreDataGeneratedPrimitiveAccessors)
 
 - (NSNumber*)primitiveStickerID;
-- (void)setPrimitiveStickerID:(NSNumber*)value;
+- (void)setPrimitiveStickerID: (NSNumber*)value;
 
 - (int64_t)primitiveStickerIDValue;
-- (void)setPrimitiveStickerIDValue:(int64_t)value_;
+- (void)setPrimitiveStickerIDValue: (int64_t)value_;
 
 - (NSString*)primitiveStickerMessage;
-- (void)setPrimitiveStickerMessage:(NSString*)value;
+- (void)setPrimitiveStickerMessage: (NSString*)value;
 
 - (NSString*)primitiveStickerName;
-- (void)setPrimitiveStickerName:(NSString*)value;
+- (void)setPrimitiveStickerName: (NSString*)value;
 
 - (NSNumber*)primitiveUsedCount;
-- (void)setPrimitiveUsedCount:(NSNumber*)value;
+- (void)setPrimitiveUsedCount: (NSNumber*)value;
 
 - (int64_t)primitiveUsedCountValue;
-- (void)setPrimitiveUsedCountValue:(int64_t)value_;
+- (void)setPrimitiveUsedCountValue: (int64_t)value_;
 
 - (STKStickerPack*)primitiveStickerPack;
-- (void)setPrimitiveStickerPack:(STKStickerPack*)value;
+- (void)setPrimitiveStickerPack: (STKStickerPack*)value;
 
 @end

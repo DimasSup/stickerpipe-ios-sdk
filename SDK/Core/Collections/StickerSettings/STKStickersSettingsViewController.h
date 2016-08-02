@@ -6,11 +6,15 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-@class STKStickerController;
+
+@class STKStickersSettingsViewController;
+@protocol STKStickersShopViewControllerDelegate;
+
+@protocol STKStickersSettingsViewControllerDelegate<NSObject>
+- (void)showStickersView;
+- (void)stickersReorder: (STKStickersSettingsViewController*)stickersController packs:(NSArray* )packs;
+@end
 
 @interface STKStickersSettingsViewController : UIViewController
-
-@property (nonatomic, strong) STKStickerController *stickerController;
-
+@property (nonatomic, weak) id <STKStickersSettingsViewControllerDelegate, STKStickersShopViewControllerDelegate> delegate;
 @end

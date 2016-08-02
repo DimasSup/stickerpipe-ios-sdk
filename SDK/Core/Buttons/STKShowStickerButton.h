@@ -3,12 +3,21 @@
 // Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-
 #import "STKBadgeView.h"
 
-@interface STKShowStickerButton : UIButton
 
-@property (nonatomic, strong) STKBadgeView *badgeView;
-@property (nonatomic, strong) IBInspectable UIColor *badgeBorderColor;
+#define STK_TEXTBUTTON_KEYBOARD @"iconChatKeyboard"
+#define STK_TEXTBUTTON_STICKERS @"iconChatSmileyBtn"
+
+typedef NS_ENUM(ushort, STKShowStickerButtonState)
+{
+	STKShowStickerButtonStateStickers,
+	STKShowStickerButtonStateKeyboard,
+};
+
+@interface STKShowStickerButton : UIButton
+@property (nonatomic) STKBadgeView* badgeView;
+@property (nonatomic) IBInspectable UIColor* badgeBorderColor;
+
+@property (nonatomic) STKShowStickerButtonState stickerButtonState;
 @end

@@ -11,6 +11,6 @@
 
 @interface STKCoreDataService : NSObject
 
-+ (void) setupCoreData;
++ (void)setupCoreData;
 
 @end

@@ -4,20 +4,22 @@
 #import <CoreData/CoreData.h>
 
 extern const struct STKStatisticAttributes {
-	__unsafe_unretained NSString *action;
-	__unsafe_unretained NSString *category;
-	__unsafe_unretained NSString *label;
-	__unsafe_unretained NSString *time;
-	__unsafe_unretained NSString *value;
+	__unsafe_unretained NSString* action;
+	__unsafe_unretained NSString* category;
+	__unsafe_unretained NSString* label;
+	__unsafe_unretained NSString* time;
+	__unsafe_unretained NSString* value;
 } STKStatisticAttributes;
 
-@interface STKStatisticID : NSManagedObjectID {}
+@interface STKStatisticID : NSManagedObjectID {
+}
 @end
 
-@interface _STKStatistic : NSManagedObject {}
-+ (id)insertInManagedObjectContext:(NSManagedObjectContext*)moc_;
+@interface _STKStatistic : NSManagedObject {
+}
++ (id)insertInManagedObjectContext: (NSManagedObjectContext*)moc_;
 + (NSString*)entityName;
-+ (NSEntityDescription*)entityInManagedObjectContext:(NSManagedObjectContext*)moc_;
++ (NSEntityDescription*)entityInManagedObjectContext: (NSManagedObjectContext*)moc_;
 @property (nonatomic, readonly, strong) STKStatisticID* objectID;
 
 @property (nonatomic, strong) NSString* action;
@@ -36,7 +38,7 @@ extern const struct STKStatisticAttributes {
 
 @property (atomic) int64_t timeValue;
 - (int64_t)timeValue;
-- (void)setTimeValue:(int64_t)value_;
+- (void)setTimeValue: (int64_t)value_;
 
 //- (BOOL)validateTime:(id*)value_ error:(NSError**)error_;
 
@@ -44,7 +46,7 @@ extern const struct STKStatisticAttributes {
 
 @property (atomic) int64_t valueValue;
 - (int64_t)valueValue;
-- (void)setValueValue:(int64_t)value_;
+- (void)setValueValue: (int64_t)value_;
 
 //- (BOOL)validateValue:(id*)value_ error:(NSError**)error_;
 
@@ -53,24 +55,24 @@ extern const struct STKStatisticAttributes {
 @interface _STKStatistic (CoreDataGeneratedPrimitiveAccessors)
 
 - (NSString*)primitiveAction;
-- (void)setPrimitiveAction:(NSString*)value;
+- (void)setPrimitiveAction: (NSString*)value;
 
 - (NSString*)primitiveCategory;
-- (void)setPrimitiveCategory:(NSString*)value;
+- (void)setPrimitiveCategory: (NSString*)value;
 
 - (NSString*)primitiveLabel;
-- (void)setPrimitiveLabel:(NSString*)value;
+- (void)setPrimitiveLabel: (NSString*)value;
 
 - (NSNumber*)primitiveTime;
-- (void)setPrimitiveTime:(NSNumber*)value;
+- (void)setPrimitiveTime: (NSNumber*)value;
 
 - (int64_t)primitiveTimeValue;
-- (void)setPrimitiveTimeValue:(int64_t)value_;
+- (void)setPrimitiveTimeValue: (int64_t)value_;
 
 - (NSNumber*)primitiveValue;
-- (void)setPrimitiveValue:(NSNumber*)value;
+- (void)setPrimitiveValue: (NSNumber*)value;
 
 - (int64_t)primitiveValueValue;
-- (void)setPrimitiveValueValue:(int64_t)value_;
+- (void)setPrimitiveValueValue: (int64_t)value_;
 
 @end

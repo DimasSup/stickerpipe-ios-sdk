@@ -6,16 +6,33 @@
 //  Copyright © 2016 908 Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-@class STKStickerController;
+
+@class STKStickersShopViewController;
+@class STKStickerPackObject;
+
+@protocol STKStickersShopViewControllerDelegate <NSObject>
+- (void)hideSuggestCollectionViewIfNeeded;
+
+- (void)showKeyboard;
+
+- (void)showStickersCollection;
+
+- (void)packRemoved: (STKStickerPackObject*)packObject fromController: (STKStickersShopViewController*)shopController;
+
+- (void)showPackWithName: (NSString*)name fromController: (STKStickersShopViewController*)shopController;
+
+- (void)packWithName: (NSString*)packName downloadedFromController: (STKStickersShopViewController*)shopController;
+
+- (void)packPurchasedWithName:(NSString*)packName price:(NSString* )packPrice fromController:(STKStickersShopViewController*)shopController;
+
+@end
 
 @interface STKStickersShopViewController : UIViewController
+@property (nonatomic, weak) id <STKStickersShopViewControllerDelegate> delegate;
 
-@property (nonatomic, weak) IBOutlet UIWebView *stickersShopWebView;
-@property (nonatomic, weak) IBOutlet UIActivityIndicatorView *activity;
+@property (nonatomic, weak) IBOutlet UIWebView* stickersShopWebView;
+@property (nonatomic, weak) IBOutlet UIActivityIndicatorView* activity;
 
-@property (nonatomic, strong) NSString *packName;
-
-@property (nonatomic, strong) STKStickerController *stickerController;
+@property (nonatomic) NSString* packName;
 
 @end

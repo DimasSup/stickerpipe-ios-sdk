@@ -10,6 +10,6 @@
 
 @interface NSString (STKMD5)
 
-- (NSString *)stk_md5String;
+- (NSString*)stk_md5String;
 
 @end

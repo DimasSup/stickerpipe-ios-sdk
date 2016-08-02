@@ -10,6 +10,6 @@
 
 @interface UIImage (CustomBundle)
 
-+ (UIImage *)imageNamedInCustomBundle:(NSString *)name;
++ (UIImage*)imageNamedInCustomBundle: (NSString*)name;
 
 @end

@@ -10,9 +10,9 @@
 
 @implementation UIImage (CustomBundle)
 
-+ (UIImage *)imageNamedInCustomBundle:(NSString *)name {
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"ResBundle" ofType:@"bundle"];
-    return [UIImage imageNamed:name inBundle:[NSBundle bundleWithPath:bundlePath] compatibleWithTraitCollection:nil];
++ (UIImage*)imageNamedInCustomBundle: (NSString*)name {
+	NSString* bundlePath = [[NSBundle mainBundle] pathForResource: @"ResBundle" ofType: @"bundle"];
+	return [UIImage imageNamed: name inBundle: [NSBundle bundleWithPath: bundlePath] compatibleWithTraitCollection: nil];
 }
 
 

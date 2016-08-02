@@ -8,34 +8,32 @@
 
 #import <UIKit/UIKit.h>
 
-typedef void(^STKCompletionBlock)(NSError *error, UIImage *stickerImage);
-typedef void(^STKDownloadingProgressBlock)(NSTimeInterval progress);
+typedef void(^ STKCompletionBlock)(NSError* error, UIImage* stickerImage);
+typedef void(^ STKDownloadingProgressBlock)(NSTimeInterval progress);
 
 @interface UIImageView (Stickers)
 
-- (void) stk_setStickerWithMessage:(NSString*)stickerMessage
-                     completion:(STKCompletionBlock) completion;
+- (void)stk_setStickerWithMessage: (NSString*)stickerMessage
+					   completion: (STKCompletionBlock)completion;
 
-- (void) stk_setStickerWithMessage:(NSString*)stickerMessage
-                    placeholder:(UIImage*)placeholder;
-
-
-- (void) stk_setStickerWithMessage:(NSString*)stickerMessage
-                    placeholder:(UIImage*)placeholder
-                     completion:(STKCompletionBlock) completion;
+- (void)stk_setStickerWithMessage: (NSString*)stickerMessage
+					  placeholder: (UIImage*)placeholder;
 
 
-- (void) stk_setStickerWithMessage:(NSString *)stickerMessage
-                    placeholder:(UIImage *)placeholder
-                  placeholderColor:(UIColor*)placeholderColor
-                       progress:(STKDownloadingProgressBlock)progressBlock
-                     completion:(STKCompletionBlock)completion;
+- (void)stk_setStickerWithMessage: (NSString*)stickerMessage
+					  placeholder: (UIImage*)placeholder
+					   completion: (STKCompletionBlock)completion;
 
 
+- (void)stk_setStickerWithMessage: (NSString*)stickerMessage
+					  placeholder: (UIImage*)placeholder
+				 placeholderColor: (UIColor*)placeholderColor
+						 progress: (STKDownloadingProgressBlock)progressBlock
+					   completion: (STKCompletionBlock)completion;
 
 
-- (void) stk_cancelStickerLoading;
+- (void)stk_cancelStickerLoading;
 
-- (void) stk_cancelStickerImageLoading:(UIImageView *)stickerImageView;
+- (void)stk_cancelStickerImageLoading: (UIImageView*)stickerImageView;
 
 @end

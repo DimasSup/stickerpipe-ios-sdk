@@ -9,23 +9,21 @@
 #import "STKStickerSettingsCell.h"
 #import "STKStickerPackObject.h"
 #import "DFImageManagerKit.h"
-#import "STKUtility.h"
+#import "STKWebserviceManager.h"
+
 
 @implementation STKStickerSettingsCell
 
-- (void) prepareForReuse {
-    [self.packIconImageView df_prepareForReuse];
+- (void)prepareForReuse {
+	[self.packIconImageView df_prepareForReuse];
 }
 
-- (void)configureWithStickerPack:(STKStickerPackObject*)stickerPack {
-    
-    NSURL *iconUrl = [STKUtility mainImageUrlForPackName:stickerPack.packName];
-    
-    
-    [self.packIconImageView df_setImageWithResource:iconUrl];
-    self.packTitleLabel.text = stickerPack.packTitle;
-    self.packDescriptionLabel.text = stickerPack.artist;
-    
+- (void)configureWithStickerPack: (STKStickerPackObject*)stickerPack {
+	NSURL* iconUrl = [[STKWebserviceManager sharedInstance] mainImageUrlForPackName: stickerPack.packName];
+
+	[self.packIconImageView df_setImageWithResource: iconUrl];
+	self.packTitleLabel.text = stickerPack.packTitle;
+	self.packDescriptionLabel.text = stickerPack.artist;
 }
 
 @end

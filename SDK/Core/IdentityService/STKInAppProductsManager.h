@@ -11,16 +11,16 @@
 @interface STKInAppProductsManager : NSObject
 
 
-+ (void)setPriceBproductId:(NSString *)priceBproductId;
-+ (NSString *)priceBProductId;
++ (void)setPriceBproductId: (NSString*)priceBproductId;
++ (NSString*)priceBProductId;
 
-+ (void)setPriceCproductId:(NSString *)priceCproductId;
-+ (NSString *)priceCProductId;
++ (void)setPriceCproductId: (NSString*)priceCproductId;
++ (NSString*)priceCProductId;
 
-+ (NSString *)productIdWithPackPrice:(NSString *)packPrice;
++ (NSString*)productIdWithPackPrice: (NSString*)packPrice;
 
 + (BOOL)hasProductIds;
 
-+ (NSArray *)productIds;
++ (NSArray*)productIds;
 
 @end

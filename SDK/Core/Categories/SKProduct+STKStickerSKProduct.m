@@ -10,10 +10,10 @@
 
 @implementation SKProduct (STKStickerSKProduct)
 
-- (NSString *)currencyString {
-    NSNumberFormatter *formatter = [NSNumberFormatter new];
-    [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-    [formatter setLocale:self.priceLocale];
-    return [formatter stringFromNumber:self.price];
+- (NSString*)currencyString {
+	NSNumberFormatter* formatter = [NSNumberFormatter new];
+	[formatter setNumberStyle: NSNumberFormatterCurrencyStyle];
+	[formatter setLocale: self.priceLocale];
+	return [formatter stringFromNumber: self.price];
 }
 @end

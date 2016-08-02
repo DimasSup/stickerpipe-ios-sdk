@@ -8,20 +8,20 @@
 
 #import "STKApiKeyManager.h"
 
-static NSString *savedApiKey;
+static NSString* savedApiKey;
 
 @implementation STKApiKeyManager
 
-+ (void)setApiKey:(NSString *)apiKey {
-    NSAssert(apiKey != nil, @"No api key");
-    NSAssert(apiKey.length > 0, @"No api key");
-    savedApiKey = apiKey;
++ (void)setApiKey: (NSString*)apiKey {
+	NSAssert(apiKey != nil, @"No api key");
+	NSAssert(apiKey.length > 0, @"No api key");
+	savedApiKey = apiKey;
 }
 
-+ (NSString *)apiKey {
-    NSAssert(savedApiKey != nil, @"No api key");
-    NSAssert(savedApiKey.length > 0, @"No api key");
-    return savedApiKey;
++ (NSString*)apiKey {
+	NSAssert(savedApiKey != nil, @"No api key");
+	NSAssert(savedApiKey.length > 0, @"No api key");
+	return savedApiKey;
 }
 
 @end

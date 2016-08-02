@@ -14,34 +14,21 @@
 
 @interface STKStickerPackObject : NSObject <STKStickerPackProtocol>
 
-@property (nonatomic, strong) NSString *artist;
+@property (nonatomic) NSString* artist;
+@property (nonatomic) NSString* packName;
+@property (nonatomic) NSString* packTitle;
+@property (nonatomic) NSNumber* packID;
+@property (nonatomic) NSString* pricePoint;
+@property (nonatomic) NSNumber* price;
+@property (nonatomic) NSMutableArray* stickers;
+@property (nonatomic) NSNumber* disabled;
+@property (nonatomic) NSNumber* order;
+@property (nonatomic) NSString* packDescription;
+@property (nonatomic) NSNumber* isNew;
+@property (nonatomic) NSString* bannerUrl;
+@property (nonatomic) NSString* productID;
 
-@property (nonatomic, strong) NSString *packName;
-
-@property (nonatomic, strong) NSString *packTitle;
-
-@property (nonatomic, strong) NSNumber *packID;
-
-@property (nonatomic, strong) NSString *pricePoint;
-
-@property (nonatomic, strong) NSNumber *price;
-
-@property (nonatomic, strong) NSMutableArray *stickers;
-
-@property (nonatomic, strong) NSNumber *disabled;
-
-@property (nonatomic, strong) NSNumber *order;
-
-@property (nonatomic, strong) NSString *packDescription;
-
-@property (nonatomic, strong) NSNumber *isNew;
-
-@property (nonatomic, strong) NSString *bannerUrl;
-
-@property (nonatomic, strong) NSString *productID;
-
-- (instancetype)initWithServerResponse:(NSDictionary*)serverResponse;
-
-- (instancetype)initWithStickerPack:(STKStickerPack*)stickerPack;
+- (instancetype)initWithServerResponse: (NSDictionary*)serverResponse;
+- (instancetype)initWithStickerPack: (STKStickerPack*)stickerPack;
 
 @end

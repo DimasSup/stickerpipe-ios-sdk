@@ -11,6 +11,6 @@
 
 @interface STKEmptyRecentCell : UICollectionViewCell
 
-- (void)configureWithText:(NSString *)text;
+- (void)configureWithText: (NSString*)text;
 
 @end

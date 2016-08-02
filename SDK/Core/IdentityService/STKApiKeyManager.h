@@ -10,8 +10,8 @@
 
 @interface STKApiKeyManager : NSObject
 
-+ (void) setApiKey:(NSString*) apiKey;
++ (void)setApiKey: (NSString*)apiKey;
 
-+ (NSString*) apiKey;
++ (NSString*)apiKey;
 
 @end

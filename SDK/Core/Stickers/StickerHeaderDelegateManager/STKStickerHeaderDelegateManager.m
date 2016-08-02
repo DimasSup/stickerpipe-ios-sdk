@@ -10,11 +10,6 @@
 #import "STKStickerHeaderCell.h"
 #import "STKStickerPackObject.h"
 
-@interface STKStickerHeaderDelegateManager()
-
-@property (strong, nonatomic) NSArray *stickerPacksArray;
-
-@end
 
 @implementation STKStickerHeaderDelegateManager
 
@@ -41,9 +36,9 @@
     cell.layer.rasterizationScale = [UIScreen mainScreen].scale;
 
 	if (indexPath.section == 1 && self.stickerPacksArray.count > 0) {
-		STKStickerPackObject *stickerPack = self.stickerPacksArray[indexPath.item];
+		STKStickerPackObject* stickerPack = self.stickerPacksArray[(NSUInteger) indexPath.item];
 		
-		[cell configWithStickerPack:stickerPack placeholder:self.placeholderImage placeholderTintColor:self.placeholderHeadercolor collectionView:collectionView cellForItemAtIndexPath:indexPath];
+		[cell configWithStickerPack: stickerPack placeholder: self.placeholderImage placeholderTintColor: self.placeholderHeaderColor collectionView: collectionView cellForItemAtIndexPath: indexPath];
 	} else if(indexPath.section == 0)
 	{
 		[cell configureSmileCell];
@@ -82,14 +77,7 @@
     }
 }
 
-- (void)setStickerPacks:(NSArray *)stickerPacks {
-    self.stickerPacksArray = stickerPacks;
-}
 
-#pragma mark - Common
 
-- (STKStickerPackObject *)itemAtIndexPath:(NSIndexPath *)indexPath {
-    return self.stickerPacksArray[indexPath.item];
-}
 
 @end

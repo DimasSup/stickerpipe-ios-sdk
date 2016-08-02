@@ -6,18 +6,15 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 
 @class STKStickerPackObject;
 
 @interface STKStickerSettingsCell : UITableViewCell
 
-@property (weak, nonatomic) IBOutlet UILabel *packTitleLabel;
+@property (nonatomic, weak) IBOutlet UILabel* packTitleLabel;
+@property (nonatomic, weak) IBOutlet UILabel* packDescriptionLabel;
+@property (nonatomic, weak) IBOutlet UIImageView* packIconImageView;
 
-@property (weak, nonatomic) IBOutlet UILabel *packDescriptionLabel;
-
-@property (weak, nonatomic) IBOutlet UIImageView *packIconImageView;
-
-- (void)configureWithStickerPack:(STKStickerPackObject*)stickerPack;
+- (void)configureWithStickerPack: (STKStickerPackObject*)stickerPack;
 
 @end

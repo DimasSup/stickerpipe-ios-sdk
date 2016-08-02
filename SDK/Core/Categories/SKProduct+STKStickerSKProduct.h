@@ -10,6 +10,6 @@
 
 @interface SKProduct (STKStickerSKProduct)
 
-- (NSString *)currencyString;
+- (NSString*)currencyString;
 
 @end

@@ -6,20 +6,18 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-
-
 
 @interface STKStickerViewCell : UICollectionViewCell
 
-//- (void) configureWithStickerMessage:(NSString*)stickerMessage
-//                         placeholder:(UIImage*)placeholder
-//                    placeholderColor:(UIColor*)placeholderColor;
+- (void)configureWithStickerMessage: (NSString*)stickerMessage
+						placeholder: (UIImage*)placeholder
+				   placeholderColor: (UIColor*)placeholderColor
+					 collectionView: (UICollectionView*)collectionView
+			 cellForItemAtIndexPath: (NSIndexPath*)indexPath
+						  isSuggest: (BOOL)isSuggest;
 
-- (void) configureWithStickerMessage:(NSString*)stickerMessage
-                         placeholder:(UIImage*)placeholder
-                    placeholderColor:(UIColor*)placeholderColor
-                      collectionView:(UICollectionView *)collectionView
-              cellForItemAtIndexPath:(NSIndexPath *)indexPath;
+- (UIImage*)returnStickerImage;
+- (void)hideStickerImage: (BOOL)isHide;
 
+@property (nonatomic) CGFloat imageInset;
 @end

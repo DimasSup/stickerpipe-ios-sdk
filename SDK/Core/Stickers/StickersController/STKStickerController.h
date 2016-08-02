@@ -6,18 +6,15 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
 #import "STKStickersConstants.h"
 
-#define STK_TEXTBUTTON_KEYBOARD @"iconChatKeyboard"
-#define STK_TEXTBUTTON_STICKERS @"iconChatSmileyBtn"
 
 
 
 
 @class STKStickerController;
 @class STKShowStickerButton;
+@class STKStickerController, STKShowStickerButton, STKStickerPackObject, STKImageManager;
 
 @protocol STKStickerControllerDelegate <NSObject>
 
@@ -28,37 +25,42 @@
 
 @optional
 
-- (void)stickerController:(STKStickerController*)stickerController didSelectStickerWithMessage:(NSString*)message;
+- (void)stickerController: (STKStickerController*)stickerController didSelectStickerWithMessage: (NSString*)message;
 
-- (void)stickerControllerDidChangePackStatus:(STKStickerController*)stickerController;
-
-- (void)stickerController:(STKStickerController*)stickerController
-    willShareStickerWithMessage:(NSString *)message;
-
+- (void)didUpdateStickerCache;
+-(void)stickerController:(STKStickerController *)stickerController didSelectPack:(NSString *)packId;
 - (void)stickerController:(STKStickerController*)stickerController didSelectCustomSmile:(NSString*)smile;
 - (void)stickerControllerDidRemoveSmile:(STKStickerController*)stickerController;
 
-- (void)stickerControllerErrorHandle:(NSError *)error;
+- (void)stickerControllerErrorHandle: (NSError*)error;
 
-- (void)stickerControllerReloadView;
+- (void)packRemoved: (STKStickerPackObject*)packObject;
 
--(void)stickerController:(STKStickerController*)stickerController didSelectPack:(NSString*)packId;
+- (void)stickersReordered;
 
+- (void)showStickersCollection;
+
+- (void)newPackShown;
+
+- (void)newPackDownloaded;
+
+- (void)packPurchasedWithName: (NSString*)packName price: (NSString*)packPrice;
+
+- (void)shopOpened;
 @end
 
 @interface STKStickerController : NSObject
+@property (nonatomic, weak) id <STKStickerControllerDelegate> delegate;
 
-@property (weak, nonatomic) id<STKStickerControllerDelegate> delegate;
+@property (nonatomic, readonly) UIView* stickersView;
 
-@property (nonatomic, strong, readonly) UIView *stickersView;
+@property (nonatomic, readonly) BOOL isStickerViewShowed;
 
-@property (nonatomic, assign, readonly) BOOL isStickerViewShowed;
+@property (nonatomic) UIColor* headerBackgroundColor;
 
-@property (nonatomic, strong) UIColor *headerBackgroundColor;
+@property (nonatomic, weak) UITextView* textInputView;
 
-@property (nonatomic, weak) UITextView *textInputView;
-
-@property (strong, nonatomic) STKShowStickerButton *keyboardButton;
+@property (nonatomic,weak) STKShowStickerButton* keyboardButton;
 
 @property (nonatomic) CGRect stickersViewFrame;
 
@@ -67,8 +69,12 @@
 @property (nonatomic) BOOL isNetworkReachable;
 @property (nonatomic) BOOL showRecents;
 
+@property (nonatomic, weak) IBOutlet UICollectionView* stickersCollectionView;
 
-//@property (nonatomic, strong) UIColor *stickersShopTintColor;
+@property (nonatomic) STKImageManager* imageManager;
+
+@property (nonatomic) UICollectionView* suggestCollectionView;
+@property (nonatomic) BOOL isSuggestArrayNotEmpty;
 
 - (void)reloadStickersView;
 
@@ -76,26 +82,30 @@
 
 - (void)hideStickersView;
 
-- (BOOL)isStickerPackDownloaded:(NSString*)packMessage;
+- (BOOL)isStickerPackDownloaded: (NSString*)packMessage;
 
-- (void)showPackInfoControllerWithStickerMessage:(NSString*)message;
+- (void)showPackInfoControllerWithStickerMessage: (NSString*)message;
 
-- (void)showPackInfoControllerWithName:(NSString *)packName;
+- (void)showPackInfoControllerWithName: (NSString*)packName;
 
 //Color settings. Default is light gray
 
-- (void)setColorForStickersPlaceholder:(UIColor*) color;
+- (void)setColorForStickersPlaceholder: (UIColor*)color;
 
-- (void)setColorForStickersHeaderPlaceholderColor:(UIColor*) color;
+- (void)setColorForStickersHeaderPlaceholderColor: (UIColor*)color;
 
-- (void)userMessageSent;
+- (void)textMessageSendStatistic;
+- (void)stickerMessageSendStatistic;
 
-- (void)handleError:(NSError *)error;
+- (void)handleError: (NSError*)error;
 
-- (void)selectPack:(NSUInteger)index;
+- (void)selectPack: (NSUInteger)index;
 
 - (void)setupInternalStickersView;
 
 - (void)showKeyboard;
+
+- (void)showSuggestCollectionView;
+- (void)hideSuggestCollectionView;
 
 @end

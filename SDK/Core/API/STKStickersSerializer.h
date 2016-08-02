@@ -12,8 +12,8 @@
 
 @interface STKStickersSerializer : NSObject
 
-- (NSArray*) serializeStickerPacks:(NSArray*)stickerPacks;
+- (NSArray*)serializeStickerPacks: (NSArray*)stickerPacks;
 
-- (STKStickerPackObject*) serializeStickerPack:(NSDictionary*)stickerPackResponse;
+- (STKStickerPackObject*)serializeStickerPack: (NSDictionary*)stickerPackResponse;
 
 @end
