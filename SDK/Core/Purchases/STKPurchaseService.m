@@ -13,7 +13,7 @@
 @property (nonatomic, copy) STKProductsBlock productsCompletionBlock;
 @property (nonatomic, copy) STKRestoreCompletionBlock restoreCompletionBlock;
 @property (nonatomic, copy) STKPurchaseCompletionBlock purchaseCompletionBlock;
-@property (nonatomic) STKPurchaseFailureBlock purchaseFailureBlock;
+@property (nonatomic,copy) STKPurchaseFailureBlock purchaseFailureBlock;
 
 @property (nonatomic) SKProductsRequest* productRequest;
 @property (nonatomic) NSMutableDictionary* purchasedRecord;
