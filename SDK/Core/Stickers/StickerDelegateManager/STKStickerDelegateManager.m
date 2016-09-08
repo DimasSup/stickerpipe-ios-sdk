@@ -115,7 +115,7 @@ static const CGFloat kStickerImageHeight = 80.0;
 		STKStickerObject* sticker = stickerPack.stickers[(NSUInteger) indexPath.item];
 		if (sticker) {
 			[self addRecentSticker: sticker forSection: indexPath.section];
-			self.didSelectSticker(sticker);
+			self.didSelectSticker(sticker, [stickerPack.packName isEqualToString: @"Recent"]);
 		}
 	}
 }

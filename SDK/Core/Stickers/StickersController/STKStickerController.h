@@ -53,8 +53,6 @@
 
 @property (nonatomic) STKShowStickerButton* keyboardButton;
 
-@property (nonatomic) CGRect stickersViewFrame;
-
 @property (nonatomic) BOOL showStickersOnStart;
 
 @property (nonatomic, weak) IBOutlet UICollectionView* stickersCollectionView;
@@ -88,8 +86,6 @@
 - (void)handleError: (NSError*)error;
 
 - (void)selectPack: (NSUInteger)index;
-
-- (void)setupInternalStickersView;
 
 - (void)showKeyboard;
 

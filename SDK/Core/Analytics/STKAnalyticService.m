@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import "STKAnalyticService.h"
 #import "STKStatistic.h"
 #import "NSManagedObjectContext+STKAdditions.h"
@@ -16,18 +15,13 @@
 //Categories
 NSString* const STKAnalyticMessageCategory = @"message";
 NSString* const STKAnalyticStickerCategory = @"sticker";
-NSString* const STKAnalyticPackCategory = @"pack";
-NSString* const STKAnalyticDevCategory = @"dev";
 
 //Actions
-NSString* const STKAnalyticActionCheck = @"check";
-NSString* const STKAnalyticActionInstall = @"install";
-NSString* const STKAnalyticActionError = @"error";
-NSString* const STKAnalyticActionSend = @"send";
+NSString* const STKAnalyticActionTabs = @"tab";
+NSString* const STKAnalyticActionRecent = @"recent";
+NSString* const STKAnalyticActionSuggest = @"suggest";
 
 //labels
-NSString* const STKStickersCountLabel = @"Stickers count";
-NSString* const STKEventsCountLabel = @"Events count";
 NSString* const STKMessageTextLabel = @"text";
 NSString* const STKMessageStickerLabel = @"sticker";
 
@@ -94,13 +88,13 @@ static const NSInteger kMemoryCacheObjectsCount = 20;
 		statistic.category = category;
 		statistic.timeValue = ((NSInteger) [[NSDate date] timeIntervalSince1970]);
 
-		if ([statistic.category isEqualToString: STKAnalyticStickerCategory]) {
-			statistic.label = label;
-			statistic.action = @"use";
-		} else {
+//		if ([statistic.category isEqualToString: STKAnalyticStickerCategory]) {
+//			statistic.label = label;
+//			statistic.action = @"use";
+//		} else {
 			statistic.label = label;
 			statistic.action = action;
-		}
+//		}
 
 		NSError* error = nil;
 		weakSelf.objectCounter++;

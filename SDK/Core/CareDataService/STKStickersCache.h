@@ -7,6 +7,8 @@
 //
 
 
+extern STKConstStringKey kRecentName;
+
 @class STKStickerObject, STKStickerPackObject, STKSticker;
 
 @interface STKStickersCache : NSObject

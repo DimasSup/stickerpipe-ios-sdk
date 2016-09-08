@@ -53,7 +53,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 
 - (instancetype)init {
 	if (self = [super init]) {
-		static const BOOL work = NO;
+		static const BOOL work = !YES;
 		_rootURLString = work ? @"http://work.stk.908.vc/" : @"https://api.stickerpipe.com/";
 
 		NSURL* URL = [NSURL URLWithString: [NSString stringWithFormat: @"%@/api/%@", self.rootURLString, kSTKApiVersion]];

@@ -19,7 +19,7 @@
 
 @implementation STKStickersCache
 
-static STKConstStringKey kRecentName = @"Recent";
+NSString *const kRecentName = @"Recent";
 
 - (instancetype)init {
 	if (self = [super init]) {
@@ -43,28 +43,39 @@ static STKConstStringKey kRecentName = @"Recent";
 #pragma mark - Saving
 
 - (NSError*)saveStickerPacks: (NSArray*)stickerPacks {
-	typeof(self) __weak weakSelf = self;
 	__block NSError* error;
 	[self.backgroundContext performBlockAndWait: ^ {
-		NSArray* packIDs = [stickerPacks valueForKeyPath: @"@unionOfObjects.packID"];
+		[self removeAbsentPacksWithCurrentPacks: stickerPacks];
 
-		NSFetchRequest* requestForDelete = [NSFetchRequest fetchRequestWithEntityName: [STKStickerPack entityName]];
-		requestForDelete.predicate = [NSPredicate predicateWithFormat: @"NOT (%K in %@)", STKStickerPackAttributes.packID, packIDs];
+		NSUInteger __block shift = 0;
 
-		NSArray* objectsForDelete = [weakSelf.backgroundContext executeFetchRequest: requestForDelete error: nil];
+		[stickerPacks enumerateObjectsUsingBlock: ^ (STKStickerPackObject* object, NSUInteger idx, BOOL* stop) {
+			STKStickerPack* stickerPack = [self stickerPackModelWithID: object.packID context: self.backgroundContext];
+			if (!stickerPack.order) {
+				stickerPack.order = @(idx);
+				++shift;
+			} else {
+				stickerPack.order = @([stickerPack.order integerValue] + shift);
+			}
+			[self fillStickerPack: stickerPack withObject: object];
+		}];
 
-		for (STKStickerPack* pack in objectsForDelete) {
-			[weakSelf.backgroundContext deleteObject: pack];
-		}
-
-		for (STKStickerPackObject* object in stickerPacks) {
-			STKStickerPack* stickerPack = [weakSelf stickerPackModelWithID: object.packID context: weakSelf.backgroundContext];
-			[weakSelf fillStickerPack: stickerPack withObject: object];
-		}
-
-		[weakSelf.backgroundContext save: &error];
+		[self.backgroundContext save: &error];
 	}];
 	return error;
+}
+
+- (void)removeAbsentPacksWithCurrentPacks: (NSArray<STKStickerPackObject*>*)stickerPacks {
+	NSArray* packIDs = [stickerPacks valueForKeyPath: @"@unionOfObjects.packID"];
+
+	NSFetchRequest* requestForDelete = [NSFetchRequest fetchRequestWithEntityName: [STKStickerPack entityName]];
+	requestForDelete.predicate = [NSPredicate predicateWithFormat: @"NOT (%K in %@)", STKStickerPackAttributes.packID, packIDs];
+
+	NSArray* objectsForDelete = [self.backgroundContext executeFetchRequest: requestForDelete error: nil];
+
+	for (STKStickerPack* pack in objectsForDelete) {
+		[self.backgroundContext deleteObject: pack];
+	}
 }
 
 - (void)saveStickerPack: (STKStickerPackObject*)stickerPack {

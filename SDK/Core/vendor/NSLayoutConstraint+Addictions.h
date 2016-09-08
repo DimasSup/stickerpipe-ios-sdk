@@ -14,7 +14,7 @@
 + (NSLayoutConstraint*)attachToSuperviewVerticalCenterItsSubview: (UIView*)subview;
 + (NSLayoutConstraint*)attachToSuperviewHorizontalCenterItsSubview: (UIView*)subview;
 
-+ (void)setConstraintsWidth: (CGFloat)width andHeight: (CGFloat)height forView: (UIView*)view;
++ (NSArray<NSLayoutConstraint*>*)setConstraintsWidth: (CGFloat)width andHeight: (CGFloat)height forView: (UIView*)view;
 
 + (NSLayoutConstraint*)setConstraintHeight: (CGFloat)height forView: (UIView*)view;
 + (NSLayoutConstraint*)setConstraintWidth: (CGFloat)width forView: (UIView*)view;

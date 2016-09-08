@@ -122,8 +122,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	return self;
 }
 
-- (void)initInternalStickerView
-{
+- (void)initInternalStickerView {
 	self.internalStickersView = [[[NSBundle mainBundle] loadNibNamed: @"STKStickersView" owner: self options: nil] firstObject];
 
 	/**
@@ -131,13 +130,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	 */
 	//    self.internalStickersView = [[[self getResourceBundle] loadNibNamed:@"STKStickersView" owner:self options:nil] firstObject];
 
-	if (self.stickersViewFrame.size.height > 0) {
-		self.internalStickersView.autoresizingMask = UIViewAutoresizingNone;
-		self.internalStickersView.frame = self.stickersViewFrame;
-	} else {
-		self.internalStickersView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-	}
-
+	self.internalStickersView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 	self.internalStickersView.clipsToBounds = YES;
 
 	//iOS 7 FIX
@@ -153,10 +146,12 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		[weakSelf setPackSelectedAtIndex: displayedSection];
 	};
 
-	self.stickersDelegateManager.didSelectSticker = ^ (STKStickerObject* sticker) {
+	self.stickersDelegateManager.didSelectSticker = ^ (STKStickerObject* sticker, BOOL recent) {
 		[weakSelf.stickersService incrementStickerUsedCountWithID: sticker.stickerID];
 
-		[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticStickerCategory action: STKAnalyticActionSend label: [NSString stringWithFormat: @"%@", sticker.stickerID] value: nil];
+		[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticStickerCategory
+														   action: recent ? STKAnalyticActionRecent : STKAnalyticActionTabs
+															label: [NSString stringWithFormat: @"%@", sticker.stickerID] value: nil];
 
 		if ([weakSelf.delegate respondsToSelector: @selector(stickerController:didSelectStickerWithMessage:)]) {
 			[weakSelf.delegate stickerController: weakSelf didSelectStickerWithMessage: sticker.stickerMessage];
@@ -270,7 +265,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 		[weakSelf.stickersService incrementStickerUsedCountWithID: sticker.stickerID];
 
-		[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticStickerCategory action: STKAnalyticActionSend label: [NSString stringWithFormat: @"%@", sticker.stickerID] value: nil];
+		[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticStickerCategory action: STKAnalyticActionSuggest label: [NSString stringWithFormat: @"%@", sticker.stickerID] value: nil];
 
 		if ([weakSelf.delegate respondsToSelector: @selector(stickerController:didSelectStickerWithMessage:)]) {
 			[weakSelf.delegate stickerController: weakSelf didSelectStickerWithMessage: sticker.stickerMessage];
@@ -650,11 +645,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 #pragma mark - statistics
 
 - (void)textMessageSendStatistic {
-	[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticMessageCategory action: STKAnalyticActionSend label: STKMessageTextLabel value: nil];
+	[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticMessageCategory action: STKAnalyticActionTabs label: STKMessageTextLabel value: nil];
 }
 
 - (void)stickerMessageSendStatistic {
-	[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticMessageCategory action: STKAnalyticActionSend label: STKMessageStickerLabel value: nil];
+	[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticMessageCategory action: STKAnalyticActionTabs label: STKMessageStickerLabel value: nil];
 }
 
 
