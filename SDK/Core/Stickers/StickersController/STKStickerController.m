@@ -123,12 +123,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 - (void)initInternalStickerView {
-	self.internalStickersView = [[[NSBundle mainBundle] loadNibNamed: @"STKStickersView" owner: self options: nil] firstObject];
-
-	/**
-	 *  For framework
-	 */
-	//    self.internalStickersView = [[[self getResourceBundle] loadNibNamed:@"STKStickersView" owner:self options:nil] firstObject];
+	if (FRAMEWORK) {
+		self.internalStickersView = [[[self getResourceBundle] loadNibNamed: @"STKStickersView" owner: self options: nil] firstObject];
+	} else {
+		self.internalStickersView = [[[NSBundle mainBundle] loadNibNamed: @"STKStickersView" owner: self options: nil] firstObject];
+	}
 
 	self.internalStickersView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 	self.internalStickersView.clipsToBounds = YES;
@@ -381,12 +380,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)collectionsButtonAction: (UIButton*)collectionsButton {
 	if (!_settingsViewController) {
-		_settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName: @"STKStickersSettingsViewController" bundle: [NSBundle mainBundle]];
-
-		/**
-		 *  For framework
-		 */
-		//    _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[self getResourceBundle]];
+		if (FRAMEWORK) {
+		    _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[self getResourceBundle]];
+		} else {
+			_settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName: @"STKStickersSettingsViewController" bundle: [NSBundle mainBundle]];
+		}
 
 		_settingsViewController.delegate = self;
 	}
@@ -396,12 +394,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)stickersShopButtonAction: (id)sender {
 	if (!_shopViewController) {
-		_shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-
-		/**
-		 *  For framework
-		 */
-		//    _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+		if (FRAMEWORK) {
+		    _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+		} else {
+			_shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
+		}
 
 		_shopViewController.delegate = self;
 	}
@@ -498,12 +495,12 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)showPackInfoControllerWithStickerMessage: (NSString*)message {
 	[self hideStickersView];
-	STKStickersShopViewController* vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-
-	/**
-	 *  For framework
-	 */
-	//    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+	STKStickersShopViewController*vc=nil;
+	if (FRAMEWORK) {
+	    vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+	} else {
+		vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
+	}
 
 	vc.delegate = self;
 	[self showStickersView];
@@ -524,12 +521,12 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 - (void)showPackInfoControllerWithName: (NSString*)packName {
-	STKStickersShopViewController* vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-
-	/**
-	 *  For framework
-	 */
-	//    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+	STKStickersShopViewController* vc = nil;
+	if (FRAMEWORK) {
+		vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [self getResourceBundle]];
+	} else {
+		vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
+	}
 
 	vc.delegate = self;
 	vc.packName = packName;

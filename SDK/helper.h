@@ -9,6 +9,8 @@
 #ifndef helper_h
 #define helper_h
 
+#define FRAMEWORK NO
+
 typedef void(^STSimpleBlock)();
 typedef void(^STBoolBlock)(BOOL flag);
 typedef void(^STIntegerBlock)(NSInteger idx);

@@ -4,6 +4,7 @@
 //
 
 #import "STKShowStickerButton.h"
+#import "UIImage+CustomBundle.h"
 
 @implementation STKShowStickerButton
 
@@ -40,22 +41,22 @@ static const CGFloat kBadgeViewPadding = 4.0;
 	_stickerButtonState = showStickerButtonState;
 
 	if (showStickerButtonState == STKShowStickerButtonStateStickers) {
-		UIImage* buttonImage = [UIImage imageNamed: @"STKShowStickersIcon"];
-
-		/**
-		 *  For framework
-		 */
-		//UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowStickersIcon"];
+		UIImage*buttonImage=nil;
+		if (FRAMEWORK) {
+			buttonImage = [UIImage imageNamedInCustomBundle: @"STKShowStickersIcon"];
+		} else {
+			buttonImage = [UIImage imageNamed: @"STKShowStickersIcon"];
+		}
 
 		[self setImage: buttonImage forState: UIControlStateNormal];
 		[self setImage: buttonImage forState: UIControlStateHighlighted];
 	} else {
-		UIImage* buttonImage = [UIImage imageNamed: @"STKShowKeyboadIcon"];
-
-		/**
-		 *  For framework
-		 */
-		//UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowKeyboadIcon"];
+		UIImage*buttonImage=nil;
+		if (FRAMEWORK) {
+			buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowKeyboadIcon"];
+		} else {
+			buttonImage = [UIImage imageNamed: @"STKShowKeyboadIcon"];
+		}
 
 		[self setImage: buttonImage forState: UIControlStateNormal];
 		[self setImage: buttonImage forState: UIControlStateHighlighted];

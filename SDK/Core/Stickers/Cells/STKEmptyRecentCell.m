@@ -21,12 +21,12 @@
 
 	self = [super initWithFrame: frame];
 	if (self) {
-
-		UIImageView* introImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"STKIntroImage"]];
-		/**
-		 *  For framework
-		 */
-		// UIImageView *introImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKIntroImage"]];
+		UIImageView* introImageView = nil;
+		if (FRAMEWORK) {
+			introImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamedInCustomBundle: @"STKIntroImage"]];
+		} else {
+			introImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"STKIntroImage"]];
+		}
 
 		introImageView.translatesAutoresizingMaskIntoConstraints = NO;
 
