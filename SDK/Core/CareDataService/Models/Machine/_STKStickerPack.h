@@ -45,25 +45,13 @@ extern const struct STKStickerPackRelationships {
 
 @property (nonatomic, strong) NSNumber* disabled;
 
-@property (atomic) BOOL disabledValue;
-- (BOOL)disabledValue;
-- (void)setDisabledValue: (BOOL)value_;
-
 //- (BOOL)validateDisabled:(id*)value_ error:(NSError**)error_;
 
 @property (nonatomic, strong) NSNumber* isNew;
 
-@property (atomic) BOOL isNewValue;
-- (BOOL)isNewValue;
-- (void)setIsNewValue: (BOOL)value_;
-
 //- (BOOL)validateIsNew:(id*)value_ error:(NSError**)error_;
 
 @property (nonatomic, strong) NSNumber* order;
-
-@property (atomic) int32_t orderValue;
-- (int32_t)orderValue;
-- (void)setOrderValue: (int32_t)value_;
 
 //- (BOOL)validateOrder:(id*)value_ error:(NSError**)error_;
 
@@ -72,10 +60,6 @@ extern const struct STKStickerPackRelationships {
 //- (BOOL)validatePackDescription:(id*)value_ error:(NSError**)error_;
 
 @property (nonatomic, strong) NSNumber* packID;
-
-@property (atomic) int64_t packIDValue;
-- (int64_t)packIDValue;
-- (void)setPackIDValue: (int64_t)value_;
 
 //- (BOOL)validatePackID:(id*)value_ error:(NSError**)error_;
 
@@ -90,10 +74,6 @@ extern const struct STKStickerPackRelationships {
 @property (nonatomic, strong) NSString* pricePoint;
 
 @property (nonatomic, strong) NSNumber* price;
-
-@property (atomic) float priceValue;
-- (float)priceValue;
-- (void)setPriceValue: (float)value_;
 
 //- (BOOL)validatePrice:(id*)value_ error:(NSError**)error_;
 

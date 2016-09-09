@@ -86,15 +86,9 @@ static const NSInteger kMemoryCacheObjectsCount = 20;
 		STKStatistic* statistic = [NSEntityDescription insertNewObjectForEntityForName: [STKStatistic entityName] inManagedObjectContext: weakSelf.backgroundContext];
 		statistic.value = value;
 		statistic.category = category;
-		statistic.timeValue = ((NSInteger) [[NSDate date] timeIntervalSince1970]);
-
-//		if ([statistic.category isEqualToString: STKAnalyticStickerCategory]) {
-//			statistic.label = label;
-//			statistic.action = @"use";
-//		} else {
+		statistic.time = [NSNumber numberWithLongLong: ((NSInteger) [[NSDate date] timeIntervalSince1970])];
 			statistic.label = label;
 			statistic.action = action;
-//		}
 
 		NSError* error = nil;
 		weakSelf.objectCounter++;

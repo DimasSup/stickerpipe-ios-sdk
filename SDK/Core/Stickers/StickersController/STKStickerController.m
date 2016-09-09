@@ -668,11 +668,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)textFieldDidChange: (NSNotification*)notification {
 	UITextView* tv = notification.object;
 
-	if (self.textInputView == tv) {
+	if (self.showSuggests && self.textInputView == tv) {
 		if (tv.text.length != 0) {
 			STKSearchModel* model = [STKSearchModel new];
 
-			model.q = [self lastWordFromText: tv.text];;
+			model.q = [self lastWordFromText: tv.text];
 			model.isSuggest = YES;
 
 			if (model.q != nil || ![model.q isEqualToString: @""]) {

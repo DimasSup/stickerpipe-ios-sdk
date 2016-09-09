@@ -62,6 +62,10 @@
 @property (nonatomic) UICollectionView* suggestCollectionView;
 @property (nonatomic) BOOL isSuggestArrayNotEmpty;
 
+/* Set textInputView property to your textView; if YES, we'll show suggest stickers each time user
+ enters any text; default is NO */
+@property (nonatomic) BOOL showSuggests;
+
 - (void)reloadStickersView;
 
 - (void)showStickersView;

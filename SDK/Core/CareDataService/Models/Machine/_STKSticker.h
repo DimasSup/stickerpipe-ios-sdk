@@ -49,10 +49,6 @@ extern const struct STKStickerRelationships {
 
 @property (nonatomic, strong) NSNumber* usedCount;
 
-@property (atomic) int64_t usedCountValue;
-- (int64_t)usedCountValue;
-- (void)setUsedCountValue: (int64_t)value_;
-
 //- (BOOL)validateUsedCount:(id*)value_ error:(NSError**)error_;
 
 @property (nonatomic, strong) STKStickerPack* stickerPack;
