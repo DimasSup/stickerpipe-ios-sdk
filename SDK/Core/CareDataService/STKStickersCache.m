@@ -89,7 +89,7 @@ NSString *const kRecentName = @"Recent";
 		sticker.usedCount = stickerObject.usedCount;
 		sticker.usedDate = stickerObject.usedDate;
 		if (sticker) {
-			[stickerModel addStickersObject: sticker];
+			[stickerModel.stickersSet addObject: sticker];
 		}
 	}
 
@@ -122,7 +122,7 @@ NSString *const kRecentName = @"Recent";
 		sticker.usedDate = stickerObject.usedDate;
 		sticker.packName = stickerObject.packName;
 		if (sticker) {
-			[stickerModel addStickersObject: sticker];
+			[stickerModel.stickersSet addObject: sticker];
 		}
 	}
 
@@ -187,7 +187,7 @@ NSString *const kRecentName = @"Recent";
 		sticker.usedDate = stickerObject.usedDate;
 		sticker.packName = stickerObject.packName;
 		if (sticker) {
-			[stickerPack addStickersObject: sticker];
+			[stickerPack.stickersSet addObject: sticker];
 		}
 	}
 	return stickerPack;

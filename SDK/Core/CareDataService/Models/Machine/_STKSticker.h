@@ -64,28 +64,3 @@ extern const struct STKStickerRelationships {
 //- (BOOL)validateStickerPack:(id*)value_ error:(NSError**)error_;
 
 @end
-
-@interface _STKSticker (CoreDataGeneratedPrimitiveAccessors)
-
-- (NSNumber*)primitiveStickerID;
-- (void)setPrimitiveStickerID: (NSNumber*)value;
-
-- (int64_t)primitiveStickerIDValue;
-- (void)setPrimitiveStickerIDValue: (int64_t)value_;
-
-- (NSString*)primitiveStickerMessage;
-- (void)setPrimitiveStickerMessage: (NSString*)value;
-
-- (NSString*)primitiveStickerName;
-- (void)setPrimitiveStickerName: (NSString*)value;
-
-- (NSNumber*)primitiveUsedCount;
-- (void)setPrimitiveUsedCount: (NSNumber*)value;
-
-- (int64_t)primitiveUsedCountValue;
-- (void)setPrimitiveUsedCountValue: (int64_t)value_;
-
-- (STKStickerPack*)primitiveStickerPack;
-- (void)setPrimitiveStickerPack: (STKStickerPack*)value;
-
-@end

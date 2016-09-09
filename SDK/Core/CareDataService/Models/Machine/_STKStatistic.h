@@ -51,28 +51,3 @@ extern const struct STKStatisticAttributes {
 //- (BOOL)validateValue:(id*)value_ error:(NSError**)error_;
 
 @end
-
-@interface _STKStatistic (CoreDataGeneratedPrimitiveAccessors)
-
-- (NSString*)primitiveAction;
-- (void)setPrimitiveAction: (NSString*)value;
-
-- (NSString*)primitiveCategory;
-- (void)setPrimitiveCategory: (NSString*)value;
-
-- (NSString*)primitiveLabel;
-- (void)setPrimitiveLabel: (NSString*)value;
-
-- (NSNumber*)primitiveTime;
-- (void)setPrimitiveTime: (NSNumber*)value;
-
-- (int64_t)primitiveTimeValue;
-- (void)setPrimitiveTimeValue: (int64_t)value_;
-
-- (NSNumber*)primitiveValue;
-- (void)setPrimitiveValue: (NSNumber*)value;
-
-- (int64_t)primitiveValueValue;
-- (void)setPrimitiveValueValue: (int64_t)value_;
-
-@end
