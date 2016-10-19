@@ -140,12 +140,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	 */
 	//    self.internalStickersView = [[[self getResourceBundle] loadNibNamed:@"STKStickersView" owner:self options:nil] firstObject];
 
-	if (self.stickersViewFrame.size.height > 0) {
-		self.internalStickersView.autoresizingMask = UIViewAutoresizingNone;
-		self.internalStickersView.frame = self.stickersViewFrame;
-	} else {
-		self.internalStickersView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-	}
+	self.internalStickersView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 
 
 	self.internalStickersView.clipsToBounds = YES;

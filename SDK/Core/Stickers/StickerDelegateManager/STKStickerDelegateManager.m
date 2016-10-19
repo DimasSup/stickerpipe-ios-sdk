@@ -155,7 +155,7 @@ static const CGFloat kStickerImageHeight = 80.0;
 	if ([pack.packName isEqualToString: @"Recent"] && pack.stickers.count == 0) {
 		UICollectionViewFlowLayout* layout = (UICollectionViewFlowLayout*) collectionViewLayout;
 
-		return CGSizeMake(self.collectionView.width - (layout.sectionInset.left + layout.sectionInset.right), 100.0);
+		return CGSizeMake(self.collectionView.superview.bounds.size.width - (layout.sectionInset.left + layout.sectionInset.right), 100.0);
 	} else {
 		return CGSizeMake(80.0, 80.0);
 	}
