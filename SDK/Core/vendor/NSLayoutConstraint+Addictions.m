@@ -51,10 +51,10 @@
 	return constraint;
 }
 
-+ (void)setConstraintsWidth: (CGFloat)width andHeight: (CGFloat)height forView: (UIView*)view
++ (NSArray<NSLayoutConstraint*>*)setConstraintsWidth: (CGFloat)width andHeight: (CGFloat)height forView: (UIView*)view
 {
-	[self setConstraintHeight: height forView: view];
-	[self setConstraintWidth: width forView: view];
+	return @[[self setConstraintWidth: width forView: view],
+			[self setConstraintHeight: height forView: view]];
 }
 
 + (NSLayoutConstraint*)setConstraintHeight: (CGFloat)height forView: (UIView*)view

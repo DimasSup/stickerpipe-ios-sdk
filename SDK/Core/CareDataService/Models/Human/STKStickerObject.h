@@ -10,7 +10,7 @@
 
 @class STKSticker, STKStickerPackObject, STKStickerObject;
 
-typedef void(^STKStickerObjectBlock)(STKStickerObject* stickerObject);
+typedef void(^STKStickerObjectBlock)(STKStickerObject* stickerObject, BOOL recent);
 
 @interface STKStickerObject : NSObject <STKStickerProtocol>
 

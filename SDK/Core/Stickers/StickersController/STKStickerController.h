@@ -62,8 +62,6 @@
 
 @property (nonatomic,weak) STKShowStickerButton* keyboardButton;
 
-@property (nonatomic) CGRect stickersViewFrame;
-
 @property (nonatomic) BOOL showStickersOnStart;
 
 @property (nonatomic) BOOL isNetworkReachable;
@@ -75,6 +73,10 @@
 
 @property (nonatomic) UICollectionView* suggestCollectionView;
 @property (nonatomic) BOOL isSuggestArrayNotEmpty;
+
+/* Set textInputView property to your textView; if YES, we'll show suggest stickers each time user
+ enters any text; default is NO */
+@property (nonatomic) BOOL showSuggests;
 
 - (void)reloadStickersView;
 
@@ -100,8 +102,6 @@
 - (void)handleError: (NSError*)error;
 
 - (void)selectPack: (NSUInteger)index;
-
-- (void)setupInternalStickersView;
 
 - (void)showKeyboard;
 

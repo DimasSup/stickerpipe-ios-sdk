@@ -13,25 +13,29 @@
 #import "DFImageManagerKit.h"
 #import "UIImageView+WebCache.h"
 #import "STKWebserviceManager.h"
-
-static CGFloat imageWidth;
+#import "UIView+CordsAdditions.h"
+#import "UIView+LayoutAdditions.h"
+#import "NSLayoutConstraint+Addictions.h"
 
 @interface STKStickerViewCell ()
 
-@property (nonatomic) UIImageView* stickerImageView;
+@property (nonatomic, weak) UIImageView* imageView;
 @property (nonatomic) DFImageTask* imageTask;
 
+@property (nonatomic, copy) NSArray<NSLayoutConstraint*>* sizeConstraints;
 @end
 
 @implementation STKStickerViewCell
 
 - (instancetype)initWithFrame: (CGRect)frame {
 	if (self = [super initWithFrame: frame]) {
-		imageWidth = frame.size.height;
-		self.stickerImageView = [[UIImageView alloc] initWithFrame: CGRectMake(0.0, 0.0, imageWidth, imageWidth)];
-		self.stickerImageView.center = CGPointMake(self.contentView.bounds.size.width / 2, self.contentView.bounds.size.height / 2);
-		self.stickerImageView.contentMode = UIViewContentModeRedraw;
-		[self addSubview: self.stickerImageView];
+		UIImageView* imageView = [UIImageView layoutInst];
+		imageView.contentMode = UIViewContentModeRedraw;
+		[self addSubview: imageView];
+		[NSLayoutConstraint attachToSuperviewCenterItsSubview: imageView];
+		self.sizeConstraints = [NSLayoutConstraint setConstraintsWidth: self.height andHeight: self.height forView: imageView];
+		self.imageView = imageView;
+
 		self.backgroundColor = [UIColor clearColor];
 	}
 
@@ -41,21 +45,15 @@ static CGFloat imageWidth;
 - (void)setImageInset: (CGFloat)imageInset {
 	_imageInset = imageInset;
 
-	CGFloat imageWidthWithInset = imageWidth - imageInset * 2;
-	self.stickerImageView.frame = CGRectMake(imageInset, imageInset, imageWidthWithInset, imageWidthWithInset);
-
-	[self layoutSubviews];
-}
-
-- (void)layoutSubviews {
-	self.stickerImageView.center = CGPointMake(self.contentView.bounds.size.width / 2, self.contentView.bounds.size.height / 2);
+	self.sizeConstraints[0].constant = self.height - imageInset;
+	self.sizeConstraints[1].constant = self.height - imageInset;
 }
 
 - (void)prepareForReuse {
 	[self.imageTask cancel];
 	self.imageTask = nil;
-	self.stickerImageView.image = nil;
-	[self.stickerImageView sd_cancelCurrentAnimationImagesLoad];
+	self.imageView.image = nil;
+	[self.imageView sd_cancelCurrentAnimationImagesLoad];
 	[[SDWebImageManager sharedManager] cancelAll];
 }
 
@@ -76,15 +74,13 @@ static CGFloat imageWidth;
 
 	UIImage* coloredPlaceholder = [resultPlaceholder imageWithImageTintColor: colorForPlaceholder];
 
-	[[STKWebserviceManager sharedInstance] imageUrlForStickerMessage: stickerMessage andDensity: [STKUtility scaleString]];
-
 	DFImageRequestOptions* options = [DFImageRequestOptions new];
 	options.priority = DFImageRequestPriorityNormal;
 
 	if (isSuggest) {
-		self.stickerImageView.image = [self imageWithColor: [UIColor clearColor]];
+		self.imageView.image = [self imageWithColor: [UIColor clearColor]];
 	} else {
-		self.stickerImageView.image = coloredPlaceholder;
+		self.imageView.image = coloredPlaceholder;
 	}
 
 	[self setNeedsLayout];
@@ -96,7 +92,7 @@ static CGFloat imageWidth;
 
 	[[SDImageCache sharedImageCache] queryDiskCacheForKey: stickerName done: ^ (UIImage* image, SDImageCacheType cacheType) {
 		if (image) {
-			weakSelf.stickerImageView.image = image;
+			weakSelf.imageView.image = image;
 			[weakSelf setNeedsLayout];
 		} else {
 			[[STKWebserviceManager sharedInstance] getStickerInfoWithId: stickerName success: ^ (id response) {
@@ -114,7 +110,7 @@ static CGFloat imageWidth;
 
 												   NSIndexPath* currentIndexPath = [collectionView indexPathForCell: weakSelf];
 												   if ([currentIndexPath compare: indexPath] == NSOrderedSame) {
-													   weakSelf.stickerImageView.image = image;
+													   weakSelf.imageView.image = image;
 													   [weakSelf setNeedsLayout];
 												   }
 											   });
@@ -129,15 +125,15 @@ static CGFloat imageWidth;
 }
 
 - (UIImage*)returnStickerImage {
-    return self.stickerImageView.image;
+	return self.imageView.image;
 }
 
 - (void)hideStickerImage: (BOOL)isHide {
-    if (isHide) {
-        self.stickerImageView.alpha = 0.0;
-    } else {
-        self.stickerImageView.alpha = 1.0;
-    }
+	if (isHide) {
+		self.imageView.alpha = 0.0;
+	} else {
+		self.imageView.alpha = 1.0;
+	}
 }
 
 - (UIImage*)imageWithColor: (UIColor*)color {

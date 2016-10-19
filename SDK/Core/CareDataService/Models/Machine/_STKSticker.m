@@ -57,24 +57,6 @@ const struct STKStickerRelationships STKStickerRelationships = {
 
 @dynamic stickerID;
 
-- (int64_t)stickerIDValue {
-	NSNumber* result = [self stickerID];
-	return [result longLongValue];
-}
-
-- (void)setStickerIDValue: (int64_t)value_ {
-	[self setStickerID: [NSNumber numberWithLongLong: value_]];
-}
-
-- (int64_t)primitiveStickerIDValue {
-	NSNumber* result = [self primitiveStickerID];
-	return [result longLongValue];
-}
-
-- (void)setPrimitiveStickerIDValue: (int64_t)value_ {
-	[self setPrimitiveStickerID: [NSNumber numberWithLongLong: value_]];
-}
-
 @dynamic stickerMessage;
 
 @dynamic stickerName;
@@ -84,24 +66,6 @@ const struct STKStickerRelationships STKStickerRelationships = {
 @dynamic usedCount;
 
 @dynamic packName;
-
-- (int64_t)usedCountValue {
-	NSNumber* result = [self usedCount];
-	return [result longLongValue];
-}
-
-- (void)setUsedCountValue: (int64_t)value_ {
-	[self setUsedCount: [NSNumber numberWithLongLong: value_]];
-}
-
-- (int64_t)primitiveUsedCountValue {
-	NSNumber* result = [self primitiveUsedCount];
-	return [result longLongValue];
-}
-
-- (void)setPrimitiveUsedCountValue: (int64_t)value_ {
-	[self setPrimitiveUsedCount: [NSNumber numberWithLongLong: value_]];
-}
 
 @dynamic stickerPack;
 

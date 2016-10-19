@@ -19,7 +19,6 @@
 
 	[stickerPacks enumerateObjectsUsingBlock: ^ (NSDictionary* object, NSUInteger idx, BOOL* stop) {
 		STKStickerPackObject* stickerPack = [self serializeStickerPack: object];
-		stickerPack.order = @(idx);
 		[packObjects addObject: stickerPack];
 	}];
 

@@ -49,10 +49,6 @@ extern const struct STKStickerRelationships {
 
 @property (nonatomic, strong) NSNumber* usedCount;
 
-@property (atomic) int64_t usedCountValue;
-- (int64_t)usedCountValue;
-- (void)setUsedCountValue: (int64_t)value_;
-
 //- (BOOL)validateUsedCount:(id*)value_ error:(NSError**)error_;
 
 @property (nonatomic, strong) STKStickerPack* stickerPack;
@@ -62,30 +58,5 @@ extern const struct STKStickerRelationships {
 @property (nonatomic, strong) NSString* packName;
 
 //- (BOOL)validateStickerPack:(id*)value_ error:(NSError**)error_;
-
-@end
-
-@interface _STKSticker (CoreDataGeneratedPrimitiveAccessors)
-
-- (NSNumber*)primitiveStickerID;
-- (void)setPrimitiveStickerID: (NSNumber*)value;
-
-- (int64_t)primitiveStickerIDValue;
-- (void)setPrimitiveStickerIDValue: (int64_t)value_;
-
-- (NSString*)primitiveStickerMessage;
-- (void)setPrimitiveStickerMessage: (NSString*)value;
-
-- (NSString*)primitiveStickerName;
-- (void)setPrimitiveStickerName: (NSString*)value;
-
-- (NSNumber*)primitiveUsedCount;
-- (void)setPrimitiveUsedCount: (NSNumber*)value;
-
-- (int64_t)primitiveUsedCountValue;
-- (void)setPrimitiveUsedCountValue: (int64_t)value_;
-
-- (STKStickerPack*)primitiveStickerPack;
-- (void)setPrimitiveStickerPack: (STKStickerPack*)value;
 
 @end
