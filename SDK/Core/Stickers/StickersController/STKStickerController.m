@@ -704,16 +704,19 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	self.textInputView.inputView = nil;
 	
 	[self reloadStickersInputViews];
+	[self hideSuggestCollectionViewIfNeeded];
 }
 
 - (void)showKeyboard {
 	[self.textInputView becomeFirstResponder];
+	[self textFieldDidChange:[NSNotification notificationWithName:UITextViewTextDidChangeNotification object:self.textInputView]];
 }
 
 - (void)reloadStickersInputViews {
 	[self.textInputView reloadInputViews];
 	if (!self.isKeyboardShowed) {
 		[self.textInputView becomeFirstResponder];
+		[self textFieldDidChange:[NSNotification notificationWithName:UITextViewTextDidChangeNotification object:self.textInputView]];
 	}
 }
 
@@ -725,12 +728,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	{
 		self.isKeyboardShowed = YES;
 	}
+	[self textFieldDidChange:[NSNotification notificationWithName:UITextViewTextDidChangeNotification object:self.textInputView]];
 }
 
 - (void)willHideKeyboard: (NSNotification*)notification {
 	self.isKeyboardShowed = NO;
 	self.textInputView.inputView = nil;
 	self.keyboardButton.stickerButtonState = STKShowStickerButtonStateStickers;
+	[self hideSuggestCollectionViewIfNeeded];
 }
 
 - (void)storageUpdated: (NSNotification*)notification {
@@ -807,6 +812,10 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 					self.isSuggestArrayNotEmpty = stickersReceived;
 				}];
 			}
+		}
+		else
+		{
+			[self hideSuggestCollectionView];
 		}
 	}
 }
