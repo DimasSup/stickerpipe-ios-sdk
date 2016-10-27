@@ -116,16 +116,16 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 		searchModel.topIfEmpty = @"1";
 		searchModel.wholeWord = @"0";
 	}
-
+	
 	searchModel.limit = @"20";
-
+	
 	NSDictionary* params = @{
-			@"q" : searchModel.q,
-			@"top_if_empty" : searchModel.topIfEmpty,
-			@"whole_word" : searchModel.wholeWord,
-			@"limit" : searchModel.limit
-	};
-
+							 @"q" : searchModel.q?:@"",
+							 @"top_if_empty" : searchModel.topIfEmpty?:@"",
+							 @"whole_word" : searchModel.wholeWord?:@"",
+							 @"limit" : searchModel.limit
+							 };
+	
 	[[STKWebserviceManager sharedInstance].getSessionManager GET: kSearchURL parameters: params success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (completion) {
 			completion(responseObject[@"data"]);
