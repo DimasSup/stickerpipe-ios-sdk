@@ -25,15 +25,11 @@
 #pragma mark - UICollectionViewDelegate
 
 - (NSInteger)numberOfSectionsInCollectionView: (UICollectionView*)collectionView {
-	return self.stickerPacksArray.count > 0 ? 2 : 1;
+	return self.stickerPacksArray.count > 0 ? 1 : 0;
 }
 
 - (NSInteger)collectionView: (UICollectionView*)collectionView numberOfItemsInSection: (NSInteger)section {
-	if (section == 0 && self.stickerPacksArray.count > 0) {
-		return self.stickerPacksArray.count;
-	} else {
-		return 1;
-	}
+    return self.stickerPacksArray.count;
 }
 
 - (UICollectionViewCell*)collectionView: (UICollectionView*)collectionView cellForItemAtIndexPath: (NSIndexPath*)indexPath {
