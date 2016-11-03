@@ -6,13 +6,19 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
+#import <DFImageManager/DFImageTask.h>
+#import <DFImageManager/DFImageRequestOptions.h>
+#import <DFImageManager/DFImageRequest.h>
+#import <DFImageManager/DFImageManager.h>
 #import "STKStickerHeaderCell.h"
-#import "DFImageManagerKit.h"
 #import "STKUtility.h"
 #import "UIImage+Tint.h"
 #import "STKStickerPackObject.h"
 #import "STKBadgeView.h"
 #import "STKWebserviceManager.h"
+#import "UIImage+CustomBundle.h"
+#import "helper.h"
+
 
 @interface STKStickerHeaderCell ()
 
@@ -27,39 +33,41 @@
 @implementation STKStickerHeaderCell
 
 - (instancetype)initWithFrame: (CGRect)frame {
-	if (self = [super initWithFrame: frame]) {
-		self.imageView = [[UIImageView alloc] initWithFrame: CGRectMake(0, 0, 24.0, 24.0)];
-		self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-		self.imageView.center = CGPointMake(self.contentView.bounds.size.width / 2, self.contentView.bounds.size.height / 2);
-		[self.contentView addSubview: self.imageView];
-
-		self.dotView = [[STKBadgeView alloc] initWithFrame: CGRectMake(0, 0, 12.0, 12.0) lineWidth: 1.0 dotSize: CGSizeZero andBorderColor: [STKUtility defaultGreyColor]];
-		self.dotView.center = CGPointMake(CGRectGetMaxX(self.imageView.frame), CGRectGetMinY(self.imageView.frame));
-
-		[self.contentView addSubview: self.dotView];
-	}
-
-	return self;
+    if (self = [super initWithFrame: frame]) {
+        self.imageView = [[UIImageView alloc] initWithFrame: CGRectMake(0, 0, 24.0, 24.0)];
+        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        self.imageView.center = CGPointMake(self.contentView.bounds.size.width / 2, self.contentView.bounds.size.height / 2);
+        [self.contentView addSubview: self.imageView];
+        
+        self.dotView = [[STKBadgeView alloc] initWithFrame: CGRectMake(0, 0, 12.0, 12.0) lineWidth: 1.0 dotSize: CGSizeZero andBorderColor: [STKUtility defaultGreyColor]];
+        self.dotView.center = CGPointMake(CGRectGetMaxX(self.imageView.frame), CGRectGetMinY(self.imageView.frame));
+        
+        [self.contentView addSubview: self.dotView];
+        
+        self.imageView.tintColor = [UIColor grayColor];
+    }
+    
+    return self;
 }
 
 - (void)setSelected: (BOOL)selected {
-	if (selected) {
-		self.backgroundColor = self.selectionColor ? self.selectionColor : [UIColor colorWithRed: 250 / 255.0 green: 250 / 255.0 blue: 250 / 255.0 alpha: 1.0];
-		self.imageView.image = self.originalImage;
-	} else {
-		self.backgroundColor = [UIColor clearColor];
-		self.imageView.image = self.grayImage ? self.grayImage : self.originalImage;
-	}
+    if (selected) {
+        self.backgroundColor = self.selectionColor ? self.selectionColor : [UIColor colorWithRed: 250 / 255.0 green: 250 / 255.0 blue: 250 / 255.0 alpha: 1.0];
+        self.imageView.image = self.originalImage;
+    } else {
+        self.backgroundColor = [UIColor clearColor];
+        self.imageView.image = self.grayImage ?: self.originalImage;
+    }
 }
 
 - (void)prepareForReuse {
-	[self.imageTask cancel];
-	self.imageTask = nil;
-	self.imageView.image = nil;
-	self.originalImage = nil;
-	self.grayImage = nil;
-	self.dotView.hidden = NO;
-	self.backgroundColor = [UIColor clearColor];
+    [self.imageTask cancel];
+    self.imageTask = nil;
+    self.imageView.image = nil;
+    self.originalImage = nil;
+    self.grayImage = nil;
+    self.dotView.hidden = NO;
+    self.backgroundColor = [UIColor clearColor];
 }
 
 - (void)configWithStickerPack:(STKStickerPackObject *)stickerPack placeholder:(UIImage *)placeholder placeholderTintColor:(UIColor *)placeholderTintColor collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {

@@ -4,6 +4,7 @@
 //
 
 #import "STKShowStickerButton.h"
+#import "UIImage+CustomBundle.h"
 
 @implementation STKShowStickerButton
 
@@ -22,7 +23,7 @@ static const CGFloat kBadgeViewPadding = 4.0;
 }
 
 - (void)initBadgeView {
-	self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+	self.imageView.contentMode = UIViewContentModeCenter;
 
 	UIColor* color = (self.badgeBorderColor) ? self.badgeBorderColor : [UIColor whiteColor];
 
@@ -42,20 +43,10 @@ static const CGFloat kBadgeViewPadding = 4.0;
 	if (showStickerButtonState == STKShowStickerButtonStateStickers) {
 		UIImage* buttonImage = [UIImage imageNamed: STK_TEXTBUTTON_STICKERS];
 
-		/**
-		 *  For framework
-		 */
-		//UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowStickersIcon"];
-
 		[self setImage: buttonImage forState: UIControlStateNormal];
 		[self setImage: buttonImage forState: UIControlStateHighlighted];
 	} else {
 		UIImage* buttonImage = [UIImage imageNamed: STK_TEXTBUTTON_KEYBOARD];
-
-		/**
-		 *  For framework
-		 */
-		//UIImage *buttonImage = [UIImage imageNamedInCustomBundle:@"STKShowKeyboadIcon"];
 
 		[self setImage: buttonImage forState: UIControlStateNormal];
 		[self setImage: buttonImage forState: UIControlStateHighlighted];

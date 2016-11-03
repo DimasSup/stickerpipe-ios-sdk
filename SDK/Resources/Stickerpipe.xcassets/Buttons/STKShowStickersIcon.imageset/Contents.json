@@ -2,18 +2,18 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x",
-      "filename" : "stck.png"
+      "filename" : "stickers.png",
+      "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "scale" : "2x",
-      "filename" : "stck@2x.png"
+      "filename" : "stickers-1.png",
+      "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "scale" : "3x",
-      "filename" : "stck@3x.png"
+      "filename" : "stickers-2.png",
+      "scale" : "3x"
     }
   ],
   "info" : {

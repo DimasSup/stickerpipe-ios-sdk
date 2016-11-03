@@ -16,6 +16,8 @@
 #import "UIView+CordsAdditions.h"
 #import "UIView+LayoutAdditions.h"
 #import "NSLayoutConstraint+Addictions.h"
+#import "UIImage+CustomBundle.h"
+#import "helper.h"
 
 @interface STKStickerViewCell ()
 
@@ -63,12 +65,12 @@
 					 collectionView: (UICollectionView*)collectionView
 			 cellForItemAtIndexPath: (NSIndexPath*)indexPath
 						  isSuggest: (BOOL)isSuggest {
-	UIImage* resultPlaceholder = placeholder ? placeholder : [UIImage imageNamed: @"STKStickerPanelPlaceholder"];
-
-	/**
-	 *  For framework
-	 */
-	//    UIImage *resultPlaceholder = placeholder ? placeholder : [UIImage imageNamedInCustomBundle:@"STKStickerPanelPlaceholder"];
+	UIImage* resultPlaceholder = nil;
+	if (FRAMEWORK) {
+		resultPlaceholder = placeholder ? placeholder : [UIImage imageNamedInCustomBundle: @"STKStickerPanelPlaceholder"];
+	} else {
+		resultPlaceholder = placeholder ? placeholder : [UIImage imageNamed: @"STKStickerPanelPlaceholder"];
+	}
 
 	UIColor* colorForPlaceholder = placeholderColor && !placeholder ? placeholderColor : [STKUtility defaultPlaceholderGrayColor];
 

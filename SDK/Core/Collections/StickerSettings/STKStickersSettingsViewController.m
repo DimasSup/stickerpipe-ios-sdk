@@ -14,6 +14,8 @@
 #import "STKStickersShopViewController.h"
 #import "STKStickerController.h"
 #import "STKWebserviceManager.h"
+#import "UIImage+CustomBundle.h"
+#import "helper.h"
 
 @interface STKStickersSettingsViewController () <UITableViewDelegate>
 
@@ -29,12 +31,11 @@
 - (void)viewDidLoad {
 	[super viewDidLoad];
 
-	[self.tableView registerNib: [UINib nibWithNibName: @"STKStickerSettingsCell" bundle: [NSBundle mainBundle]] forCellReuseIdentifier: @"STKStickerSettingsCell"];
-	/**
-	 *  For framework
-	 */
-	//    [self.tableView registerNib:[UINib nibWithNibName:@"STKStickerSettingsCell" bundle:[self getResourceBundle]] forCellReuseIdentifier:@"STKStickerSettingsCell"];
-
+	if (FRAMEWORK) {
+		[self.tableView registerNib: [UINib nibWithNibName: @"STKStickerSettingsCell" bundle: [self getResourceBundle]] forCellReuseIdentifier: @"STKStickerSettingsCell"];
+	} else {
+		[self.tableView registerNib: [UINib nibWithNibName: @"STKStickerSettingsCell" bundle: [NSBundle mainBundle]] forCellReuseIdentifier: @"STKStickerSettingsCell"];
+	}
 
 	self.dataSource = [[STKTableViewDataSource alloc] initWithItems: nil cellIdentifier: @"STKStickerSettingsCell" configureBlock: ^ (STKStickerSettingsCell* cell, STKStickerPackObject* item) {
 		[cell configureWithStickerPack: item];
@@ -62,7 +63,7 @@
 				[weakSelf.tableView deleteRowsAtIndexPaths: @[indexPath] withRowAnimation: UITableViewRowAnimationTop];
 				[weakSelf.tableView setEditing: YES animated: NO];
 			});
-		}                                   failure: nil];
+		}                                                        failure: nil];
 	};
 
 	self.dataSource.moveBlock = ^ (NSIndexPath* fromIndexPath, NSIndexPath* toIndexPath) {
@@ -103,13 +104,12 @@
 }
 
 - (void)setUpButtons {
-
-	UIBarButtonItem* closeBarButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKBackIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(closeAction:)];
-
-	/**
-	 *  For framework
-	 */
-	//    UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
+	UIBarButtonItem* closeBarButton = nil;
+	if (FRAMEWORK) {
+		closeBarButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamedInCustomBundle: @"STKBackIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(closeAction:)];
+	} else {
+		closeBarButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKBackIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(closeAction:)];
+	}
 
 	self.navigationItem.leftBarButtonItem = closeBarButton;
 
@@ -144,11 +144,12 @@
 - (void)tableView: (UITableView*)tableView didSelectRowAtIndexPath: (NSIndexPath*)indexPath {
 	STKStickerPackObject* stickerPack = [self.dataSource itemAtIndexPath: indexPath];
 
-	STKStickersShopViewController* shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-	/**
-	 *  For framework
-	 */
-	//    STKStickersShopViewController *shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+	STKStickersShopViewController*shopViewController=nil;
+	if (FRAMEWORK) {
+		shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
+	} else {
+		shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
+	}
 
 	shopViewController.delegate = self.delegate;
     [self.delegate showStickersView];

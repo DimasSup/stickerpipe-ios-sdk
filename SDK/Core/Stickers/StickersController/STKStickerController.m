@@ -135,11 +135,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 {
 	self.internalStickersView = [[[NSBundle mainBundle] loadNibNamed: @"STKStickersViewCustom" owner: self options: nil] firstObject];
 
-	/**
-	 *  For framework
-	 */
-	//    self.internalStickersView = [[[self getResourceBundle] loadNibNamed:@"STKStickersView" owner:self options:nil] firstObject];
-
 	self.internalStickersView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 
 
@@ -180,8 +175,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	[self.stickersCollectionView registerClass: [STKStickersSeparator class] forSupplementaryViewOfKind: UICollectionElementKindSectionFooter withReuseIdentifier: @"STKStickerPanelSeparator"];
 
 
-	self.stickersDelegateManager.collectionView = self.stickersCollectionView;
-
 	[self.stickersDelegateManager initZoomStickerPreviewView];
 }
 
@@ -201,15 +194,18 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		{
 			[weakSelf.delegate stickerController:weakSelf didSelectPack:stickerPack.packName];
 		}
-
-		NSInteger numberOfItems = [weakSelf.stickersCollectionView numberOfItemsInSection: indexPath.item];
-
-		if (numberOfItems != 0) {
-			NSIndexPath* newIndexPath = [NSIndexPath indexPathForItem: 0 inSection: indexPath.item];
-			CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath: newIndexPath].frame;
-			if (stickerPack.stickers.count > 0 || indexPath.item == 0) {
-				[weakSelf.stickersCollectionView setContentOffset: CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y - kStickersSectionPaddingTopBottom) animated: animated];
-				weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
+		if([weakSelf.stickersCollectionView numberOfSections]>indexPath.item)
+		{
+			
+			NSInteger numberOfItems = [weakSelf.stickersCollectionView numberOfItemsInSection: indexPath.item];
+			
+			if (numberOfItems != 0) {
+				NSIndexPath* newIndexPath = [NSIndexPath indexPathForItem: 0 inSection: indexPath.item];
+				CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath: newIndexPath].frame;
+				if (stickerPack.stickers.count > 0 || indexPath.item == 0) {
+					[weakSelf.stickersCollectionView setContentOffset: CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y - kStickersSectionPaddingTopBottom) animated: animated];
+					weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
+				}
 			}
 		}
 		[weakSelf hideCustomSmiles];
@@ -443,11 +439,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	if (!_settingsViewController) {
 		_settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName: @"STKStickersSettingsViewController" bundle: [NSBundle mainBundle]];
 
-		/**
-		 *  For framework
-		 */
-		//    _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[self getResourceBundle]];
-
 		_settingsViewController.delegate = self;
 	}
 
@@ -457,11 +448,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)stickersShopButtonAction: (id)sender {
 	if (!_shopViewController) {
 		_shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-
-		/**
-		 *  For framework
-		 */
-		//    _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
 
 		_shopViewController.delegate = self;
 	}
@@ -596,11 +582,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	[self hideStickersView];
 	STKStickersShopViewController* vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
 
-	/**
-	 *  For framework
-	 */
-	//    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
-
 	vc.delegate = self;
 	[self showStickersView];
 
@@ -621,11 +602,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)showPackInfoControllerWithName: (NSString*)packName {
 	STKStickersShopViewController* vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-
-	/**
-	 *  For framework
-	 */
-	//    STKStickersShopViewController *vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
 
 	vc.delegate = self;
 	vc.packName = packName;

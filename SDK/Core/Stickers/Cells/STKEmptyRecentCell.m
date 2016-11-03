@@ -21,15 +21,12 @@
 
 	self = [super initWithFrame: frame];
 	if (self) {
-
-		UIImageView* introImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"STKIntroImage"]];
-		/**
-		 *  For framework
-		 */
-		// UIImageView *introImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKIntroImage"]];
-
+		UIImageView* introImageView = nil;
+		introImageView = [[UIImageView alloc] initWithImage: [UIImage imageNamed: @"STKIntroImage"]];
+		
+		
 		introImageView.translatesAutoresizingMaskIntoConstraints = NO;
-
+		
 		[self.contentView addSubview: introImageView];
 		[self.contentView addConstraint: [NSLayoutConstraint constraintWithItem: introImageView attribute: NSLayoutAttributeCenterX relatedBy: NSLayoutRelationEqual toItem: self.contentView attribute: NSLayoutAttributeCenterX multiplier: 1.0 constant: 0]];
 		//TODO:Refactoring

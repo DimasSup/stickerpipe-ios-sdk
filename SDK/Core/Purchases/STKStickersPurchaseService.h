@@ -6,6 +6,8 @@
 //  Copyright © 2016 908 Inc. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
+
 
 @protocol STKStickersPurchaseDelegate <NSObject>
 

@@ -17,6 +17,8 @@
 #import "SKProduct+STKStickerSKProduct.h"
 #import "STKStickersShopJsInterface.h"
 #import "STKWebserviceManager.h"
+#import "UIImage+CustomBundle.h"
+#import "helper.h"
 
 
 static NSString* const uri = @"http://demo.stickerpipe.com/work/libs/store/js/stickerPipeStore.js";
@@ -160,20 +162,22 @@ static NSUInteger const productsCount = 2;
 
 - (void)setUpButtons {
 
-	UIBarButtonItem* closeBarButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKBackIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(closeAction:)];
+	UIBarButtonItem*closeBarButton=nil;
+	if (FRAMEWORK) {
+		closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
+	} else {
+		closeBarButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKBackIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(closeAction:)];
+	}
 
-	/**
-	 *  For framework
-	 */
-	//      UIBarButtonItem *closeBarButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKBackIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction:)];
 	self.navigationItem.leftBarButtonItem = closeBarButton;
 
-	UIBarButtonItem* settingsButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKSettingsIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(showCollections:)];
+	UIBarButtonItem*settingsButton=nil;
+	if (FRAMEWORK) {
+		settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKSettingsIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(showCollections:)];
+	} else {
+		settingsButton = [[UIBarButtonItem alloc] initWithImage: [UIImage imageNamed: @"STKSettingsIcon"] style: UIBarButtonItemStylePlain target: self action: @selector(showCollections:)];
+	}
 
-	/**
-	 *  For framework
-	 */
-	//    UIBarButtonItem *settingsButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamedInCustomBundle:@"STKSettingsIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(showCollections:)];
 	self.navigationItem.rightBarButtonItem = settingsButton;
 }
 

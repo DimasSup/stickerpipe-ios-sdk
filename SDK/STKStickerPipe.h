@@ -15,6 +15,5 @@
 #import "STKImageManager.h"
 #import "STKUtility.h"
 #import "STKShowStickerButton.h"
-
-
-
+#import "STKStickersPurchaseService.h"
+#import "UIImage+Tint.h"
