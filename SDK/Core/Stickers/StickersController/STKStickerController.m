@@ -31,6 +31,8 @@
 #import "SmilesHelper.h"
 #import "StickerPipeCustomSmilesDelegateManager.h"
 #import "helper.h"
+#import "UserSettingsService.h"
+#import "LPAppDelegate.h"
 
 @interface STKStickerController () <UITextViewDelegate, STKStickersSettingsViewControllerDelegate, STKStickersShopViewControllerDelegate>
 
@@ -342,10 +344,38 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	{
 		[smileIds addObject:[SmilesHelper smilesMappingCode][item]];
 	}
+	NSArray* recntSmiles = [GetServiceUserSettings() objectValueForKey:@"recent_smiles"];
 	[self.customSmileDelegateManager setAllSmiles:smileIds];
+	[self.customSmileDelegateManager setAllRecentSmiles:recntSmiles];
+	
 	__weak typeof(self) weakSelf = self;
 	
 	[self.customSmileDelegateManager setDidSelectCustomSmile:^(NSString * smileId, NSIndexPath * indexPath) {
+		
+		if(smileId)
+		{
+			NSArray* recntSmiles = [GetServiceUserSettings() objectValueForKey:@"recent_smiles"];
+			
+			NSMutableArray* arr = [NSMutableArray arrayWithArray:recntSmiles];
+			[arr removeObject:smileId];
+			[arr insertObject:smileId atIndex:0];
+			
+			UICollectionViewFlowLayout* layout = (UICollectionViewFlowLayout*)(weakSelf.customSmilesCollectionView.collectionViewLayout);
+			
+			int c = (weakSelf.customSmilesCollectionView.frame.size.width - weakSelf.customSmilesCollectionView.layoutMargins.left-weakSelf.customSmilesCollectionView.layoutMargins.right)/([weakSelf.customSmileDelegateManager collectionView:weakSelf.customSmilesCollectionView layout:nil sizeForItemAtIndexPath:nil].width+layout.minimumInteritemSpacing);
+			
+			c = c*2;
+			if(arr.count>c)
+			{
+				[arr removeObjectsInRange:NSMakeRange(c, arr.count-c)];
+			}
+				
+			
+			[GetServiceUserSettings() setObjectValue:arr forKey:@"recent_smiles"];
+
+			
+		}
+		
 		if(weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(stickerController:didSelectCustomSmile:)])
 		{
 			[weakSelf.delegate stickerController:weakSelf didSelectCustomSmile:smileId];
@@ -430,7 +460,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 -(void)showCustomSmiles
 {
-	self.customSmilesMainView.hidden = NO;
+	if(_customSmilesMainView.hidden)
+	{
+		NSArray* recntSmiles = [GetServiceUserSettings() objectValueForKey:@"recent_smiles"];
+		[[self customSmileDelegateManager] setAllRecentSmiles:recntSmiles];
+		[self.customSmilesCollectionView reloadData];
+		self.customSmilesMainView.hidden = NO;
+	}
+	
 }
 
 #pragma mark - Actions
@@ -529,12 +566,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 -(int)getLastSelectedStickerPack
 {
-	return [[NSUserDefaults standardUserDefaults] integerForKey:@"stk_lastselected_header"];
+	NSNumber* num = [GetServiceUserSettings()  objectValueForKey:@"stk_lastselected_header"];
+	
+	return num?[num intValue]:-1;
 	
 }
 -(void)setLastSelectedStickerPack:(int)value
 {
-	[[NSUserDefaults standardUserDefaults] setInteger:value forKey:@"stk_lastselected_header"];
+	[GetServiceUserSettings()  setObjectValue:@(value) forKey:@"stk_lastselected_header"];
 }
 
 

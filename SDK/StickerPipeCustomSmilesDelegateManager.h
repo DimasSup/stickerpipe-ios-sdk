@@ -17,5 +17,8 @@
 @property (nonatomic, copy) void(^didSelectCustomSmile)(NSString* smile,NSIndexPath* indexPath);
 
 -(void)setAllSmiles:(NSArray*)smiles;
+-(void)setAllRecentSmiles:(NSArray*)smiles;
 
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 @end

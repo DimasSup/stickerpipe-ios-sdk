@@ -9,10 +9,11 @@
 #import "StickerPipeCustomSmilesDelegateManager.h"
 #import "STKStickersSeparator.h"
 #import "StickerPipeCustomSmileCell.h"
+#import "UserSettingsService.h"
 
 @interface StickerPipeCustomSmilesDelegateManager()
 @property(nonatomic,strong)NSArray* smiles;
-
+@property(nonatomic,strong)NSArray* recentSmiles;
 @end
 
 @implementation StickerPipeCustomSmilesDelegateManager
@@ -38,12 +39,27 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
 	
-	return 1;
+	return self.recentSmiles.count>0?2: 1;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView
 	 numberOfItemsInSection:(NSInteger)section
 {
+	if(self.recentSmiles.count)
+	{
+		if(section==0)
+		{
+			UICollectionViewFlowLayout* layout = collectionView.collectionViewLayout;
+			int c = (collectionView.frame.size.width - collectionView.layoutMargins.left-collectionView.layoutMargins.right)/([self collectionView:collectionView layout:nil sizeForItemAtIndexPath:nil].width+layout.minimumInteritemSpacing);
+			
+			c = c*2;
+			
+			return MIN(c,self.recentSmiles.count);
+		}
+		else{
+			return self.smiles.count;
+		}
+	}
 	return self.smiles.count;
 }
 
@@ -52,10 +68,24 @@
 {
 	StickerPipeCustomSmileCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier:kStickerPipeCustomSmileCell forIndexPath:indexPath];
 	
-	[cell reinitializeWithSmile:self.smiles[indexPath.row]];
+	NSString* itm = nil;
 	
+	if(self.recentSmiles.count)
+	{
+		if(indexPath.section==0)
+		{
+			itm = self.recentSmiles[indexPath.row];
+		}
+		else
+		{
+			itm = self.smiles[indexPath.row];
+		}
+	}
+	else{
+		itm = self.smiles[indexPath.row];
+	}
 	
-	
+	[cell reinitializeWithSmile:itm];
 	
 	return cell;
 }
@@ -82,7 +112,25 @@
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
 	if(self.didSelectCustomSmile)
 	{
-		self.didSelectCustomSmile(_smiles[indexPath.row],indexPath);
+		NSString* itm = nil;
+		
+		if(self.recentSmiles.count)
+		{
+			if(indexPath.section==0)
+			{
+				itm = self.recentSmiles[indexPath.row];
+			}
+			else
+			{
+				itm = self.smiles[indexPath.row];
+			}
+		}
+		else{
+			itm = self.smiles[indexPath.row];
+		}
+
+		
+		self.didSelectCustomSmile(itm,indexPath);
 	}
 }
 
@@ -90,6 +138,9 @@
 {
 	self.smiles =  smiles;
 }
-
+-(void)setAllRecentSmiles:(NSArray *)smiles
+{
+	self.recentSmiles = smiles;
+}
 
 @end
