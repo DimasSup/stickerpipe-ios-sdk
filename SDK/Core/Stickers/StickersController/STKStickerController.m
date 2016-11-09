@@ -246,12 +246,13 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)initKeyBoardButton {
 	STKShowStickerButton* button = [STKShowStickerButton buttonWithType: UIButtonTypeSystem];
 	self.keyboardButton = button;
-	self.keyboardButton.translatesAutoresizingMaskIntoConstraints = NO;
+	self.keyboardButton.translatesAutoresizingMaskIntoConstraints = YES;
 	self.keyboardButton.tintColor = [UIColor grayColor];
 	self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
 	self.keyboardButton.stickerButtonState = STKShowStickerButtonStateStickers;
 	[self.keyboardButton addTarget: self action: @selector(keyboardButtonAction:) forControlEvents: UIControlEventTouchUpInside];
 	self.keyboardButton.frame = CGRectMake(self.textInputView.frame.origin.x, self.textInputView.frame.origin.y, 33, 33);
+	self.keyboardButton.autoresizingMask = UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleLeftMargin;
 	[self.textInputView.superview addSubview: button];
 
 	[self.textInputView.superview layoutSubviews];

@@ -39,7 +39,8 @@ static const CGFloat kBadgeViewPadding = 4.0;
 
 - (void)setStickerButtonState: (STKShowStickerButtonState)showStickerButtonState {
 	_stickerButtonState = showStickerButtonState;
-
+	BOOL animated = [UIView areAnimationsEnabled];
+	[UIView setAnimationsEnabled:NO];
 	if (showStickerButtonState == STKShowStickerButtonStateStickers) {
 		UIImage* buttonImage = [UIImage imageNamed: STK_TEXTBUTTON_STICKERS];
 
@@ -51,6 +52,7 @@ static const CGFloat kBadgeViewPadding = 4.0;
 		[self setImage: buttonImage forState: UIControlStateNormal];
 		[self setImage: buttonImage forState: UIControlStateHighlighted];
 	}
+	[UIView setAnimationsEnabled:animated];
 }
 
 

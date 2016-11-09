@@ -43,32 +43,37 @@
 				  sortDescriptors: (NSArray*)sortDescriptors
 					   fetchLimit: (NSUInteger)fetchLimit
 						  context: (NSManagedObjectContext*)context {
-
-	NSFetchRequest* request = [self stk_fetchRequestWithContext: context];
-	request.sortDescriptors = sortDescriptors;
-	request.predicate = predicate;
-	request.fetchLimit = fetchLimit;
-
-	__block NSArray* objects = nil;
-
-	[context performBlockAndWait: ^ {
-		NSError* error = nil;
-
-		objects = [context executeFetchRequest: request error: &error];
-
-		if (error) {
-			STKLog(@"Coredata error: %@", error.localizedDescription);
-		}
-	}];
-
-	return objects;
+	if([self stk_entityName].length)
+	{
+		
+		
+		NSFetchRequest* request = [self stk_fetchRequestWithContext: context];
+		request.sortDescriptors = sortDescriptors;
+		request.predicate = predicate;
+		request.fetchLimit = fetchLimit;
+		
+		__block NSArray* objects = nil;
+		
+		[context performBlockAndWait: ^ {
+			NSError* error = nil;
+			
+			objects = [context executeFetchRequest: request error: &error];
+			
+			if (error) {
+				STKLog(@"Coredata error: %@", error.localizedDescription);
+			}
+		}];
+		
+		return objects;
+	}
+	else return @[];
 }
 
 + (NSArray*)stk_findAllInContext: (NSManagedObjectContext*)context {
 	NSFetchRequest* request = [self stk_fetchRequestWithContext: context];
-
+	
 	__block NSArray* objects = nil;
-
+	
 	[context performBlockAndWait: ^ {
 		NSError* error = nil;
 
