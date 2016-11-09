@@ -13,15 +13,6 @@
 
 @implementation STKStickerHeaderDelegateManager
 
-- (void)setStickerPacks: (NSArray*)stickerPacks {
-	self.stickerPacksArray = stickerPacks;
-}
-
-- (STKStickerPackObject*)itemAtIndexPath: (NSIndexPath*)indexPath {
-	return self.stickerPacksArray[(NSUInteger) indexPath.item];
-}
-
-
 #pragma mark - UICollectionViewDelegate
 
 - (NSInteger)numberOfSectionsInCollectionView: (UICollectionView*)collectionView {

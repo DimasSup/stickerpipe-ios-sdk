@@ -6,14 +6,11 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-#import "STKStickersManager.h"
-#import "UIImageView+Stickers.h"
 #import "STKStickerController.h"
 #import "STKStickersConstants.h"
-#import "STKPurchaseService.h"
+#import "STKStickersManager.h"
 #import "STKImageManager.h"
-#import "STKUtility.h"
 #import "STKShowStickerButton.h"
+#import "UIImageView+Stickers.h"
+#import "STKPurchaseService.h"
 #import "STKStickersPurchaseService.h"
-#import "UIImage+Tint.h"

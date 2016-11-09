@@ -126,7 +126,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			@"limit" : searchModel.limit
 	};
 
-	[[STKWebserviceManager sharedInstance].getSessionManager GET: kSearchURL parameters: params success: ^ (NSURLSessionDataTask* task, id responseObject) {
+    [[STKWebserviceManager sharedInstance].getSessionManager GET: kSearchURL parameters: params progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (completion) {
 			completion(responseObject[@"data"]);
 		}
@@ -143,7 +143,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 	NSString* route = [NSString stringWithFormat: @"packs/%@", packName];
 	NSDictionary* params = @{@"purchase_type" : [self purchaseType: pricePoint]};
 
-	[[STKWebserviceManager sharedInstance].stickerSessionManager POST: route parameters: params success: ^ (NSURLSessionDataTask* task, id responseObject) {
+	[[STKWebserviceManager sharedInstance].stickerSessionManager POST: route parameters: params progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (success) {
 			success(responseObject);
 		}
@@ -158,7 +158,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 								   failure: (void (^)(NSError* error))failure {
 	NSDictionary* params = @{@"is_subscriber" : @([STKStickersManager isSubscriber])};
 
-	[[STKWebserviceManager sharedInstance].getSessionManager GET: kPacksURL parameters: params success: ^ (NSURLSessionDataTask* task, id responseObject) {
+	[[STKWebserviceManager sharedInstance].getSessionManager GET: kPacksURL parameters: params progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		NSTimeInterval timeInterval = 0;
 
 		timeInterval = [responseObject[@"meta"][@"shop_last_modified"] doubleValue];
@@ -187,7 +187,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 	}
 
 	if (array.count > 0) {
-		[self.analyticSessionManager POST: kStatisticUrl parameters: array success: ^ (NSURLSessionDataTask* task, id responseObject) {
+		[self.analyticSessionManager POST: kStatisticUrl parameters: array progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 			if (success) {
 				success(responseObject);
 			}
@@ -215,7 +215,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 					 failure: (void (^)(NSError*))failure {
 	NSString* route = [NSString stringWithFormat: @"content/%@", contentId];
 
-	[self.backgroundSessionManager GET: route parameters: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
+	[self.backgroundSessionManager GET: route parameters: nil progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (success) {
 			success(responseObject);
 		}
@@ -235,7 +235,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 		parameters = @{@"type" : type};
 	}
 
-	[self.backgroundSessionManager GET: kPacksURL parameters: parameters success: ^ (NSURLSessionDataTask* task, id responseObject) {
+	[self.backgroundSessionManager GET: kPacksURL parameters: parameters progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		NSHTTPURLResponse* response = ((NSHTTPURLResponse*) [task response]);
 		NSTimeInterval timeInterval = 0;
 		if ([response respondsToSelector: @selector(allHeaderFields)]) {
@@ -264,7 +264,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 					   failure: (void (^)(NSError*))failure {
 	NSString* route = [NSString stringWithFormat: @"pack/%@", packName];
 
-	[self.backgroundSessionManager GET: route parameters: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
+	[self.backgroundSessionManager GET: route parameters: nil progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (success) {
 			success(responseObject);
 		}
@@ -292,7 +292,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)sendDeviceToken: (NSString*)token failure: (void (^)(NSError*))failure {
-	[self.backgroundSessionManager POST: @"token" parameters: @{@"token" : token} success: nil failure: ^ (NSURLSessionDataTask* _Nullable task, NSError* _Nonnull error) {
+	[self.backgroundSessionManager POST: @"token" parameters: @{@"token" : token} progress: nil success: nil failure: ^ (NSURLSessionDataTask* _Nullable task, NSError* _Nonnull error) {
 		if (failure) {
 			failure(error);
 		}

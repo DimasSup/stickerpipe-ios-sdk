@@ -12,9 +12,9 @@
 #import "STKInAppProductsManager.h"
 #import "STKCoreDataService.h"
 #import "STKStickersConstants.h"
-#import "NSString+MD5.h"
 #import "STKStickerController.h"
 #import "STKWebserviceManager.h"
+#import "STKUtility.h"
 
 static BOOL downloadMaxIm = NO;
 
@@ -26,12 +26,9 @@ static BOOL downloadMaxIm = NO;
 + (BOOL)isStickerMessage: (NSString*)message {
 	NSString* regexPattern = @"^\\[\\[(.*)\\]\\]";
 
-
 	NSPredicate* predicate = [NSPredicate predicateWithFormat: @"SELF MATCHES %@", regexPattern];
 
-	BOOL isStickerMessage = [predicate evaluateWithObject: message];
-
-	return isStickerMessage;
+	return [predicate evaluateWithObject: message];
 }
 
 + (BOOL)isOldFormatStickerMessage: (NSString*)message {
@@ -49,6 +46,7 @@ static BOOL downloadMaxIm = NO;
 + (void)initWithApiKey: (NSString*)apiKey {
 	[STKApiKeyManager setApiKey: apiKey];
 	[STKCoreDataService setupCoreData];
+	[self setStartTimeInterval];
 }
 
 #pragma mark - User key

@@ -74,8 +74,8 @@
     //TODO:Refactoring
     
     if ([stickerPack.packName isEqualToString: @"Recent"]) {
-            self.originalImage = [[UIImage imageNamed: @"STKRecentIcon"] imageWithRenderingMode: UIImageRenderingModeAlwaysTemplate];
-            self.imageView.image = [[UIImage imageNamed: @"STKRecentIcon"] imageWithRenderingMode: UIImageRenderingModeAlwaysTemplate];
+        self.originalImage = [[UIImage imageNamedInCustomBundle: @"STKRecentIcon"] imageWithRenderingMode: UIImageRenderingModeAlwaysTemplate];
+        self.imageView.image = [[UIImage imageNamedInCustomBundle: @"STKRecentIcon"] imageWithRenderingMode: UIImageRenderingModeAlwaysTemplate];
         
         self.dotView.hidden = YES;
     } else {
@@ -93,8 +93,7 @@
         UIImage* coloredPlaceholder = [resultPlaceholder imageWithImageTintColor: colorForPlaceholder];
         
         
-        DFImageRequestOptions* options = [DFImageRequestOptions new];
-        
+        DFMutableImageRequestOptions* options = [DFMutableImageRequestOptions new];
         options.priority = DFImageRequestPriorityHigh;
         
         self.originalImage = coloredPlaceholder;
@@ -103,12 +102,12 @@
         
         NSURL* iconUrl = [[STKWebserviceManager sharedInstance] tabImageUrlForPackName: stickerPack.packName];
         
-        DFImageRequest* request = [DFImageRequest requestWithResource: iconUrl targetSize: CGSizeZero contentMode: DFImageContentModeAspectFit options: options];
+        DFImageRequest* request = [DFImageRequest requestWithResource: iconUrl targetSize: CGSizeZero contentMode: DFImageContentModeAspectFit options: options.options];
         
         typeof(self) __weak weakSelf = self;
         
         //TODO:Refactoring
-        self.imageTask = [[DFImageManager sharedManager] imageTaskForRequest: request completion: ^ (UIImage* image, NSDictionary* info) {
+        self.imageTask = [[DFImageManager sharedManager] imageTaskForRequest: request completion: ^ (UIImage *__nullable image, NSError *__nullable error, DFImageResponse *__nullable response, DFImageTask *__nonnull imageTask) {
             if (image) {
                 NSIndexPath* currentIndexPath = [collectionView indexPathForCell: weakSelf];
                 if ([currentIndexPath compare: indexPath] == NSOrderedSame) {
@@ -119,7 +118,6 @@
                     [weakSelf setNeedsLayout];
                 }
             } else {
-                NSError* error = info[DFImageInfoErrorKey];
                 if (error.code != -1) {
                     STKLog(@"Failed loading from header cell: %@", error.localizedDescription);
                 }

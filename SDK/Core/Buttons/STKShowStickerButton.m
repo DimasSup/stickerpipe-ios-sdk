@@ -11,6 +11,8 @@
 static const CGFloat kBadgeViewPadding = 4.0;
 
 - (void)awakeFromNib {
+    [super awakeFromNib];
+    
 	[self initBadgeView];
 }
 

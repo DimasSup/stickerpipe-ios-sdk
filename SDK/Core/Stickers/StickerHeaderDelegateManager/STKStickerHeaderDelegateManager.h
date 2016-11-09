@@ -23,8 +23,4 @@
 @property (nonatomic) UIColor* placeholderHeaderColor;
 @property (nonatomic) NSArray<STKStickerPackObject*>* stickerPacksArray;
 
-#warning -add deprecated later; use stickerPacksArray directly instead
-- (STKStickerPackObject*)itemAtIndexPath: (NSIndexPath*)indexPath;
-- (void)setStickerPacks: (NSArray*)stickerPacks;
-
 @end

@@ -15,42 +15,53 @@
 
 + (void)initWithApiKey: (NSString*)apiKey;
 
+
 + (void)setUserKey: (NSString*)userKey;
 + (NSString*)userKey;
+
 
 + (void)setLocalization: (NSString*)localization;
 + (NSString*)localization;
 
-+ (BOOL)isStickerMessage: (NSString*)message;
 
++ (BOOL)isStickerMessage: (NSString*)message;
 + (BOOL)isOldFormatStickerMessage: (NSString*)message;
+
 
 + (void)setStartTimeInterval;
 
+
 + (void)setPriceBWithLabel: (NSString*)priceLabel
 				  andValue: (CGFloat)priceValue;
-
 + (NSString*)priceBLabel;
 + (CGFloat)priceBValue;
 
+
 + (void)setPriceCwithLabel: (NSString*)priceLabel
 				  andValue: (CGFloat)priceValue;
-
 + (NSString*)priceCLabel;
 + (CGFloat)priceCValue;
+
+
++ (void)setPriceBProductId: (NSString*)priceBProductId
+		andPriceCProductId: (NSString*)priceCProductId;
+
 
 + (void)setUserAsSubscriber: (BOOL)subscriber;
 + (BOOL)isSubscriber;
 
-+ (void)setPriceBProductId: (NSString*)priceBProductId andPriceCProductId: (NSString*)priceCProductId;
 
 + (void)setDownloadMaxImages: (BOOL)downloadMaxImages;
 + (BOOL)downloadMaxImages;
 
+
 + (void)sendDeviceToken: (NSData*)deviceToken
 				failure: (void (^)(NSError*))failure;
 
-+ (void)getUserInfo: (NSDictionary*)info stickerController: (STKStickerController*)stickerController;
+
++ (void)getUserInfo: (NSDictionary*)info
+  stickerController: (STKStickerController*)stickerController;
+
 
 + (void)setShopContentColor: (UIColor*)color;
 
