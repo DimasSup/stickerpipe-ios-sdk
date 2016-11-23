@@ -27,6 +27,8 @@
 @property (nonatomic, readonly) AFHTTPSessionManager* backgroundSessionManager;
 //
 
+@property (nonatomic, readonly) AFHTTPSessionManager* errorManager;
+
 @property (nonatomic) BOOL networkReachable;
 
 @property (nonatomic, readonly) NSString* rootURLString;
@@ -66,6 +68,10 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 		_sessionManager = [[AFHTTPSessionManager alloc] initWithBaseURL: URL];
 		_getSessionManager = [[AFHTTPSessionManager alloc] initWithBaseURL: URL];
 
+		NSURL* errorHandlingRoot = [NSURL URLWithString: @"https://api.stickerpipe.com/logs/"];
+		_errorManager = [[AFHTTPSessionManager alloc] initWithBaseURL: errorHandlingRoot];
+
+		self.errorManager.requestSerializer = [self baseSerializer];
 		self.stickerSessionManager.requestSerializer = [self baseSerializer];
 		self.sessionManager.requestSerializer = [self baseSerializer];
 		self.getSessionManager.requestSerializer = [self getSerializer];
@@ -109,6 +115,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)searchStickersWithSearchModel: (STKSearchModel*)searchModel completion: (void (^)(NSArray* stickers))completion {
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+
 	if (searchModel.isSuggest) {
 		searchModel.topIfEmpty = @"0";
 		searchModel.wholeWord = @"1";
@@ -131,6 +139,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			completion(responseObject[@"data"]);
 		}
 	}                   failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		[self sendAnErrorWithCategory: funcName p1: params.description p2: @""];
+
 		if (completion) {
 			completion(nil);
 		}
@@ -140,6 +150,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 - (void)loadStickerPackWithName: (NSString*)packName andPricePoint: (NSString*)pricePoint
 						success: (void (^)(id))success
 						failure: (void (^)(NSError*))failure {
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+
 	NSString* route = [NSString stringWithFormat: @"packs/%@", packName];
 	NSDictionary* params = @{@"purchase_type" : [self purchaseType: pricePoint]};
 
@@ -148,6 +160,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			success(responseObject);
 		}
 	}                        failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		[self sendAnErrorWithCategory: funcName p1: params.description p2: @""];
+
 		if (failure) {
 			failure(error);
 		}
@@ -156,6 +170,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 
 - (void)getStickersPacksForUserWithSuccess: (void (^)(id response, NSTimeInterval lastModifiedDate))success
 								   failure: (void (^)(NSError* error))failure {
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+
 	NSDictionary* params = @{@"is_subscriber" : @([STKStickersManager isSubscriber])};
 
 	[[STKWebserviceManager sharedInstance].getSessionManager GET: kPacksURL parameters: params progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
@@ -171,6 +187,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			success(responseObject, timeInterval);
 		}
 	}                   failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		[self sendAnErrorWithCategory: funcName p1: params.description p2: @""];
+
 		if (failure) {
 			dispatch_async(dispatch_get_main_queue(), ^ {
 				failure(error);
@@ -180,6 +198,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)sendStatistics: (NSArray*)statisticsArray success: (void (^)(id))success failure: (void (^)(NSError*))failure {
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+
 	NSMutableArray* array = [NSMutableArray array];
 
 	for (STKStatistic* statistic in statisticsArray) {
@@ -191,7 +211,9 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			if (success) {
 				success(responseObject);
 			}
-		}                 failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		}                         failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+			[self sendAnErrorWithCategory: funcName p1: array.description p2: @""];
+
 			if (failure) {
 				failure(error);
 			}
@@ -213,13 +235,17 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 - (void)getStickerInfoWithId: (NSString*)contentId
 					 success: (void (^)(id response))success
 					 failure: (void (^)(NSError*))failure {
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+
 	NSString* route = [NSString stringWithFormat: @"content/%@", contentId];
 
 	[self.backgroundSessionManager GET: route parameters: nil progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (success) {
 			success(responseObject);
 		}
-	}                failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+	}                          failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		[self sendAnErrorWithCategory: funcName p1: @"" p2: @""];
+
 		if (failure) {
 			failure(error);
 		}
@@ -229,13 +255,15 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 - (void)getStickersPackWithType: (NSString*)type
 						success: (void (^)(id response, NSTimeInterval lastModifiedDate))success
 						failure: (void (^)(NSError* error))failure {
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
 
-	NSDictionary* parameters = nil;
+
+	NSDictionary* params = nil;
 	if (type) {
-		parameters = @{@"type" : type};
+		params = @{@"type" : type};
 	}
 
-	[self.backgroundSessionManager GET: kPacksURL parameters: parameters progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
+	[self.backgroundSessionManager GET: kPacksURL parameters: params progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		NSHTTPURLResponse* response = ((NSHTTPURLResponse*) [task response]);
 		NSTimeInterval timeInterval = 0;
 		if ([response respondsToSelector: @selector(allHeaderFields)]) {
@@ -250,7 +278,9 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 		if (success) {
 			success(responseObject, timeInterval);
 		}
-	}                failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+	}                          failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		[self sendAnErrorWithCategory: funcName p1: params.description ?: @"" p2: @""];
+
 		if (failure) {
 			dispatch_async(dispatch_get_main_queue(), ^ {
 				failure(error);
@@ -264,11 +294,15 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 					   failure: (void (^)(NSError*))failure {
 	NSString* route = [NSString stringWithFormat: @"pack/%@", packName];
 
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+
 	[self.backgroundSessionManager GET: route parameters: nil progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (success) {
 			success(responseObject);
 		}
 	}                failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		[self sendAnErrorWithCategory: funcName p1: packName p2: @""];
+
 		if (failure) {
 			failure(error);
 		}
@@ -278,13 +312,17 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 - (void)deleteStickerPackWithName: (NSString*)packName
 						  success: (void (^)(id))success
 						  failure: (void (^)(NSError*))failure {
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+
 	NSString* route = [NSString stringWithFormat: @"packs/%@", packName];
 
 	[self.backgroundSessionManager DELETE: route parameters: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (success) {
 			success(responseObject);
 		}
-	}                   failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+	}                             failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		[self sendAnErrorWithCategory: funcName p1: packName p2: @""];
+
 		if (failure) {
 			failure(error);
 		}
@@ -292,10 +330,24 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)sendDeviceToken: (NSString*)token failure: (void (^)(NSError*))failure {
-	[self.backgroundSessionManager POST: @"token" parameters: @{@"token" : token} progress: nil success: nil failure: ^ (NSURLSessionDataTask* _Nullable task, NSError* _Nonnull error) {
+	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+
+	[self.backgroundSessionManager POST: @"token" parameters: @{@"token": token} progress: nil success: nil failure: ^ (NSURLSessionDataTask* _Nullable task, NSError* _Nonnull error) {
+		[self sendAnErrorWithCategory: funcName p1: token p2: @""];
+
 		if (failure) {
 			failure(error);
 		}
+	}];
+}
+
+- (void)sendAnErrorWithCategory: (NSString*)category p1: (NSString*)p1 p2: (NSString*)p2 {
+	NSString* route = [NSString stringWithFormat: @"pack/%@/%@/%@", category, p1, p2];
+
+	[self.errorManager POST: route parameters: nil progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
+		STKLog(@"Error sent for %@", route);
+	} failure: ^ (NSURLSessionDataTask* task, NSError* error) {
+		STKLog(@"Error was not sent for %@", route);
 	}];
 }
 

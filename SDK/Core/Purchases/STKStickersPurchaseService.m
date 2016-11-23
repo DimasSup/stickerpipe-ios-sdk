@@ -6,14 +6,12 @@
 //  Copyright © 2016 908 Inc. All rights reserved.
 //
 
-#import <RMStore/RMStore.h>
 #import "STKStickersPurchaseService.h"
 #import "STKInAppProductsManager.h"
-#import "RMStoreKeychainPersistence.h"
 
 
-@interface STKStickersPurchaseService () <RMStoreObserver>
-@property (nonatomic, strong) RMStoreKeychainPersistence* persistence;
+@interface STKStickersPurchaseService () //<RMStoreObserver>
+//@property (nonatomic, strong) RMStoreKeychainPersistence* persistence;
 @end
 
 @implementation STKStickersPurchaseService
@@ -30,10 +28,10 @@
 
 - (id)init {
 	if (self = [super init]) {
-		_persistence = [RMStoreKeychainPersistence new];
+		/*_persistence = [RMStoreKeychainPersistence new];
 		[RMStore defaultStore].transactionPersistor = _persistence;
 		[[RMStore defaultStore] addStoreObserver: self];
-		self.persistence = [RMStore defaultStore].transactionPersistor;
+		self.persistence = [RMStore defaultStore].transactionPersistor;*/
 	}
 
 	return self;
@@ -42,7 +40,7 @@
 - (void)requestProductsWithIdentifier: (NSArray*)productIds
 						   completion: (void (^)(NSArray*))completion
 							  failure: (void (^)(NSError*))failre {
-	NSSet* product = [NSSet setWithArray: productIds];
+	/*NSSet* product = [NSSet setWithArray: productIds];
 	[[RMStore defaultStore] requestProducts: product success: ^ (NSArray* products, NSArray* invalidProductIdentifiers) {
 		completion(products);
 		NSLog(@"Products loaded");
@@ -51,14 +49,14 @@
 		if (failre) {
 			failre(error);
 		}
-	}];
+	}];*/
 }
 
 - (void)purchaseProductWithPackName: (NSString*)packName
 					   andPackPrice: (NSString*)packPrice {
 	typeof(self) __weak weakSelf = self;
 
-	[[RMStore defaultStore] addPayment: [STKInAppProductsManager productIdWithPackPrice: packPrice] success: ^ (SKPaymentTransaction* transaction) {
+	/*[[RMStore defaultStore] addPayment: [STKInAppProductsManager productIdWithPackPrice: packPrice] success: ^ (SKPaymentTransaction* transaction) {
 		NSLog(@"purchase complete");
 		[weakSelf.persistence consumeProductOfIdentifier:
 				[STKInAppProductsManager productIdWithPackPrice: packPrice]];
@@ -68,7 +66,7 @@
 	}                          failure: ^ (SKPaymentTransaction* transaction, NSError* error) {
 		NSLog(@"purchase failed");
 		[weakSelf purchaseFailedError: error];
-	}];
+	}];*/
 }
 
 - (void)purchaseInternalPackName: (NSString*)packName

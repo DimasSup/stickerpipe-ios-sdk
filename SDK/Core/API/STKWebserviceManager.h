@@ -43,6 +43,7 @@
 - (void)sendDeviceToken: (NSString*)token
 				failure: (void (^)(NSError*))failure;
 
+- (void)sendAnErrorWithCategory: (NSString*)category p1: (NSString*)p1 p2: (NSString*)p2;
 //
 // check networkReachable after calling it; idempotent method
 - (void)startCheckingNetwork;
