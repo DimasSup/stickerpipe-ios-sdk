@@ -104,7 +104,7 @@
         UIImage *coloredPlaceholder = [resultPlaceholder imageWithImageTintColor:colorForPlaceholder];
         
         
-        DFImageRequestOptions *options = [DFImageRequestOptions new];
+        DFMutableImageRequestOptions *options = [DFMutableImageRequestOptions new];
         
         options.priority = DFImageRequestPriorityHigh;
         
@@ -117,8 +117,9 @@
         __weak typeof(self) weakSelf = self;
         
         //TODO:Refactoring
-        self.imageTask =[[DFImageManager sharedManager] imageTaskForRequest:request completion:^(UIImage *image, NSDictionary *info) {
-            
+        self.imageTask =[[DFImageManager sharedManager] imageTaskForRequest:request completion:^(UIImage * _Nullable image, NSError * _Nullable error, DFImageResponse * _Nullable response, DFImageTask * _Nonnull imageTask) {
+			
+			
             if (image) {
                 NSIndexPath *currentIndexPath = [collectionView indexPathForCell:weakSelf];
                 
@@ -131,7 +132,6 @@
                 [weakSelf setNeedsLayout];
                 }
             } else {
-                NSError *error = info[DFImageInfoErrorKey];
                 if (error.code != -1) {
                     STKLog(@"Failed loading from header cell: %@", error.localizedDescription);
                 }
