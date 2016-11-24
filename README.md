@@ -7,13 +7,10 @@ You can find complete integration documentation and sample [here](https://github
 
 Add to your Podfile:
 ```objc
-pod 'DFImageManager', '~> 0.5.0'
-pod 'AFNetworking', '~> 2.0'
-pod 'MD5Digest', '~> 1.1'
-pod 'RMStore', '~> 0.7'
-pod 'RMStore/KeychainPersistence'
-pod 'RMStore/NSUserDefaultsPersistence'
-pod 'SDWebImage', '~> 3.7'
+pod 'DFImageManager', '~> 0.8.0'
+pod 'AFNetworking', '~> 3.1.0'
+pod 'SDWebImage', '~> 3.8.2'
+pod 'MBProgressHUD'
 ```
 
 ## Credits
