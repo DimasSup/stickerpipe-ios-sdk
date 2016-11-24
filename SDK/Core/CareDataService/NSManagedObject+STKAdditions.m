@@ -87,6 +87,12 @@
 }
 
 + (NSFetchRequest*)stk_fetchRequestWithContext: (NSManagedObjectContext*)context {
+	if (context == nil) {
+		STKLog(@"Context is nil");
+
+		return nil;
+	}
+
 	NSFetchRequest* request = [NSFetchRequest new];
 	request.entity = [NSEntityDescription entityForName: [self stk_entityName] inManagedObjectContext: context];
 	return request;

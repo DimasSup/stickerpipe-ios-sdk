@@ -76,9 +76,6 @@
 
 	UIImage* coloredPlaceholder = [resultPlaceholder imageWithImageTintColor: colorForPlaceholder];
 
-	DFImageRequestOptions* options = [DFImageRequestOptions new];
-	options.priority = DFImageRequestPriorityNormal;
-
 	if (isSuggest) {
 		self.imageView.image = [self imageWithColor: [UIColor clearColor]];
 	} else {

@@ -41,11 +41,6 @@ const struct STKStickerRelationships STKStickerRelationships = {
 + (NSSet*)keyPathsForValuesAffectingValueForKey: (NSString*)key {
 	NSSet* keyPaths = [super keyPathsForValuesAffectingValueForKey: key];
 
-	if ([key isEqualToString: @"stickerIDValue"]) {
-		NSSet* affectingKey = [NSSet setWithObject: @"stickerID"];
-		keyPaths = [keyPaths setByAddingObjectsFromSet: affectingKey];
-		return keyPaths;
-	}
 	if ([key isEqualToString: @"usedCountValue"]) {
 		NSSet* affectingKey = [NSSet setWithObject: @"usedCount"];
 		keyPaths = [keyPaths setByAddingObjectsFromSet: affectingKey];

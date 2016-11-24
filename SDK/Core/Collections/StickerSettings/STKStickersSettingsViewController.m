@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
+#import <MBProgressHUD/MBProgressHUD.h>
 #import "STKStickersSettingsViewController.h"
 #import "STKStickersEntityService.h"
 #import "STKTableViewDataSource.h"
@@ -15,6 +16,7 @@
 #import "STKStickerController.h"
 #import "STKWebserviceManager.h"
 #import "UIImage+CustomBundle.h"
+#import "UIView+ActivityIndicator.h"
 #import "helper.h"
 
 @interface STKStickersSettingsViewController () <UITableViewDelegate>
@@ -53,6 +55,8 @@
 	typeof(self) __weak weakSelf = self;
 
 	self.dataSource.deleteBlock = ^ (NSIndexPath* indexPath, STKStickerPackObject* item) {
+		MBProgressHUD* hud = [weakSelf.view showActivityIndicator];
+
 		[[STKWebserviceManager sharedInstance] deleteStickerPackWithName: item.packName success: ^ (id response) {
 			dispatch_async(dispatch_get_main_queue(), ^ {
 				[weakSelf.service togglePackDisabling: item];
@@ -62,6 +66,8 @@
 
 				[weakSelf.tableView deleteRowsAtIndexPaths: @[indexPath] withRowAnimation: UITableViewRowAnimationTop];
 				[weakSelf.tableView setEditing: YES animated: NO];
+
+				[hud hideAnimated: YES];
 			});
 		}                                                        failure: nil];
 	};
@@ -151,6 +157,7 @@
 		shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
 	}
 
+	[self saveReorderings];
 	shopViewController.delegate = self.delegate;
     [self.delegate showStickersView];
 	shopViewController.packName = stickerPack.packName;
@@ -167,10 +174,7 @@
 
 - (IBAction)closeAction: (id)sender {
 	[self dismissViewControllerAnimated: YES completion: ^ {
-		[[NSNotificationCenter defaultCenter] postNotificationName: STKStickersReorderStickersNotification object: self userInfo: @{@"packs" : self.dataSource.dataSource}];
-		[[NSNotificationCenter defaultCenter] postNotificationName: STKCloseModalViewNotification object: self];
-
-		[self.delegate stickersReorder: self packs: self.dataSource.dataSource];
+		[self saveReorderings];
 
 		NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
 		[userDefaults setObject: @"currentVC" forKey: @"viewController"];
@@ -178,6 +182,13 @@
 
 		[self.delegate showStickersView];
 	}];
+}
+
+- (void)saveReorderings {
+	[[NSNotificationCenter defaultCenter] postNotificationName: STKStickersReorderStickersNotification object: self userInfo: @{@"packs" : self.dataSource.dataSource}];
+	[[NSNotificationCenter defaultCenter] postNotificationName: STKCloseModalViewNotification object: self];
+
+	[self.delegate stickersReorder: self packs: self.dataSource.dataSource];
 }
 
 - (NSBundle*)getResourceBundle {

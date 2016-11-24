@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
 #import "STKStickersConstants.h"
 
 
@@ -17,59 +18,132 @@
 @class STKStickerController, STKShowStickerButton, STKStickerPackObject, STKImageManager;
 
 @protocol STKStickerControllerDelegate <NSObject>
-
-@required
-
-//View controller for presenting modal controllers
+/**
+ View controller for presenting modal controllers
+*/
 - (UIViewController*)stickerControllerViewControllerForPresentingModalView;
 
 @optional
 
-- (void)stickerController: (STKStickerController*)stickerController didSelectStickerWithMessage: (NSString*)message;
+/**
+ Sticker selected; you can use @message to get image from @imageManager property
+*/
+- (void)  stickerController: (STKStickerController*)stickerController
+didSelectStickerWithMessage: (NSString*)message;
 
+
+/**
+ Sticker packs info in local store updated
+*/
 - (void)didUpdateStickerCache;
 -(void)stickerController:(STKStickerController *)stickerController didSelectPack:(NSString *)packId;
 - (void)stickerController:(STKStickerController*)stickerController didSelectCustomSmile:(NSString*)smile;
 - (void)stickerControllerDidRemoveSmile:(STKStickerController*)stickerController;
 
+
+/**
+ Respond to StickerController error in your code
+*/
 - (void)stickerControllerErrorHandle: (NSError*)error;
 
+
+/**
+ Pack removed from settings
+*/
 - (void)packRemoved: (STKStickerPackObject*)packObject;
 
+/**
+ Sticker packs reordered from settings
+*/
 - (void)stickersReordered;
 
+
+/**
+ Stickers view presented; called after moving from other controllers - settings / shop
+*/
 - (void)showStickersCollection;
 
+/**
+ Called, when new pack was downloaded and shown
+*/
 - (void)newPackShown;
 
+/**
+ Called, when new pack was downloaded from store
+*/
 - (void)newPackDownloaded;
 
-- (void)packPurchasedWithName: (NSString*)packName price: (NSString*)packPrice;
+/**
+ Called, when user purchases new pack
+*/
+- (void)packPurchasedWithName: (NSString*)packName
+						price: (NSString*)packPrice;
 
+/**
+ Called, when shop controller presented
+*/
 - (void)shopOpened;
 @end
+
+
+/***
+ *
+ *
+ *
+ */
+
 
 @interface STKStickerController : NSObject
 @property (nonatomic, weak) id <STKStickerControllerDelegate> delegate;
 
+/**
+ Pass error here to process it by StickerController and act properly;
+ calls stickerControllerErrorHandle: method, if implemented
+*/
+- (void)handleError: (NSError*)error;
+
+
+/**
+ Use this object to get image for sticker message, received from delegate method
+*/
+@property (nonatomic) STKImageManager* imageManager;
+
+/**
+ Check if sticker pack already downloaded for current user
+*/
+- (BOOL)isStickerPackDownloaded: (NSString*)packMessage;
+
+
+/**
+ Set this textView to your message input
+*/
+@property (nonatomic) UITextView* textInputView;
+
+
+/**
+ Container for all Stickers views
+*/
 @property (nonatomic, readonly) UIView* stickersView;
 
-@property (nonatomic, readonly) BOOL isStickerViewShowed;
-
-@property (nonatomic) UIColor* headerBackgroundColor;
-
-@property (nonatomic, weak) UITextView* textInputView;
-
-@property (nonatomic,weak) STKShowStickerButton* keyboardButton;
+/**
+ Button for changing keyboard / stickers presentation
+*/
+@property (nonatomic) STKShowStickerButton* keyboardButton;
 
 @property (nonatomic) BOOL showStickersOnStart;
 
 @property (nonatomic) BOOL isNetworkReachable;
 @property (nonatomic) BOOL showRecents;
 
+/**
+ CollectionView with stickers
+*/
 @property (nonatomic, weak) IBOutlet UICollectionView* stickersCollectionView;
 
-@property (nonatomic) STKImageManager* imageManager;
+/**
+ If true, stickers will be shown right after they will be loaded; default is NO
+*/
+@property (nonatomic) BOOL showStickersOnStart;
 
 @property (nonatomic) UICollectionView* suggestCollectionView;
 @property (nonatomic) BOOL isSuggestArrayNotEmpty;
@@ -78,34 +152,66 @@
  enters any text; default is NO */
 @property (nonatomic) BOOL showSuggests;
 
+/**
+ Reload sticker view with stored stickers
+*/
 - (void)reloadStickersView;
 
+/**
+ Stickers / keyboard presenting
+*/
 - (void)showStickersView;
-
 - (void)hideStickersView;
+- (void)showKeyboard;
+- (BOOL)isStickerViewShowed;
 
-- (BOOL)isStickerPackDownloaded: (NSString*)packMessage;
+/**
+ Select pack with index
+*/
+- (void)selectPack: (NSUInteger)index;
 
+
+/**
+ Show sticker pack info
+*/
 - (void)showPackInfoControllerWithStickerMessage: (NSString*)message;
-
 - (void)showPackInfoControllerWithName: (NSString*)packName;
 
-//Color settings. Default is light gray
 
-- (void)setColorForStickersPlaceholder: (UIColor*)color;
-
-- (void)setColorForStickersHeaderPlaceholderColor: (UIColor*)color;
-
+/**
+ Send statistic
+*/
 - (void)textMessageSendStatistic;
 - (void)stickerMessageSendStatistic;
 
-- (void)handleError: (NSError*)error;
 
-- (void)selectPack: (NSUInteger)index;
+/**
+ Background color for header, containing packs
+*/
+@property (nonatomic) UIColor* headerBackgroundColor;
 
-- (void)showKeyboard;
+/**
+ Methods for customization placeholders
+*/
+- (void)setColorForStickersPlaceholder: (UIColor*)color;
+- (void)setColorForStickersHeaderPlaceholderColor: (UIColor*)color;
+
+
+/**
+ Collection view to present suggested stickers
+*/
+@property (nonatomic) UICollectionView* suggestCollectionView;
+
+/**
+ Check, if there are suggests to present
+*/
+@property (nonatomic) BOOL isSuggestArrayNotEmpty;
+
+/**
+ Indicates if suggests should be presented; default is NO
+*/
+@property (nonatomic) BOOL showSuggests;
 
 - (void)showSuggestCollectionView;
 - (void)hideSuggestCollectionView;
-
 @end

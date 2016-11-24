@@ -33,10 +33,6 @@ extern const struct STKStickerRelationships {
 
 @property (nonatomic, strong) NSNumber* stickerID;
 
-@property (atomic) int64_t stickerIDValue;
-- (int64_t)stickerIDValue;
-- (void)setStickerIDValue: (int64_t)value_;
-
 //- (BOOL)validateStickerID:(id*)value_ error:(NSError**)error_;
 
 @property (nonatomic, strong) NSString* stickerMessage;

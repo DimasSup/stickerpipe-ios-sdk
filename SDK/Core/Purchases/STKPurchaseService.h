@@ -18,7 +18,6 @@ typedef void (^ STKPurchaseFailureBlock)(NSError* error);
 - (void)purchaseFailed;
 @end
 
-//TODO:possibly unused class
 
 @interface STKPurchaseService : NSObject
 @property (nonatomic, weak) id <STKPurchaseServiceDelegate> delegate;

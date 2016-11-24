@@ -24,3 +24,8 @@
 void STKLog(NSString* format, ...);
 
 @end
+
+
+@interface NSString(MD5String)
+- (NSString *)MD5Digest;
+@end

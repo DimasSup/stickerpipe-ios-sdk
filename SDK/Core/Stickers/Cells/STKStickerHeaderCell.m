@@ -143,18 +143,17 @@
 }
 
 - (void)configureSettingsCell {
-	self.originalImage = [UIImage imageNamed: @"STKSettingsSelectedIcon"];
-	self.grayImage = [UIImage imageNamed: @"STKSettingsIcon"];
-
-	/**
-	 *  For framework
-	 */
-	//    self.originalImage = [UIImage imageNamedInCustomBundle:@"STKSettingsSelectedIcon"];
-	//    self.grayImage = [UIImage imageNamedInCustomBundle:@"STKSettingsIcon"];
-
-	self.imageView.image = self.grayImage;
-	self.imageView.tintColor = [UIColor colorWithRed: 4 / 255.0f green: 122 / 255.0f blue: 1 alpha: 1];
-	self.dotView.hidden = YES;
+    if (FRAMEWORK) {
+        self.originalImage = [UIImage imageNamedInCustomBundle:@"STKSettingsSelectedIcon"];
+        self.grayImage = [UIImage imageNamedInCustomBundle:@"STKSettingsIcon"];
+    } else {
+        self.originalImage = [UIImage imageNamed: @"STKSettingsSelectedIcon"];
+        self.grayImage = [UIImage imageNamed: @"STKSettingsIcon"];
+    }
+    
+    self.imageView.image = self.grayImage;
+    self.imageView.tintColor = [UIColor grayColor];
+    self.dotView.hidden = YES;
 }
 
 - (void)configureSmileCell {

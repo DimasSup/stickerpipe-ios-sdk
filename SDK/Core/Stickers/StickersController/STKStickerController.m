@@ -109,7 +109,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 		self.stickersShopButton.badgeBorderColor = [STKUtility defaultGreyColor];
 		self.stickersShopButton.tintColor = [STKUtility defaultBlueColor];
-		self.stickersShopButton.backgroundColor = self.headerBackgroundColor ?: [STKUtility defaultGreyColor];
+		self.stickersShopButton.backgroundColor = [STKUtility defaultGreyColor];
 
 		[self initInternalStickerView];
 		[self initStickerHeader];
@@ -138,8 +138,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	self.internalStickersView = [[[NSBundle mainBundle] loadNibNamed: @"STKStickersViewCustom" owner: self options: nil] firstObject];
 
 	self.internalStickersView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-
-
 	self.internalStickersView.clipsToBounds = YES;
 
 	//iOS 7 FIX
@@ -176,12 +174,16 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	[self.stickersCollectionView registerClass: [UICollectionReusableView class] forSupplementaryViewOfKind: UICollectionElementKindSectionHeader withReuseIdentifier: @"UICollectionReusableView"];
 	[self.stickersCollectionView registerClass: [STKStickersSeparator class] forSupplementaryViewOfKind: UICollectionElementKindSectionFooter withReuseIdentifier: @"STKStickerPanelSeparator"];
 
+	self.stickersDelegateManager.collectionView = self.stickersCollectionView;
 
 	[self.stickersDelegateManager initZoomStickerPreviewView];
 }
 
 - (void)initStickerHeader {
 	typeof(self) __weak weakSelf = self;
+    
+    [self.stickersShopButton setImage:[[UIImage imageNamedInCustomBundle: @"STKShopIcon"] imageWithRenderingMode: UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
+    self.stickersShopButton.tintColor = [UIColor grayColor];
 
 	self.stickersHeaderDelegateManager.didSelectRow = ^ (NSIndexPath* indexPath, STKStickerPackObject* stickerPack, BOOL animated) {
 		if (stickerPack.isNew.boolValue) {
@@ -293,6 +295,13 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	[self.suggestCollectionView registerClass: [UICollectionReusableView class] forSupplementaryViewOfKind: UICollectionElementKindSectionHeader withReuseIdentifier: @"UICollectionReusableView"];
 
 	self.searchDelegateManager.collectionView = self.suggestCollectionView;
+}
+
+- (void)setHeaderBackgroundColor: (UIColor*)headerBackgroundColor {
+	_headerBackgroundColor = headerBackgroundColor;
+
+	self.stickersShopButton.backgroundColor = headerBackgroundColor;
+	self.stickersHeaderCollectionView.backgroundColor = headerBackgroundColor;
 }
 
 
