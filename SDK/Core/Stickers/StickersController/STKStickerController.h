@@ -130,7 +130,6 @@ didSelectStickerWithMessage: (NSString*)message;
 */
 @property (nonatomic) STKShowStickerButton* keyboardButton;
 
-@property (nonatomic) BOOL showStickersOnStart;
 
 @property (nonatomic) BOOL isNetworkReachable;
 @property (nonatomic) BOOL showRecents;
@@ -145,12 +144,7 @@ didSelectStickerWithMessage: (NSString*)message;
 */
 @property (nonatomic) BOOL showStickersOnStart;
 
-@property (nonatomic) UICollectionView* suggestCollectionView;
-@property (nonatomic) BOOL isSuggestArrayNotEmpty;
 
-/* Set textInputView property to your textView; if YES, we'll show suggest stickers each time user
- enters any text; default is NO */
-@property (nonatomic) BOOL showSuggests;
 
 /**
  Reload sticker view with stored stickers

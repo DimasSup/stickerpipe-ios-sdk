@@ -33,6 +33,7 @@
 #import "helper.h"
 #import "UserSettingsService.h"
 #import "LPAppDelegate.h"
+#import "UIImage+CustomBundle.h"
 
 @interface STKStickerController () <UITextViewDelegate, STKStickersSettingsViewControllerDelegate, STKStickersShopViewControllerDelegate>
 
