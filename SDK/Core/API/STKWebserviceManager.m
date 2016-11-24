@@ -115,7 +115,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)searchStickersWithSearchModel: (STKSearchModel*)searchModel completion: (void (^)(NSArray* stickers))completion {
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"searchStickersWithSearchModel";
 
 	if (searchModel.isSuggest) {
 		searchModel.topIfEmpty = @"0";
@@ -150,7 +150,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 - (void)loadStickerPackWithName: (NSString*)packName andPricePoint: (NSString*)pricePoint
 						success: (void (^)(id))success
 						failure: (void (^)(NSError*))failure {
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"loadStickerPackWithName";
 
 	NSString* route = [NSString stringWithFormat: @"packs/%@", packName];
 	NSDictionary* params = @{@"purchase_type" : [self purchaseType: pricePoint]};
@@ -170,7 +170,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 
 - (void)getStickersPacksForUserWithSuccess: (void (^)(id response, NSTimeInterval lastModifiedDate))success
 								   failure: (void (^)(NSError* error))failure {
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"getStickersPacksForUserWithSuccess";
 
 	NSDictionary* params = @{@"is_subscriber" : @([STKStickersManager isSubscriber])};
 
@@ -198,7 +198,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)sendStatistics: (NSArray*)statisticsArray success: (void (^)(id))success failure: (void (^)(NSError*))failure {
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"sendStatistics";
 
 	NSMutableArray* array = [NSMutableArray array];
 
@@ -235,7 +235,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 - (void)getStickerInfoWithId: (NSString*)contentId
 					 success: (void (^)(id response))success
 					 failure: (void (^)(NSError*))failure {
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"getStickerInfoWithId";
 
 	NSString* route = [NSString stringWithFormat: @"content/%@", contentId];
 
@@ -255,7 +255,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 - (void)getStickersPackWithType: (NSString*)type
 						success: (void (^)(id response, NSTimeInterval lastModifiedDate))success
 						failure: (void (^)(NSError* error))failure {
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"getStickersPackWithType";
 
 
 	NSDictionary* params = nil;
@@ -294,7 +294,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 					   failure: (void (^)(NSError*))failure {
 	NSString* route = [NSString stringWithFormat: @"pack/%@", packName];
 
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"getStickerPackWithName";
 
 	[self.backgroundSessionManager GET: route parameters: nil progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		if (success) {
@@ -312,7 +312,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 - (void)deleteStickerPackWithName: (NSString*)packName
 						  success: (void (^)(id))success
 						  failure: (void (^)(NSError*))failure {
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"deleteStickerPackWithName";
 
 	NSString* route = [NSString stringWithFormat: @"packs/%@", packName];
 
@@ -330,7 +330,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)sendDeviceToken: (NSString*)token failure: (void (^)(NSError*))failure {
-	NSString* funcName = [NSString stringWithUTF8String: __FUNCTION__];
+	NSString* funcName = @"sendDeviceToken";
 
 	[self.backgroundSessionManager POST: @"token" parameters: @{@"token": token} progress: nil success: nil failure: ^ (NSURLSessionDataTask* _Nullable task, NSError* _Nonnull error) {
 		[self sendAnErrorWithCategory: funcName p1: token p2: @""];
@@ -342,7 +342,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)sendAnErrorWithCategory: (NSString*)category p1: (NSString*)p1 p2: (NSString*)p2 {
-	NSString* route = [NSString stringWithFormat: @"pack/%@/%@/%@", category, p1, p2];
+	NSString* route = [NSString stringWithFormat: @"pack/%@/%@", /*category, */p1, p2];
 
 	[self.errorManager POST: route parameters: nil progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
 		STKLog(@"Error sent for %@", route);
