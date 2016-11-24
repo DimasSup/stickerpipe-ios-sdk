@@ -139,7 +139,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			completion(responseObject[@"data"]);
 		}
 	}                   failure: ^ (NSURLSessionDataTask* task, NSError* error) {
-		[self sendAnErrorWithCategory: funcName p1: params.description p2: @""];
+		[self sendAnErrorWithCategory: funcName p1: @"" p2: @""];
 
 		if (completion) {
 			completion(nil);
@@ -160,7 +160,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			success(responseObject);
 		}
 	}                        failure: ^ (NSURLSessionDataTask* task, NSError* error) {
-		[self sendAnErrorWithCategory: funcName p1: params.description p2: @""];
+		[self sendAnErrorWithCategory: funcName p1: @"" p2: @""];
 
 		if (failure) {
 			failure(error);
@@ -187,7 +187,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			success(responseObject, timeInterval);
 		}
 	}                   failure: ^ (NSURLSessionDataTask* task, NSError* error) {
-		[self sendAnErrorWithCategory: funcName p1: params.description p2: @""];
+		[self sendAnErrorWithCategory: funcName p1: @"" p2: @""];
 
 		if (failure) {
 			dispatch_async(dispatch_get_main_queue(), ^ {
@@ -212,7 +212,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 				success(responseObject);
 			}
 		}                         failure: ^ (NSURLSessionDataTask* task, NSError* error) {
-			[self sendAnErrorWithCategory: funcName p1: array.description p2: @""];
+			[self sendAnErrorWithCategory: funcName p1: @"" p2: @""];
 
 			if (failure) {
 				failure(error);
@@ -279,7 +279,7 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 			success(responseObject, timeInterval);
 		}
 	}                          failure: ^ (NSURLSessionDataTask* task, NSError* error) {
-		[self sendAnErrorWithCategory: funcName p1: params.description ?: @"" p2: @""];
+		[self sendAnErrorWithCategory: funcName p1: @"" p2: @""];
 
 		if (failure) {
 			dispatch_async(dispatch_get_main_queue(), ^ {
