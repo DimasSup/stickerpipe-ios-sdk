@@ -7,10 +7,10 @@ You can find complete integration documentation and sample [here](https://github
 
 Add to your Podfile:
 ```objc
-pod 'DFImageManager', '~> 0.8.0'
-pod 'AFNetworking', '~> 3.1.0'
-pod 'SDWebImage', '~> 3.8.2'
-pod 'MBProgressHUD'
+pod 'AFNetworking', '3.1.0'
+pod 'DFImageManager', '0.8.0'
+pod 'MBProgressHUD', '1.0.0'
+pod 'SDWebImage', '3.8.2'
 ```
 
 ## Credits
