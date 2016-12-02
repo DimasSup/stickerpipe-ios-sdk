@@ -11,10 +11,22 @@
 #import "STKStickersConstants.h"
 #import "STKSearchModel.h"
 #import "STKUtility.h"
-#import "STKStatistic.h"
+#import "STKStatistic+CoreDataProperties.h"
 
+
+@protocol KeyValueHTTP<NSObject>
+- (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field;
+@end
+
+@interface AFJSONRequestSerializer(KeyValueHTTP) <KeyValueHTTP>
+@end
+
+@interface SDWebImageDownloader(KeyValueHTTP) <KeyValueHTTP>
+@end
 
 @interface STKWebserviceManager ()
+@property (nonatomic, readonly) SDWebImageDownloader* imageDownloader;
+
 @property (nonatomic, readonly) AFHTTPSessionManager* getSessionManager;
 @property (nonatomic, readonly) AFHTTPSessionManager* stickerSessionManager;
 @property (nonatomic, readonly) AFHTTPSessionManager* sessionManager;
@@ -36,10 +48,12 @@
 
 @implementation STKWebserviceManager
 
+static STKConstStringKey kLastModifiedDateKey = @"kLastModifiedDateKey";
 static STKConstStringKey kPacksURL = @"shop/my";
 static STKConstStringKey kStatisticUrl = @"statistics";
 static STKConstStringKey kSearchURL = @"search";
 static STKConstStringKey kSTKApiVersion = @"v2";
+static STKConstStringKey kSdkVersion = @"0.3.3";
 
 + (instancetype)sharedInstance {
 	static STKWebserviceManager* sharedInstance = nil;
@@ -57,6 +71,10 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 	if (self = [super init]) {
 		static const BOOL work = !YES;
 		_rootURLString = work ? @"http://work.stk.908.vc/" : @"https://api.stickerpipe.com/";
+
+		_imageDownloader = [SDWebImageDownloader new];
+		_networkReachable = YES;
+		[self fillHTTPHeader: self.imageDownloader];
 
 		NSURL* URL = [NSURL URLWithString: [NSString stringWithFormat: @"%@/api/%@", self.rootURLString, kSTKApiVersion]];
 
@@ -83,6 +101,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 		_backgroundSessionManager = [[AFHTTPSessionManager alloc] initWithBaseURL: URL];
 		self.backgroundSessionManager.requestSerializer = [self baseSerializer];
 		self.backgroundSessionManager.completionQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+		self.lastUpdateDate = 0;
 	}
 
 	return self;
@@ -90,15 +110,20 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 
 - (AFJSONRequestSerializer*)baseSerializer {
 	AFJSONRequestSerializer* serializer = [AFJSONRequestSerializer serializer];
-	[serializer setValue: [STKStickersManager userKey] forHTTPHeaderField: @"UserID"];
-	[serializer setValue: kSTKApiVersion forHTTPHeaderField: @"ApiVersion"];
-	[serializer setValue: @"iOS" forHTTPHeaderField: @"Platform"];
-	[serializer setValue: [STKUUIDManager generatedDeviceToken] forHTTPHeaderField: @"DeviceId"];
-	[serializer setValue: [STKApiKeyManager apiKey] forHTTPHeaderField: @"ApiKey"];
-	[serializer setValue: [[NSBundle mainBundle] bundleIdentifier] forHTTPHeaderField: @"Package"];
-	[serializer setValue: [self localization] forHTTPHeaderField: @"Localization"];
+	[self fillHTTPHeader: serializer];
 
 	return serializer;
+}
+
+- (void)fillHTTPHeader: (id <KeyValueHTTP>)header {
+	[header setValue: [STKStickersManager userKey] forHTTPHeaderField: @"UserID"];
+	[header setValue: kSTKApiVersion forHTTPHeaderField: @"ApiVersion"];
+	[header setValue: @"iOS" forHTTPHeaderField: @"Platform"];
+	[header setValue: [STKUUIDManager generatedDeviceToken] forHTTPHeaderField: @"DeviceId"];
+	[header setValue: [STKApiKeyManager apiKey] forHTTPHeaderField: @"ApiKey"];
+	[header setValue: kSdkVersion forHTTPHeaderField: @"SdkVersion"];
+	[header setValue: [[NSBundle mainBundle] bundleIdentifier] forHTTPHeaderField: @"Package"];
+	[header setValue: [self localization] forHTTPHeaderField: @"Localization"];
 }
 
 - (AFJSONRequestSerializer*)getSerializer {
@@ -329,6 +354,20 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 	}];
 }
 
+- (id <SDWebImageOperation>)downloadImageWithURL: (NSURL*)url
+									  completion: (SDWebImageDownloaderCompletedBlock)completion {
+	return [self downloadImageWithURL: url progress: nil completion: completion];
+}
+
+- (id <SDWebImageOperation>)downloadImageWithURL: (NSURL*)url
+										progress: (SDWebImageDownloaderProgressBlock)progressBlock
+									  completion: (SDWebImageDownloaderCompletedBlock)completion {
+	return [self.imageDownloader downloadImageWithURL: url
+											  options: 0
+											 progress: progressBlock
+											completed: completion];
+}
+
 - (void)sendDeviceToken: (NSString*)token failure: (void (^)(NSError*))failure {
 	NSString* funcName = @"sendDeviceToken";
 
@@ -342,6 +381,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 }
 
 - (void)sendAnErrorWithCategory: (NSString*)category p1: (NSString*)p1 p2: (NSString*)p2 {
+#ifndef DEBUG
+
 	NSString* route = [NSString stringWithFormat: @"pack/%@/%@", /*category, */p1, p2];
 
 	[self.errorManager POST: route parameters: nil progress: nil success: ^ (NSURLSessionDataTask* task, id responseObject) {
@@ -349,8 +390,8 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 	} failure: ^ (NSURLSessionDataTask* task, NSError* error) {
 		STKLog(@"Error was not sent for %@", route);
 	}];
+#endif
 }
-
 
 #pragma mark - Reachability
 
@@ -441,6 +482,35 @@ static STKConstStringKey kSTKApiVersion = @"v2";
 	NSString* urlString = [NSString stringWithFormat: @"%@/%@_mdpi.png", packName, stickerName];
 
 	return [NSURL URLWithString: urlString relativeToURL: [self stkUrl]];
+}
+
+
+#pragma mark - defaults
+
+- (NSTimeInterval)lastUpdateDate {
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	NSTimeInterval lastUpdateDate = [defaults doubleForKey: kLastUpdateIntervalKey];
+	return lastUpdateDate;
+}
+
+- (void)setLastUpdateDate: (NSTimeInterval)lastUpdateDate {
+	[self willChangeValueForKey: @"lastUpdateDate"];
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	[defaults setDouble: lastUpdateDate forKey: kLastUpdateIntervalKey];
+	[self didChangeValueForKey: @"lastUpdateDate"];
+}
+
+- (NSTimeInterval)lastModifiedDate {
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	NSTimeInterval timeInterval = [defaults doubleForKey: kLastModifiedDateKey];
+	return timeInterval;
+}
+
+- (void)setLastModifiedDate: (NSTimeInterval)lastModifiedDate {
+	[self willChangeValueForKey: @"lastModifiedDate"];
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+	[defaults setDouble: lastModifiedDate forKey: kLastModifiedDateKey];
+	[self didChangeValueForKey: @"lastModifiedDate"];
 }
 
 @end

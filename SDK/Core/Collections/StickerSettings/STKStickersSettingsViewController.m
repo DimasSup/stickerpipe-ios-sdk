@@ -9,81 +9,69 @@
 #import <MBProgressHUD/MBProgressHUD.h>
 #import "STKStickersSettingsViewController.h"
 #import "STKStickersEntityService.h"
-#import "STKTableViewDataSource.h"
-#import "STKStickerPackObject.h"
 #import "STKStickerSettingsCell.h"
 #import "STKStickersShopViewController.h"
 #import "STKStickerController.h"
 #import "STKWebserviceManager.h"
 #import "UIImage+CustomBundle.h"
 #import "UIView+ActivityIndicator.h"
+#import "STKStickerPack+CoreDataProperties.h"
+#import "NSManagedObjectContext+STKAdditions.h"
+#import "STKUtility.h"
+#import "STKStickersCache.h"
+#import "UIView+CordsAdditions.h"
 
-@interface STKStickersSettingsViewController () <UITableViewDelegate>
+@interface STKStickersSettingsViewController () <UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, weak) IBOutlet UITableView* tableView;
 @property (nonatomic) STKStickersEntityService* service;
-@property (nonatomic) STKTableViewDataSource* dataSource;
 @property (nonatomic) UIBarButtonItem* editBarButton;
+
+@property (nonatomic) NSFetchedResultsController<STKStickerPack*>* frc;
 
 @end
 
 @implementation STKStickersSettingsViewController
 
+NSString* const kCellIdentifier = @"STKStickerSettingsCell";
+
 - (void)viewDidLoad {
 	[super viewDidLoad];
 
-	if (FRAMEWORK) {
-		[self.tableView registerNib: [UINib nibWithNibName: @"STKStickerSettingsCell" bundle: [self getResourceBundle]] forCellReuseIdentifier: @"STKStickerSettingsCell"];
-	} else {
-		[self.tableView registerNib: [UINib nibWithNibName: @"STKStickerSettingsCell" bundle: [NSBundle mainBundle]] forCellReuseIdentifier: @"STKStickerSettingsCell"];
+	NSFetchRequest* request = [STKStickerPack fetchRequest];
+	request.predicate = [NSPredicate predicateWithFormat: @"disabled = NO"];
+	request.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey: @"order" ascending: YES]];
+
+	self.frc = [[NSFetchedResultsController alloc] initWithFetchRequest: request
+												   managedObjectContext: [NSManagedObjectContext stk_defaultContext]
+													 sectionNameKeyPath: nil
+															  cacheName: nil];
+
+	self.frc.delegate = self;
+
+	NSError* error = nil;
+
+	if (![self.frc performFetch: &error]) {
+		STKLog(@"fetch faulted with error: %@", error.description);
 	}
 
-	self.dataSource = [[STKTableViewDataSource alloc] initWithItems: nil cellIdentifier: @"STKStickerSettingsCell" configureBlock: ^ (STKStickerSettingsCell* cell, STKStickerPackObject* item) {
-		[cell configureWithStickerPack: item];
-	}];
+	[self.tableView registerNib: [UINib nibWithNibName: @"STKStickerSettingsCell" bundle: [NSBundle stkBundle]] forCellReuseIdentifier: @"STKStickerSettingsCell"];
 
 	self.service = [STKStickersEntityService new];
-
-	self.tableView.dataSource = self.dataSource;
-	self.tableView.delegate = self;
 
 	self.navigationItem.title = NSLocalizedString(@"Settings", nil);
 
 	[self setUpButtons];
-
-	typeof(self) __weak weakSelf = self;
-
-	self.dataSource.deleteBlock = ^ (NSIndexPath* indexPath, STKStickerPackObject* item) {
-		MBProgressHUD* hud = [weakSelf.view showActivityIndicator];
-
-		[[STKWebserviceManager sharedInstance] deleteStickerPackWithName: item.packName success: ^ (id response) {
-			dispatch_async(dispatch_get_main_queue(), ^ {
-				[weakSelf.service togglePackDisabling: item];
-
-				[weakSelf.tableView setEditing: NO animated: NO];
-				[weakSelf.dataSource.dataSource removeObject: item];
-
-				[weakSelf.tableView deleteRowsAtIndexPaths: @[indexPath] withRowAnimation: UITableViewRowAnimationTop];
-				[weakSelf.tableView setEditing: YES animated: NO];
-
-				[hud hideAnimated: YES];
-			});
-		}                                                        failure: nil];
-	};
-
-	self.dataSource.moveBlock = ^ (NSIndexPath* fromIndexPath, NSIndexPath* toIndexPath) {
-		[weakSelf reorderPacks];
-	};
 }
 
 - (void)viewWillAppear: (BOOL)animated {
 	[super viewWillAppear: animated];
 
+	[self startEditing: NO];
+
 	NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
 	[userDefaults setObject: @"settings" forKey: @"viewController"];
 	[userDefaults synchronize];
-
-	[self updateStickerPacks];
 }
 
 - (void)viewDidDisappear: (BOOL)animated {
@@ -102,13 +90,6 @@
 	return YES;
 }
 
-- (NSString*)getImageName: (NSString*)imName {
-	NSString* bundlePath = [[NSBundle mainBundle] pathForResource: @"ResBundle" ofType: @"bundle"];
-	NSString* imageName = [[NSBundle bundleWithPath: bundlePath] pathForResource: imName ofType: @"png"];
-
-	return imageName;
-}
-
 - (void)setUpButtons {
 	UIBarButtonItem* closeBarButton = nil;
 	if (FRAMEWORK) {
@@ -122,44 +103,18 @@
 	self.editBarButton = [[UIBarButtonItem alloc] initWithTitle: NSLocalizedString(@"Edit", nil) style: UIBarButtonItemStylePlain target: self action: @selector(editAction:)];
 
 	self.navigationItem.rightBarButtonItem = self.editBarButton;
-
-}
-
-- (void)reorderPacks {
-	NSMutableArray* dataSource = [self.dataSource dataSource];
-	[dataSource enumerateObjectsUsingBlock: ^ (STKStickerPackObject* obj, NSUInteger idx, BOOL* stop) {
-		obj.order = @(idx);
-	}];
-	NSArray* reorderedPacks = [NSArray arrayWithArray: dataSource];
-	self.service.stickersArray = reorderedPacks;
-	[self.service saveStickerPacks: reorderedPacks];
-}
-
-- (void)updateStickerPacks {
-	typeof(self) __weak weakSelf = self;
-
-	[self.service getStickerPacksIgnoringRecentWithType: nil completion: ^ (NSArray* stickerPacks) {
-		[weakSelf.dataSource setDataSourceArray: stickerPacks];
-		[weakSelf.tableView reloadData];
-	}                                           failure: nil];
 }
 
 
 #pragma mark - UITableViewDelegate
 
 - (void)tableView: (UITableView*)tableView didSelectRowAtIndexPath: (NSIndexPath*)indexPath {
-	STKStickerPackObject* stickerPack = [self.dataSource itemAtIndexPath: indexPath];
+	STKStickerPack* stickerPack = [self.frc objectAtIndexPath: indexPath];
 
-	STKStickersShopViewController*shopViewController=nil;
-	if (FRAMEWORK) {
-		shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
-	} else {
-		shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-	}
-
+	STKStickersShopViewController* shopViewController = [STKStickersShopViewController viewControllerFromNib: @"STKStickersShopViewController"];
 	[self saveReorderings];
 	shopViewController.delegate = self.delegate;
-    [self.delegate showStickersView];
+	[self.delegate showStickersView];
 	shopViewController.packName = stickerPack.packName;
 	[self.navigationController pushViewController: shopViewController animated: YES];
 	[self.tableView deselectRowAtIndexPath: indexPath animated: YES];
@@ -169,8 +124,12 @@
 #pragma mark - Actions
 
 - (IBAction)editAction: (id)sender {
-	[self.tableView setEditing: !self.tableView.editing animated: YES];
-	self.editBarButton.title = (self.tableView.editing) ? NSLocalizedString(@"Done", nil) : NSLocalizedString(@"Edit", nil);
+	[self startEditing: !self.tableView.editing];
+}
+
+- (void)startEditing: (BOOL)editing {
+	[self.tableView setEditing: editing animated: YES];
+	self.editBarButton.title = editing ? NSLocalizedString(@"Done", nil) : NSLocalizedString(@"Edit", nil);
 }
 
 - (IBAction)closeAction: (id)sender {
@@ -186,17 +145,78 @@
 }
 
 - (void)saveReorderings {
-	[[NSNotificationCenter defaultCenter] postNotificationName: STKStickersReorderStickersNotification object: self userInfo: @{@"packs" : self.dataSource.dataSource}];
 	[[NSNotificationCenter defaultCenter] postNotificationName: STKCloseModalViewNotification object: self];
-
-	[self.delegate stickersReorder: self packs: self.dataSource.dataSource];
 }
 
-- (NSBundle*)getResourceBundle {
-	NSString* bundlePath = [[NSBundle mainBundle] pathForResource: @"ResBundle" ofType: @"bundle"];
-	NSBundle* bundle = [NSBundle bundleWithPath: bundlePath];
 
-	return bundle;
+#pragma mark - UITableViewDataSource
+
+- (NSInteger)tableView: (UITableView*)tableView numberOfRowsInSection: (NSInteger)section {
+	return self.frc.sections[(NSUInteger) section].numberOfObjects;
 }
+
+- (UITableViewCell*)tableView: (UITableView*)tableView cellForRowAtIndexPath: (NSIndexPath*)indexPath {
+	STKStickerSettingsCell* cell = [tableView dequeueReusableCellWithIdentifier: kCellIdentifier
+																   forIndexPath: indexPath];
+	STKStickerPack* pack = [self.frc objectAtIndexPath: indexPath];
+
+	[cell configureWithStickerPack: pack];
+
+	return cell;
+}
+
+- (void)tableView: (UITableView*)tableView moveRowAtIndexPath: (NSIndexPath*)sourceIndexPath toIndexPath: (NSIndexPath*)destinationIndexPath {
+	[self.service movePackFromIndex: (NSUInteger) sourceIndexPath.row
+							  toIdx: (NSUInteger) destinationIndexPath.row];
+
+//TODO: -temp
+
+	[[NSNotificationCenter defaultCenter] postNotificationName: kSTKPackDisabledNotification
+														object: nil];
+}
+
+- (BOOL)tableView: (UITableView*)tableView canMoveRowAtIndexPath: (NSIndexPath*)indexPath {
+	return YES;
+}
+
+- (void)tableView: (UITableView*)tableView commitEditingStyle: (UITableViewCellEditingStyle)editingStyle forRowAtIndexPath: (NSIndexPath*)indexPath {
+	if (editingStyle == UITableViewCellEditingStyleDelete) {
+		MBProgressHUD* hud = [self.view showActivityIndicator];
+
+		STKStickerPack* pack = [self.frc objectAtIndexPath: indexPath];
+
+		[[STKWebserviceManager sharedInstance] deleteStickerPackWithName: pack.packName success: ^ (id response) {
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				[self.service togglePackDisabling: pack];
+
+				[hud hideAnimated: YES];
+			});
+		}                                                        failure: nil];
+	}
+}
+
+
+#pragma mark - NSFetchedResultsControllerDelegate
+
+- (void)controller: (NSFetchedResultsController*)controller
+   didChangeObject: (id)anObject
+	   atIndexPath: (NSIndexPath*)indexPath
+	 forChangeType: (NSFetchedResultsChangeType)type
+	  newIndexPath: (NSIndexPath*)newIndexPath {
+	switch (type) {
+		case NSFetchedResultsChangeDelete:
+			[self.tableView setEditing: NO animated: NO];
+			[self.tableView deleteRowsAtIndexPaths: @[indexPath]
+								  withRowAnimation: UITableViewRowAnimationTop];
+			[self.tableView setEditing: YES animated: NO];
+			break;
+		case NSFetchedResultsChangeInsert:
+		case NSFetchedResultsChangeMove:
+		case NSFetchedResultsChangeUpdate:
+			[self.tableView reloadData];
+			break;
+	}
+}
+
 
 @end

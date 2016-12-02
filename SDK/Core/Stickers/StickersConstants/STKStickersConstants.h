@@ -8,17 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSString* const STKPackRemovedNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKStickerController instead")));
-extern NSString* const STKStickersReorderStickersNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKStickerController instead")));
-extern NSString* const STKShowStickersCollectionsNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKStickerController instead")));
-extern NSString* const STKShowPackNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKStickerController instead")));
-extern NSString* const STKNewPackDownloadedNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKStickerController instead")));
-extern NSString* const STKPurchasePackNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKStickerController instead")));
-extern NSString* const STKOpenShopNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKStickerController instead")));
-
-extern NSString* const STKPurchaseSucceededNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKPurchaseService instead")));
-extern NSString* const STKPurchaseFailedNotification __attribute__((deprecated("First in 0.3.15; Use delegate methods from STKPurchaseService instead")));
-
 extern NSString* const STKCloseModalViewNotification;
 
 extern NSString* const STKStickersCacheDidUpdateStickersNotification;

@@ -10,13 +10,14 @@
 #import <UIKit/UIKit.h>
 
 @class DFImageTask;
+@protocol SDWebImageOperation;
 
 typedef void(^ STKCompletionBlock)(NSError* error, UIImage* stickerImage);
 typedef void(^ STKDownloadingProgressBlock)(NSTimeInterval progress);
 
 @interface STKImageManager : NSObject
 
-@property (nonatomic) DFImageTask* imageTask;
+@property (nonatomic, readonly) id <SDWebImageOperation> imageTask;
 
 - (void)getImageForStickerMessage: (NSString*)stickerMessage withProgress: (STKDownloadingProgressBlock)progressBlock andCompletion: (STKCompletionBlock)completion;
 

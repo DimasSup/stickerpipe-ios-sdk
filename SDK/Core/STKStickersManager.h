@@ -28,9 +28,6 @@
 + (BOOL)isOldFormatStickerMessage: (NSString*)message;
 
 
-+ (void)setStartTimeInterval;
-
-
 + (void)setPriceBWithLabel: (NSString*)priceLabel
 				  andValue: (CGFloat)priceValue;
 + (NSString*)priceBLabel;
@@ -65,4 +62,5 @@
 
 + (void)setShopContentColor: (UIColor*)color;
 
++ (void)setStartTimeInterval;
 @end

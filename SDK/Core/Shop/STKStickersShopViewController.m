@@ -10,7 +10,6 @@
 #import "UIWebView+AFNetworking.h"
 #import "STKStickersManager.h"
 #import "STKInAppProductsManager.h"
-#import "STKStickerPackObject.h"
 #import "STKStickersConstants.h"
 #import "STKStickersPurchaseService.h"
 #import "STKStickersEntityService.h"
@@ -18,6 +17,7 @@
 #import "STKStickersShopJsInterface.h"
 #import "STKWebserviceManager.h"
 #import "UIImage+CustomBundle.h"
+#import "STKStickerPack+CoreDataProperties.h"
 
 
 static NSString* const uri = @"http://demo.stickerpipe.com/work/libs/store/js/stickerPipeStore.js";
@@ -41,6 +41,8 @@ static NSUInteger const productsCount = 2;
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
+
+	self.entityService = [STKStickersEntityService new];
 
 	self.prices = [NSMutableArray new];
 
@@ -152,13 +154,6 @@ static NSUInteger const productsCount = 2;
 	}];
 }
 
-- (STKStickersEntityService*)entityService {
-	if (!_entityService) {
-		_entityService = [STKStickersEntityService new];
-	}
-	return _entityService;
-}
-
 - (void)setUpButtons {
 
 	UIBarButtonItem*closeBarButton=nil;
@@ -192,16 +187,13 @@ static NSUInteger const productsCount = 2;
 
 - (void)loadPackWithName: (NSString*)packName andPrice: (NSString*)packPrice {
 	[[STKWebserviceManager sharedInstance] loadStickerPackWithName: packName andPricePoint: packPrice success: ^ (id response) {
-		[self.entityService downloadNewPack: response[@"data"] onSuccess: ^ {
-			[self.delegate packWithName: packName downloadedFromController: self];
+		[self.entityService downloadNewPack: response[@"data"]];
+		[self.delegate packWithName: packName downloadedFromController: self];
 
-			[[NSNotificationCenter defaultCenter] postNotificationName: STKNewPackDownloadedNotification object: self userInfo: @{@"packName" : packName}];
+		[self.delegate hideSuggestCollectionViewIfNeeded];
 
-			[self.delegate hideSuggestCollectionViewIfNeeded];
-
-			[self dismissViewControllerAnimated: YES completion: ^ {
-				[self.delegate showKeyboard];
-			}];
+		[self dismissViewControllerAnimated: YES completion: ^ {
+			[self.delegate showKeyboard];
 		}];
 	}                                failure: ^ (NSError* error) {
 		dispatch_async(dispatch_get_main_queue(), ^ {
@@ -261,8 +253,6 @@ static NSUInteger const productsCount = 2;
 			[[STKStickersPurchaseService sharedInstance] purchaseProductWithPackName: packName andPackPrice: packPrice];
 		} else {
 			[self.delegate packPurchasedWithName: packName price: packPrice fromController: self];
-
-			[[NSNotificationCenter defaultCenter] postNotificationName: STKPurchasePackNotification object: self userInfo: @{@"packName" : packName, @"packPrice" : packPrice}];
 		}
 	}
 }
@@ -277,11 +267,9 @@ static NSUInteger const productsCount = 2;
 
 - (void)removePack: (NSString*)packName {
 	[[STKWebserviceManager sharedInstance] deleteStickerPackWithName: packName success: ^ (id response) {
-		STKStickerPackObject* stickerPack = [self.entityService getStickerPackWithName: packName];
-		[self.entityService togglePackDisabling: stickerPack];
 		dispatch_async(dispatch_get_main_queue(), ^ {
-			[[NSNotificationCenter defaultCenter] postNotificationName: STKPackRemovedNotification object: self userInfo: @{@"pack" : stickerPack}];
-
+			STKStickerPack* stickerPack = [self.entityService getStickerPackWithName: packName];
+			[self.entityService togglePackDisabling: stickerPack];
 			[self.delegate packRemoved: stickerPack fromController: self];
 
 			[self.stickersShopWebView stringByEvaluatingJavaScriptFromString: @"window.JsInterface.onPackRemoveSuccess()"];
@@ -302,8 +290,6 @@ static NSUInteger const productsCount = 2;
             [self.delegate showKeyboard];
 
 			[self.delegate showPackWithName: packName fromController: self];
-
-			[[NSNotificationCenter defaultCenter] postNotificationName: STKShowPackNotification object: self userInfo: @{@"packName" : packName}];
 		}];
 	});
 }
@@ -349,8 +335,6 @@ static NSUInteger const productsCount = 2;
 	dispatch_async(dispatch_get_main_queue(), ^ {
 		[self dismissViewControllerAnimated: YES completion: ^ {
 			[self.delegate showStickersCollection];
-
-			[[NSNotificationCenter defaultCenter] postNotificationName: STKShowStickersCollectionsNotification object: self];
 		}];
 	});
 }

@@ -6,15 +6,18 @@
 //  Copyright (c) 2015 908 Inc. All rights reserved.
 //
 
+#import <CoreData/CoreData.h>
 #import "STKStickersManager.h"
 #import "STKAnalyticService.h"
 #import "STKApiKeyManager.h"
 #import "STKInAppProductsManager.h"
-#import "STKCoreDataService.h"
 #import "STKStickersConstants.h"
 #import "STKStickerController.h"
 #import "STKWebserviceManager.h"
 #import "STKUtility.h"
+#import "STKStickersEntityService.h"
+#import "NSPersistentStoreCoordinator+STKAdditions.h"
+#import "NSManagedObjectContext+STKAdditions.h"
 
 static BOOL downloadMaxIm = NO;
 
@@ -45,8 +48,10 @@ static BOOL downloadMaxIm = NO;
 
 + (void)initWithApiKey: (NSString*)apiKey {
 	[STKApiKeyManager setApiKey: apiKey];
-	[STKCoreDataService setupCoreData];
-	[self setStartTimeInterval];
+
+	NSPersistentStoreCoordinator* coordinator = [NSPersistentStoreCoordinator stk_defaultPersistentsStoreCoordinator];
+
+	[NSManagedObjectContext stk_setupContextStackWithPersistanceStore: coordinator];
 }
 
 #pragma mark - User key
@@ -68,14 +73,6 @@ static BOOL downloadMaxIm = NO;
 
 + (NSString*)localization {
 	return [[NSUserDefaults standardUserDefaults] stringForKey: kLocalizationDefaultsKey];
-}
-
-#pragma mark - Srart time interval
-
-+ (void)setStartTimeInterval {
-	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-	[defaults setDouble: 0 forKey: kLastUpdateIntervalKey];
-	[defaults synchronize];
 }
 
 #pragma mark - Prices
@@ -174,6 +171,18 @@ static BOOL downloadMaxIm = NO;
 	NSString* colorForShop = [NSString stringWithFormat: @"%02x%02x%02x", r, g, b];
 
 	[[NSUserDefaults standardUserDefaults] setObject: colorForShop forKey: kShopColor];
+}
+
++ (void)setStartTimeInterval {
+//TODO: -temp, remove
+
+	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+
+	if ([defaults doubleForKey: kLastUpdateIntervalKey] == 0) {
+		STKLog(@"-setStartTimeInterval calls automatically after each initialization of STKStickerController; you don't need to call it by yourself");
+	}
+
+	[defaults setDouble: 0 forKey: kLastUpdateIntervalKey];
 }
 
 @end

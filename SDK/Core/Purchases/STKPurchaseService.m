@@ -173,8 +173,6 @@
 	if ([o respondsToSelector: @selector(purchaseSucceedForPack:withPrice:)]) {
 		[o purchaseSucceedForPack: packName withPrice: packPrice];
 	}
-
-	[[NSNotificationCenter defaultCenter] postNotificationName: STKPurchaseSucceededNotification object: self userInfo: @{@"packName" : packName, @"packPrice" : packPrice}];
 }
 
 - (void)purchaseFailed {
@@ -182,8 +180,6 @@
 	if ([o respondsToSelector: @selector(purchaseFailed)]) {
 		[o purchaseFailed];
 	}
-
-	[[NSNotificationCenter defaultCenter] postNotificationName: STKPurchaseFailedNotification object: self];
 }
 
 @end

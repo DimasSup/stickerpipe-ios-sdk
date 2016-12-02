@@ -3,14 +3,20 @@
 // Copyright (c) 2016 908 Inc. All rights reserved.
 //
 
+#import "SDWebImageDownloader.h"
+
 @class AFHTTPSessionManager;
 @class STKSearchModel;
+@class DFImageTask;
 
 @interface STKWebserviceManager : NSObject
 + (instancetype)sharedInstance;
 
 //
 // KVO compatible
+//TODO:temp, move it somewhere
+@property (nonatomic) NSTimeInterval lastModifiedDate;
+@property (nonatomic) NSTimeInterval lastUpdateDate;
 @property (nonatomic, readonly) BOOL networkReachable;
 //
 
@@ -39,6 +45,9 @@
 - (void)deleteStickerPackWithName: (NSString*)packName
 						  success: (void (^)(id))success
 						  failure: (void (^)(NSError*))failure;
+
+- (id <SDWebImageOperation>)downloadImageWithURL: (NSURL*)url completion: (SDWebImageDownloaderCompletedBlock)completion;
+- (id <SDWebImageOperation>)downloadImageWithURL: (NSURL*)url progress: (SDWebImageDownloaderProgressBlock)progressBlock completion: (SDWebImageDownloaderCompletedBlock)completion;
 
 - (void)sendDeviceToken: (NSString*)token
 				failure: (void (^)(NSError*))failure;

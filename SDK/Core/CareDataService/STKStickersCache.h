@@ -7,47 +7,32 @@
 //
 
 
-extern STKConstStringKey kRecentName;
+extern NSString* const kSTKPackDisabledNotification;
 
-@class STKStickerObject, STKStickerPackObject, STKSticker;
+@class STKSticker;
+@class STKStickerPack;
 
 @interface STKStickersCache : NSObject
 
-@property (nonatomic) NSManagedObjectContext* backgroundContext;
 @property (nonatomic) NSManagedObjectContext* mainContext;
 
 - (NSError*)saveStickerPacks: (NSArray*)stickerPacks;
 
-- (void)saveStickerPack: (STKStickerPackObject*)stickerPack;
+- (STKStickerPack*)getStickerPackWithPackName: (NSString*)packName;
 
-- (void)saveDisabledStickerPack: (STKStickerPackObject*)stickerPack;
-
-- (void)updateStickerPack: (STKStickerPackObject*)stickerPackObject;
-
-- (STKStickerPackObject*)getStickerPackWithPackName: (NSString*)packName;
-
-- (void)getStickerPacksIgnoringRecentForContext: (NSManagedObjectContext*)context
-									   response: (void (^)(NSArray*))response;
-
-- (void)getAllPacksIgnoringRecent: (void (^)(NSArray* stickerPacks))response;
-
-- (void)getStickerPacks: (void (^)(NSArray* stickerPacks))response;
-
-- (STKStickerPackObject*)recentStickerPack;
+- (NSArray<STKStickerPack*>*)getAllEnabledPacks;
 
 - (NSString*)packNameForStickerId: (NSString*)stickerId;
 
 - (BOOL)isStickerPackDownloaded: (NSString*)packName;
 
-- (BOOL)hasNewStickerPacks;
-
-- (void)incrementUsedCountWithStickerID: (NSNumber*)stickerID;
-
-- (void)markStickerPack: (STKStickerPackObject*)pack disabled: (BOOL)disabled;
+- (void)markStickerPack: (STKStickerPack*)pack disabled: (BOOL)disabled;
 
 - (BOOL)hasPackWithName: (NSString*)packName;
 
-- (void)stickerWithStickerID: (NSNumber*)stickerID completion: (void (^)(STKSticker* sticker))completion;
-- (void)saveSticker: (STKStickerObject*)stickerObject;
+- (void)incrementStickerUsedCount: (STKSticker*)sticker;
 
+- (BOOL)hasRecents;
+- (NSArray<STKSticker*>*)getRecentStickers;
+- (NSError*)saveChangesIfNeeded;
 @end

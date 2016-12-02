@@ -21,9 +21,10 @@
 @interface STKStickerViewCell ()
 
 @property (nonatomic, weak) UIImageView* imageView;
-@property (nonatomic) DFImageTask* imageTask;
+@property (nonatomic) id <SDWebImageOperation> imageOperation;
 
 @property (nonatomic, copy) NSArray<NSLayoutConstraint*>* sizeConstraints;
+@property (nonatomic, copy) NSString *stickerMessage;
 @end
 
 @implementation STKStickerViewCell
@@ -51,8 +52,7 @@
 }
 
 - (void)prepareForReuse {
-	[self.imageTask cancel];
-	self.imageTask = nil;
+	[self.imageOperation cancel];
 	self.imageView.image = nil;
 	[self.imageView sd_cancelCurrentAnimationImagesLoad];
 	[[SDWebImageManager sharedManager] cancelAll];
@@ -61,9 +61,9 @@
 - (void)configureWithStickerMessage: (NSString*)stickerMessage
 						placeholder: (UIImage*)placeholder
 				   placeholderColor: (UIColor*)placeholderColor
-					 collectionView: (UICollectionView*)collectionView
-			 cellForItemAtIndexPath: (NSIndexPath*)indexPath
 						  isSuggest: (BOOL)isSuggest {
+	self.stickerMessage = stickerMessage;
+
 	UIImage* resultPlaceholder = nil;
 	if (FRAMEWORK) {
 		resultPlaceholder = placeholder ? placeholder : [UIImage imageNamedInCustomBundle: @"STKStickerPanelPlaceholder"];
@@ -96,30 +96,21 @@
 			[[STKWebserviceManager sharedInstance] getStickerInfoWithId: stickerName success: ^ (id response) {
 				NSString* urlString = response[@"data"][@"image"][[STKUtility scaleString]];
 
-				SDWebImageDownloader* downloader = [SDWebImageDownloader sharedDownloader];
-
-				[downloader downloadImageWithURL: [NSURL URLWithString: urlString]
-										 options: 0
-										progress: nil
-									   completed: ^ (UIImage* image, NSData* data, NSError* error, BOOL finished) {
-										   if (image && finished) {
-											   [[SDImageCache sharedImageCache] storeImage: image forKey: stickerName];
-											   dispatch_async(dispatch_get_main_queue(), ^ {
-
-												   NSIndexPath* currentIndexPath = [collectionView indexPathForCell: weakSelf];
-												   if ([currentIndexPath compare: indexPath] == NSOrderedSame) {
-													   weakSelf.imageView.image = image;
-													   [weakSelf setNeedsLayout];
-												   }
-											   });
-										   }
-									   }];
+				self.imageOperation = [[STKWebserviceManager sharedInstance] downloadImageWithURL: [NSURL URLWithString: urlString]
+																					   completion: ^ (UIImage* downloadedImage, NSData* data, NSError* error, BOOL finished) {
+																						   if (downloadedImage && finished) {
+																							   [[SDImageCache sharedImageCache] storeImage: downloadedImage forKey: stickerName];
+																							   if ([self.stickerMessage isEqualToString: stickerMessage]) {
+																								   dispatch_async(dispatch_get_main_queue(), ^ {
+																									   weakSelf.imageView.image = downloadedImage;
+																									   [weakSelf setNeedsLayout];
+																								   });
+																							   }
+																						   }
+																					   }];
 			}                                                   failure: nil];
 		}
 	}];
-
-	[self.imageTask resume];
-
 }
 
 - (UIImage*)returnStickerImage {

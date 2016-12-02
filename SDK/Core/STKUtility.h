@@ -21,11 +21,26 @@
 + (UIColor*)defaultPlaceholderGrayColor;
 + (UIColor*)defaultBlueColor;
 
++ (NSBundle*)getResourceBundle;
 void STKLog(NSString* format, ...);
+
 
 @end
 
 
 @interface NSString(MD5String)
 - (NSString *)MD5Digest;
+@end
+
+
+//--------Custom Bundle----------
+
+@interface NSBundle (CustomBundle)
++ (NSBundle*)stkBundle;
+
++ (NSArray*)loadNibNamed: (NSString*)name owner: (id)owner options: (NSDictionary*)options;
+@end
+
+@interface UIViewController (CustomBundle)
++ (instancetype)viewControllerFromNib: (NSString*)nibNameOrNil;
 @end

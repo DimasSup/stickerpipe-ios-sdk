@@ -17,7 +17,6 @@
 #import "STKEmptyRecentCell.h"
 #import "STKStickersSettingsViewController.h"
 #import "STKStickersShopViewController.h"
-#import "STKStickerPackObject.h"
 #import "STKOrientationNavigationController.h"
 #import "STKShowStickerButton.h"
 #import "STKAnalyticService.h"
@@ -28,8 +27,11 @@
 #import "NSLayoutConstraint+Addictions.h"
 #import "STKImageManager.h"
 #import "UIImage+CustomBundle.h"
+#import "UIView+ActivityIndicator.h"
+#import "MBProgressHUD.h"
+#import "UIView+CordsAdditions.h"
 
-@interface STKStickerController () <UITextViewDelegate, STKStickersSettingsViewControllerDelegate, STKStickersShopViewControllerDelegate>
+@interface STKStickerController () <UITextViewDelegate, STKStickersSettingsViewControllerDelegate, STKStickersShopViewControllerDelegate, STKStickerHeaderCollectionViewDelegate>
 
 @property (nonatomic) IBOutlet UIView* internalStickersView;
 @property (nonatomic, weak) IBOutlet UICollectionView* stickersHeaderCollectionView;
@@ -40,7 +42,6 @@
 @property (nonatomic) STKStickerDelegateManager* stickersDelegateManager;
 @property (nonatomic) STKStickerHeaderDelegateManager* stickersHeaderDelegateManager;
 @property (nonatomic) BOOL isKeyboardShowed;
-@property (nonatomic) BOOL initialLoadingFinished;
 
 @property (nonatomic) STKStickersEntityService* stickersService;
 
@@ -49,10 +50,9 @@
 
 @property (nonatomic) STKSearchDelegateManager* searchDelegateManager;
 
-- (IBAction)collectionsButtonAction: (id)sender;
-- (IBAction)stickersShopButtonAction: (id)sender;
-- (IBAction)closeError: (id)sender;
+@property (nonatomic) BOOL recentPresented;
 
+@property (nonatomic, weak) MBProgressHUD* hud;
 @end
 
 @implementation STKStickerController
@@ -62,13 +62,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (instancetype)init {
 	if (self = [super init]) {
-		[[STKWebserviceManager sharedInstance] addObserver: self
-												forKeyPath: @"networkReachable"
-												   options: NSKeyValueObservingOptionNew
-												   context: nil];
-
-		[[STKWebserviceManager sharedInstance] startCheckingNetwork];
-
 		[[NSNotificationCenter defaultCenter] addObserver: self
 												 selector: @selector(willHideKeyboard:)
 													 name: UIKeyboardWillHideNotification
@@ -93,7 +86,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		self.imageManager = [STKImageManager new];
 
 		self.stickersDelegateManager = [STKStickerDelegateManager new];
-		self.stickersDelegateManager.stickersService = self.stickersService;
 
 		self.stickersHeaderDelegateManager = [STKStickerHeaderDelegateManager new];
 
@@ -106,11 +98,8 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		[self initStickersCollectionView];
 
 		[self loadStickerPacksWithCompletion: ^ {
-			self.initialLoadingFinished = YES;
 			[self reloadStickersView];
 		}];
-
-		[self reloadRecentAtStart];
 
 		NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
 		[userDefaults setObject: @"currentVC" forKey: @"viewController"];
@@ -124,11 +113,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 - (void)initInternalStickerView {
-	if (FRAMEWORK) {
-		self.internalStickersView = [[[self getResourceBundle] loadNibNamed: @"STKStickersView" owner: self options: nil] firstObject];
-	} else {
-		self.internalStickersView = [[[NSBundle mainBundle] loadNibNamed: @"STKStickersView" owner: self options: nil] firstObject];
-	}
+	self.internalStickersView = [[NSBundle loadNibNamed: @"STKStickersView" owner: self options: nil] firstObject];
 
 	self.internalStickersView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 	self.internalStickersView.clipsToBounds = YES;
@@ -146,8 +131,8 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		[weakSelf setPackSelectedAtIndex: displayedSection];
 	};
 
-	self.stickersDelegateManager.didSelectSticker = ^ (STKStickerObject* sticker, BOOL recent) {
-		[weakSelf.stickersService incrementStickerUsedCountWithID: sticker.stickerID];
+	self.stickersDelegateManager.didSelectSticker = ^ (STKSticker* sticker, BOOL recent) {
+		[weakSelf.stickersService incrementStickerUsedCount: sticker];
 
 		[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticStickerCategory
 														   action: recent ? STKAnalyticActionRecent : STKAnalyticActionTabs
@@ -173,33 +158,26 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)initStickerHeader {
 	typeof(self) __weak weakSelf = self;
-    
-    [self.stickersShopButton setImage:[[UIImage imageNamedInCustomBundle: @"STKShopIcon"] imageWithRenderingMode: UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
-    self.stickersShopButton.tintColor = [UIColor grayColor];
 
-	self.stickersHeaderDelegateManager.didSelectRow = ^ (NSIndexPath* indexPath, STKStickerPackObject* stickerPack, BOOL animated) {
-		if (stickerPack.isNew.boolValue) {
-			stickerPack.isNew = @NO;
-			[weakSelf.stickersService updateStickerPackInCache: stickerPack];
-			[weakSelf reloadHeaderItemAtIndexPath: indexPath];
-		}
+	[self.stickersShopButton setImage: [[UIImage imageNamedInCustomBundle: @"STKShopIcon"] imageWithRenderingMode: UIImageRenderingModeAlwaysTemplate] forState: UIControlStateNormal];
+	self.stickersShopButton.tintColor = [UIColor grayColor];
+
+	self.stickersHeaderDelegateManager.delegate = self;
+
+	self.stickersHeaderDelegateManager.didSelectRow = ^ (NSIndexPath* indexPath, STKStickerPack* stickerPack, BOOL animated) {
+		[weakSelf makeSourceNotNewIfNeeded: stickerPack];
 
 		NSInteger numberOfItems = [weakSelf.stickersCollectionView numberOfItemsInSection: indexPath.item];
 
 		if (numberOfItems != 0) {
 			NSIndexPath* newIndexPath = [NSIndexPath indexPathForItem: 0 inSection: indexPath.item];
 			CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath: newIndexPath].frame;
-			if (stickerPack.stickers.count > 0 || indexPath.item == 0) {
-				[weakSelf.stickersCollectionView setContentOffset: CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y - kStickersSectionPaddingTopBottom) animated: animated];
-				weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
-			}
+			[weakSelf.stickersCollectionView setContentOffset: CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y - kStickersSectionPaddingTopBottom) animated: animated];
+			weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
 		}
 	};
 
-	self.stickersHeaderDelegateManager.didSelectSettingsRow = ^ {
-		[weakSelf collectionsButtonAction: nil];
-	};
-
+	self.stickersHeaderDelegateManager.collectionView = self.stickersHeaderCollectionView;
 	self.stickersHeaderCollectionView.dataSource = self.stickersHeaderDelegateManager;
 	self.stickersHeaderCollectionView.delegate = self.stickersHeaderDelegateManager;
 
@@ -254,8 +232,13 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	[aFlowLayout setItemSize: CGSizeMake(320, 80)];
 	[aFlowLayout setScrollDirection: UICollectionViewScrollDirectionHorizontal];
 
+	CALayer *upperBorder = [CALayer layer];
+	upperBorder.backgroundColor = [UIColor colorWithRed: 0.84f green: 0.84f blue: 0.85f alpha: 1].CGColor;
+	upperBorder.frame = CGRectMake(0, 0, self.suggestCollectionView.width, 0.5f);
+	[self.suggestCollectionView.layer addSublayer:upperBorder];
+
 	[self.suggestCollectionView setCollectionViewLayout: aFlowLayout];
-	self.suggestCollectionView.backgroundColor = [UIColor colorWithRed: 1.0f green: 1.0f blue: 1.0f alpha: 0.6];
+	self.suggestCollectionView.backgroundColor = [UIColor colorWithRed: 0.89f green: 0.89f blue: 0.92f alpha: 0.7];
 	[self.suggestCollectionView setShowsHorizontalScrollIndicator: NO];
 	[self.suggestCollectionView setShowsVerticalScrollIndicator: NO];
 
@@ -263,10 +246,10 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 	typeof(self) __weak weakSelf = self;
 
-	self.searchDelegateManager.didSelectSticker = ^ (STKStickerObject* sticker) {
+	self.searchDelegateManager.didSelectSticker = ^ (STKSticker* sticker) {
 		[weakSelf hideSuggestCollectionView];
 
-		[weakSelf.stickersService incrementStickerUsedCountWithID: sticker.stickerID];
+		[weakSelf.stickersService incrementStickerUsedCount: sticker];
 
 		[[STKAnalyticService sharedService] sendEventWithCategory: STKAnalyticStickerCategory action: STKAnalyticActionSuggest label: [NSString stringWithFormat: @"%@", sticker.stickerID] value: nil];
 
@@ -296,15 +279,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 #pragma mark - STKStickersSettingsViewControllerDelegate
 
 - (void)stickersReorder: (STKStickersSettingsViewController*)stickersController packs: (NSArray*)packs {
-	NSMutableArray* stickers = [packs mutableCopy];
-	[stickers insertObject: self.stickersService.stickersArray[0] atIndex: 0];
-	self.stickersService.stickersArray = stickers;
-	self.stickersHeaderDelegateManager.stickerPacksArray = stickers;
-	[self.stickersDelegateManager setStickerPacksArray: stickers];
-	[self.stickersCollectionView reloadData];
-	[self.stickersHeaderCollectionView reloadData];
-	[self reloadRecent];
-
 	id <STKStickerControllerDelegate> o = self.delegate;
 	if ([o respondsToSelector: @selector(stickersReordered)]) {
 		[o stickersReordered];
@@ -316,35 +290,44 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 	[self reloadStickersView];
 
+	[self setPackSelectedAtIndex: 0];
+	[self.stickersCollectionView setContentOffset: CGPointZero];
+
 	self.textInputView.inputView = self.stickersView;
 
 	[self reloadStickersInputViews];
+
+	// if have not updated yet
+	if ([STKWebserviceManager sharedInstance].networkReachable && [STKWebserviceManager sharedInstance].lastModifiedDate == 0) {
+		self.internalStickersView.userInteractionEnabled = NO;
+		self.hud = [self.internalStickersView showActivityIndicator];
+	}
 }
 
 - (void)loadStickerPacksWithCompletion: (STSimpleBlock)completion {
-	[self.stickersService getStickerPacksWithType: nil completion: ^ (NSArray* stickerPacks) {
-		self.stickersService.stickersArray = stickerPacks;
+	[self.stickersService updateStickerPacksFromServerWithCompletion: ^ (NSError* error) {
+		if (error) {
+			if (error.code == -1009) {
+				[[STKWebserviceManager sharedInstance] addObserver: self
+														forKeyPath: @"networkReachable"
+														   options: NSKeyValueObservingOptionNew
+														   context: nil];
+
+				[[STKWebserviceManager sharedInstance] startCheckingNetwork];
+			}
+		}
+
+		if (self.hud) {
+			[self.hud hideAnimated: YES];
+			self.hud = nil;
+			self.internalStickersView.userInteractionEnabled = YES;
+			[self setPackSelectedAtIndex: 0];
+		}
+
 		self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
 		self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
 		if (completion) completion();
-	}                                     failure: nil];
-}
-
-- (void)reloadRecent {
-	STKStickerPackObject* recentPack = [self.stickersService recentPack];
-	NSMutableArray* stickers = [self.stickersService.stickersArray mutableCopy];
-	stickers[0] = recentPack;
-	self.stickersService.stickersArray = stickers;
-	[self.stickersDelegateManager setStickerPacksArray: stickers];
-	[self.stickersCollectionView reloadSections: [NSIndexSet indexSetWithIndex: 0]];
-}
-
-- (void)reloadRecentAtStart {
-	NSMutableArray* stickers = [@[[self.stickersService recentPack]] mutableCopy];
-
-	self.stickersService.stickersArray = stickers;
-	[self.stickersDelegateManager setStickerPacksArray: stickers];
-	[self.stickersCollectionView reloadSections: [NSIndexSet indexSetWithIndex: 0]];
+	}];
 }
 
 - (void)showModalViewController: (UIViewController*)viewController {
@@ -391,38 +374,33 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)collectionsButtonAction: (UIButton*)collectionsButton {
 	if (!_settingsViewController) {
-		if (FRAMEWORK) {
-		    _settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName:@"STKStickersSettingsViewController" bundle:[self getResourceBundle]];
-		} else {
-			_settingsViewController = [[STKStickersSettingsViewController alloc] initWithNibName: @"STKStickersSettingsViewController" bundle: [NSBundle mainBundle]];
-		}
+		_settingsViewController = [STKStickersSettingsViewController viewControllerFromNib: @"STKStickersSettingsViewController"];
 
 		_settingsViewController.delegate = self;
 	}
 
 	[self showModalViewController: _settingsViewController];
+
+	[self updateRecents];
 }
 
 - (void)stickersShopButtonAction: (id)sender {
 	if (!_shopViewController) {
-		if (FRAMEWORK) {
-		    _shopViewController = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
-		} else {
-			_shopViewController = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-		}
+		_shopViewController = [STKStickersShopViewController viewControllerFromNib: @"STKStickersShopViewController"];
 
 		_shopViewController.delegate = self;
 	}
 
 	self.stickersService.hasNewModifiedPacks = NO;
+	self.stickersShopButton.badgeView.hidden = YES;
 	[self showModalViewController: _shopViewController];
+
+	[self updateRecents];
 
 	id <STKStickerControllerDelegate> o = self.delegate;
 	if ([o respondsToSelector: @selector(shopOpened)]) {
 		[o shopOpened];
 	}
-
-	[[NSNotificationCenter defaultCenter] postNotificationName: STKOpenShopNotification object: self];
 }
 
 - (void)keyboardButtonAction: (UIButton*)keyboardButton {
@@ -457,47 +435,45 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Reload
 
-- (void)reloadStickersView {
-	NSArray* stickerPacks = self.stickersService.stickersArray;
-	[self.stickersDelegateManager setStickerPacksArray: stickerPacks];
-	self.stickersHeaderDelegateManager.stickerPacksArray = stickerPacks;
-	[self.stickersCollectionView reloadData];
+- (void)makeSourceNotNewIfNeeded: (STKStickerPack*)stickerPack {
+	if (stickerPack.isNew.boolValue) {
+		stickerPack.isNew = @NO;
+
+		NSError* errorDuringSaving = [self.stickersService saveChangesIfNeeded];
+		if (errorDuringSaving) {
+			STKLog(@"saving stickers failed with %@", errorDuringSaving.description);
+		}
+	}
+}
+
+- (void)updateRecents {
+	NSArray<STKStickerPack*>* recent = [self.stickersService getRecentStickers];
+	self.stickersDelegateManager.recentStickers = recent;
+	self.recentPresented = recent.count > 0;
+
 	[self.stickersHeaderCollectionView reloadData];
-	self.stickersCollectionView.contentOffset = CGPointZero;
-	self.stickersDelegateManager.currentDisplayedSection = 0;
-
-	[self setPackSelectedAtIndex: 0];
+	[self.stickersCollectionView reloadData];
 }
 
-- (void)reloadHeaderItemAtIndexPath: (NSIndexPath*)indexPath {
-	NSArray* stickerPacks = self.stickersService.stickersArray;
-	self.stickersHeaderDelegateManager.stickerPacksArray = stickerPacks;
-	[self.stickersHeaderCollectionView reloadItemsAtIndexPaths: @[indexPath]];
-	[self.stickersHeaderCollectionView selectItemAtIndexPath: indexPath animated: NO scrollPosition: UICollectionViewScrollPositionNone];
-}
+- (void)reloadStickersView {
+	[self.stickersDelegateManager performFetch];
+	[self.stickersHeaderDelegateManager performFetch];
 
-- (void)reloadStickersHeader {
-	NSArray* stickerPacks = self.stickersService.stickersArray;
-	self.stickersHeaderDelegateManager.stickerPacksArray = stickerPacks;
-	[self.stickersHeaderCollectionView reloadItemsAtIndexPaths: @[[NSIndexPath indexPathForItem: 1 inSection: 0]]];
-	NSIndexPath* selectedIndexPath = [NSIndexPath indexPathForItem: self.stickersDelegateManager.currentDisplayedSection inSection: 0];
-	[self.stickersHeaderCollectionView selectItemAtIndexPath: selectedIndexPath animated: NO scrollPosition: UICollectionViewScrollPositionNone];
+	[self updateRecents];
 }
 
 
 #pragma mark - Selection
 
 - (void)setPackSelectedAtIndex: (NSInteger)index {
-	if ([self.stickersHeaderCollectionView numberOfItemsInSection: 0] - 1 >= index) {
+	if (self.stickersHeaderCollectionView.numberOfSections > 0 && [self.stickersHeaderCollectionView numberOfItemsInSection: 0] > index) {
 		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: index inSection: 0];
 
-		STKStickerPackObject* stickerPack = self.stickersHeaderDelegateManager.stickerPacksArray[(NSUInteger) indexPath.row];
-		if (stickerPack.isNew.boolValue) {
-			stickerPack.isNew = @NO;
-			[self.stickersService updateStickerPackInCache: stickerPack];
-			[self reloadHeaderItemAtIndexPath: [NSIndexPath indexPathForItem: index inSection: 0]];
-		}
 		[self.stickersHeaderCollectionView selectItemAtIndexPath: indexPath animated: YES scrollPosition: UICollectionViewScrollPositionCenteredHorizontally];
+		[self.stickersHeaderDelegateManager invalidateSelectionForIndexPath: indexPath];
+
+		//ignore recent tab
+		[self makeSourceNotNewIfNeeded: [self.stickersHeaderDelegateManager stickerPackForIndexPath: indexPath]];
 	}
 }
 
@@ -506,12 +482,8 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)showPackInfoControllerWithStickerMessage: (NSString*)message {
 	[self hideStickersView];
-	STKStickersShopViewController*vc=nil;
-	if (FRAMEWORK) {
-	    vc = [[STKStickersShopViewController alloc] initWithNibName:@"STKStickersShopViewController" bundle:[self getResourceBundle]];
-	} else {
-		vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-	}
+
+	STKStickersShopViewController* vc = [STKStickersShopViewController viewControllerFromNib: @"STKStickersShopViewController"];
 
 	vc.delegate = self;
 	[self showStickersView];
@@ -520,24 +492,17 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		vc.packName = [self.stickersService packNameForStickerId: [STKUtility stickerIdWithMessage: message]];
 		[self showModalViewController: vc];
 	} else {
-		typeof(self) __weak weakSelf = self;
-
 		[self.stickersService getPackNameForMessage: message completion: ^ (NSString* packName) {
 			vc.packName = packName;
 			dispatch_async(dispatch_get_main_queue(), ^ {
-				[weakSelf showModalViewController: vc];
+				[self showModalViewController: vc];
 			});
 		}];
 	}
 }
 
 - (void)showPackInfoControllerWithName: (NSString*)packName {
-	STKStickersShopViewController* vc = nil;
-	if (FRAMEWORK) {
-		vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [self getResourceBundle]];
-	} else {
-		vc = [[STKStickersShopViewController alloc] initWithNibName: @"STKStickersShopViewController" bundle: [NSBundle mainBundle]];
-	}
+	STKStickersShopViewController* vc = [STKStickersShopViewController viewControllerFromNib: @"STKStickersShopViewController"];
 
 	vc.delegate = self;
 	vc.packName = packName;
@@ -602,7 +567,9 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 #pragma mark - Show/hide stickers
 
 - (void)hideStickersView {
-    self.keyboardButton.stickerButtonState = STKShowStickerButtonStateStickers;
+	[self updateRecents];
+
+	self.keyboardButton.stickerButtonState = STKShowStickerButtonStateStickers;
 
 	self.textInputView.inputView = nil;
 
@@ -661,16 +628,6 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 
-#pragma mark - resource bundle
-
-- (NSBundle*)getResourceBundle {
-	NSString* bundlePath = [[NSBundle mainBundle] pathForResource: @"ResBundle" ofType: @"bundle"];
-	NSBundle* bundle = [NSBundle bundleWithPath: bundlePath];
-
-	return bundle;
-}
-
-
 #pragma mark - text view notification
 
 - (void)textFieldDidChange: (NSNotification*)notification {
@@ -683,7 +640,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 			model.q = [self lastWordFromText: tv.text];
 			model.isSuggest = YES;
 
-			if (model.q != nil || ![model.q isEqualToString: @""]) {
+			if (model.q.length > 0) {
 				[[STKWebserviceManager sharedInstance] searchStickersWithSearchModel: model completion: ^ (NSArray* stickers) {
 					BOOL stickersReceived = stickers.count != 0;
 
@@ -715,13 +672,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	if (object == [STKWebserviceManager sharedInstance]) {
 		if ([change[NSKeyValueChangeNewKey] boolValue]) {
 			self.errorView.hidden = YES;
-			if (self.initialLoadingFinished) {
-				[self loadStickerPacksWithCompletion: ^ {
-					if (self.showStickersOnStart) {
-						[self showStickersView];
-					}
-				}];
-			}
+			[self loadStickerPacksWithCompletion: ^ {
+				if (self.showStickersOnStart) {
+					[self showStickersView];
+				}
+			}];
 		} else {
 			[self handleError: [NSError errorWithDomain: NSCocoaErrorDomain code: NSURLErrorNotConnectedToInternet userInfo: nil]];
 		}
@@ -774,27 +729,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	}
 }
 
-- (void)packRemoved: (STKStickerPackObject*)packObject fromController: (STKStickersShopViewController*)shopController {
-	NSMutableArray* stickerPacks = [self.stickersService.stickersArray mutableCopy];
-
-	__block NSInteger packIndex = -1;
-
-	[stickerPacks enumerateObjectsUsingBlock: ^ (STKStickerPackObject* pack, NSUInteger idx, BOOL* stop) {
-		if (pack.packID == packObject.packID) {
-			packIndex = idx;
-		}
-	}];
-
-	if (packIndex >= 0) {
-		[stickerPacks removeObjectAtIndex: (NSUInteger) packIndex];
-		self.stickersService.stickersArray = stickerPacks;
-		self.stickersHeaderDelegateManager.stickerPacksArray = stickerPacks;
-		[self.stickersDelegateManager setStickerPacksArray: stickerPacks];
-		[self.stickersCollectionView reloadData];
-		[self.stickersHeaderCollectionView reloadData];
-		[self reloadRecent];
-	}
-
+- (void)packRemoved: (STKStickerPack*)packObject fromController: (STKStickersShopViewController*)shopController {
 	id <STKStickerControllerDelegate> o = self.delegate;
 	if ([o respondsToSelector: @selector(packRemoved:)]) {
 		[o packRemoved: packObject];
@@ -809,11 +744,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)showPackWithName: (NSString*)name fromController: (STKStickersShopViewController*)shopController {
 	NSUInteger stickerIndex = [self.stickersService indexOfPackWithName: name];
+	if (self.recentPresented) {
+		++stickerIndex;
+	}
 	[self setPackSelectedAtIndex: stickerIndex];
 
 	if ([self.stickersHeaderCollectionView numberOfItemsInSection: 0] - 1 >= stickerIndex) {
 		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: stickerIndex inSection: 0];
-		[(id <STKStickerHeaderCollectionViewDelegate>) self.stickersHeaderCollectionView.delegate scrollToIndexPath: indexPath animated: NO];
+		[self.stickersHeaderDelegateManager scrollToIndexPath: indexPath animated: NO];
 	}
 
 	id <STKStickerControllerDelegate> o = self.delegate;
@@ -823,23 +761,20 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 - (void)packWithName: (NSString*)packName downloadedFromController: (STKStickersShopViewController*)shopController {
-	[self.stickersService getStickerPacksWithType: nil completion: ^ (NSArray* stickerPacks) {
-		dispatch_async(dispatch_get_main_queue(), ^ {
-			self.stickersService.stickersArray = stickerPacks;
-			self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
-			self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
-			NSUInteger stickerIndex = [self.stickersService indexOfPackWithName: packName];
+	[self.stickersService getStickerPacksWithCompletion: ^ (NSArray<STKStickerPack*>* stickerPacks) {
+		self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
+		self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
 
-			self.stickersHeaderDelegateManager.stickerPacksArray = self.stickersService.stickersArray;
-			[self.stickersDelegateManager setStickerPacksArray: self.stickersService.stickersArray];
+		NSIndexPath* path = [NSIndexPath indexPathForRow: self.recentPresented ? 1 : 0 inSection: 0];
 
-			[self.stickersHeaderCollectionView reloadData];
-			[self.stickersCollectionView reloadData];
+		[self setPackSelectedAtIndex: path.item];
 
-			[self setPackSelectedAtIndex: stickerIndex];
-			[self.stickersHeaderDelegateManager collectionView: self.stickersHeaderCollectionView didSelectItemAtIndexPath: [NSIndexPath indexPathForRow: stickerIndex inSection: 0]];
-		});
-	}                                     failure: nil];
+		[self.stickersHeaderCollectionView selectItemAtIndexPath: path
+														animated: NO
+												  scrollPosition: UICollectionViewScrollPositionCenteredHorizontally];
+		[self.stickersHeaderDelegateManager collectionView: self.stickersHeaderCollectionView
+								  didSelectItemAtIndexPath: path];
+	}];
 
 	id <STKStickerControllerDelegate> o = self.delegate;
 	if ([o respondsToSelector: @selector(newPackDownloaded)]) {
@@ -857,10 +792,15 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver: self];
 
-	[[STKWebserviceManager sharedInstance] removeObserver: self
-											   forKeyPath: @"networkReachable"
-												  context: nil];
-}
+	@try{
+		[[STKWebserviceManager sharedInstance] removeObserver: self
+												   forKeyPath: @"lastUpdateDate"];
+	} @catch (id e){}
 
+	@try{
+		[[STKWebserviceManager sharedInstance] removeObserver: self
+												   forKeyPath: @"networkReachable"];
+	} @catch (id e){}
+}
 
 @end

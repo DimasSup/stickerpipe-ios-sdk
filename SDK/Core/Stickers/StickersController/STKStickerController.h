@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "STKStickersConstants.h"
 
-@class STKStickerController, STKShowStickerButton, STKStickerPackObject, STKImageManager;
+@class STKStickerController, STKShowStickerButton, STKImageManager;
+@class STKStickerPack;
 
 @protocol STKStickerControllerDelegate <NSObject>
 /**
@@ -41,7 +42,7 @@ didSelectStickerWithMessage: (NSString*)message;
 /**
  Pack removed from settings
 */
-- (void)packRemoved: (STKStickerPackObject*)packObject;
+- (void)packRemoved: (STKStickerPack*)packObject;
 
 /**
  Sticker packs reordered from settings

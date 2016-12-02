@@ -14,17 +14,8 @@
 
 + (NSArray*)stk_findWithPredicate: (NSPredicate*)predicate
 				  sortDescriptors: (NSArray*)sortDescriptors
-						  context: (NSManagedObjectContext*)context;
-
-+ (NSArray*)stk_findWithPredicate: (NSPredicate*)predicate
-				  sortDescriptors: (NSArray*)sortDescriptors
 					   fetchLimit: (NSUInteger)fetchLimit
 						  context: (NSManagedObjectContext*)context;
-
-+ (NSArray*)stk_findAllWithSortDescriptor: (NSArray*)sortDescriptors context: (NSManagedObjectContext*)context;
-
-
-+ (void)stk_deleteAllInContext: (NSManagedObjectContext*)context;
 
 + (instancetype)stk_objectWithUniqueAttribute: (NSString*)attribute
 										value: (id)value

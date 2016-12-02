@@ -7,9 +7,9 @@
 //
 
 #import "STKStickerSettingsCell.h"
-#import "STKStickerPackObject.h"
 #import "DFImageManagerKit.h"
 #import "STKWebserviceManager.h"
+#import "STKStickerPack+CoreDataProperties.h"
 
 
 @implementation STKStickerSettingsCell
@@ -18,7 +18,7 @@
 	[self.packIconImageView df_prepareForReuse];
 }
 
-- (void)configureWithStickerPack: (STKStickerPackObject*)stickerPack {
+- (void)configureWithStickerPack: (STKStickerPack*)stickerPack {
 	NSURL* iconUrl = [[STKWebserviceManager sharedInstance] mainImageUrlForPackName: stickerPack.packName];
 
 	[self.packIconImageView df_setImageWithResource: iconUrl];

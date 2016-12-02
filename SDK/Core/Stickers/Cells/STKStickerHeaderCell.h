@@ -7,13 +7,17 @@
 //
 
 
-@class STKStickerPackObject;
+@class STKStickerPack;
 
 @interface STKStickerHeaderCell : UICollectionViewCell
 
 @property (nonatomic) UIColor* selectionColor;
 
-- (void)configWithStickerPack: (STKStickerPackObject*)stickerPack placeholder: (UIImage*)placeholder placeholderTintColor: (UIColor*)placeholderTintColor collectionView: (UICollectionView*)collectionView cellForItemAtIndexPath: (NSIndexPath*)indexPath;
+- (void)setStickerCellSelected: (BOOL)selected;
+- (void)configRecentCell;
+- (void)configWithStickerPack: (STKStickerPack*)stickerPack
+				  placeholder: (UIImage*)placeholder
+		 placeholderTintColor: (UIColor*)placeholderTintColor;
 
 - (void)configureSettingsCell;
 

@@ -7,7 +7,7 @@
 //
 
 
-#import "STKStickerObject.h"
+#import "STKSticker+CoreDataProperties.h"
 
 @class STKStickersEntityService;
 
@@ -23,14 +23,11 @@
 
 @property (nonatomic) UIColor* placeholderColor;
 
-@property (nonatomic) STKStickersEntityService* stickersService;
-
-- (void)setStickerPacksArray: (NSArray*)stickerPacks;
-
-- (void)setStickerPlaceholder: (UIImage*)stickerPlaceholder;
-
-- (void)addRecentSticker: (STKStickerObject*)sticker forSection: (NSInteger)section;
+@property (nonatomic) UIImage* stickerPlaceholderImage;
 
 - (void)initZoomStickerPreviewView;
 
+- (void)performFetch;
+
+@property (nonatomic) NSArray<STKSticker*>* recentStickers;
 @end
