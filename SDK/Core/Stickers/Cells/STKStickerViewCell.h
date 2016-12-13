@@ -12,8 +12,6 @@
 - (void)configureWithStickerMessage: (NSString*)stickerMessage
 						placeholder: (UIImage*)placeholder
 				   placeholderColor: (UIColor*)placeholderColor
-					 collectionView: (UICollectionView*)collectionView
-			 cellForItemAtIndexPath: (NSIndexPath*)indexPath
 						  isSuggest: (BOOL)isSuggest;
 
 - (UIImage*)returnStickerImage;

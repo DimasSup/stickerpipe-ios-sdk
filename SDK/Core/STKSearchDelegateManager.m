@@ -8,9 +8,11 @@
 
 #import "STKSearchDelegateManager.h"
 #import "STKStickerViewCell.h"
-#import "STKStickerObject.h"
 #import "STKStickerDelegateManager.h"
 #import "STKStickersEntityService.h"
+#import "STKSticker+CoreDataProperties.h"
+#import "NSManagedObject+STKAdditions.h"
+#import "NSManagedObjectContext+STKAdditions.h"
 
 @interface STKSearchDelegateManager () <UICollectionViewDelegateFlowLayout>
 
@@ -43,7 +45,7 @@
 	NSString* str = [NSString stringWithFormat: @"[[%@]]", dict[@"content_id"]];
 
 	STKStickerViewCell* cell = [collectionView dequeueReusableCellWithReuseIdentifier: @"STKStickerViewCell" forIndexPath: indexPath];
-	[cell configureWithStickerMessage: str placeholder: self.stickerPlaceholderImage placeholderColor: self.placeholderColor collectionView: collectionView cellForItemAtIndexPath: indexPath isSuggest: YES];
+	[cell configureWithStickerMessage: str placeholder: self.stickerPlaceholderImage placeholderColor: self.placeholderColor isSuggest: YES];
 	cell.imageInset = 8;
 
 	return cell;
@@ -56,7 +58,11 @@
 		NSDictionary* dict = self.searchStickerPacks[(NSUInteger) indexPath.item];
 		NSString* str = [NSString stringWithFormat: @"[[%@]]", dict[@"content_id"]];
 
-		STKStickerObject* stickerObject = [STKStickerObject new];
+		NSNumber *stickerID = dict[@"content_id"];
+
+		STKSticker* stickerObject = [STKSticker stk_objectWithUniqueAttribute: @"stickerID"
+																		value: stickerID
+																	  context: [NSManagedObjectContext stk_defaultContext]];
 
 		stickerObject.stickerMessage = str;
 		stickerObject.stickerID = dict[@"content_id"];
@@ -64,17 +70,7 @@
 		stickerObject.usedDate = [NSDate date];
 		stickerObject.packName = dict[@"pack"];
 
-		[self.stickerDelegateManager.stickersService stickerWithStickerID: stickerObject.stickerID completion: ^ (STKSticker* sticker) {
-			if (!sticker) {
-				[self.stickerDelegateManager.stickersService saveSticker: stickerObject];
-			}
-		}];
-
 		self.didSelectSticker(stickerObject);
-
-		[self.stickerDelegateManager setStickerPacksArray: self.stickerDelegateManager.stickersService.stickersArray];
-
-		[self.stickerDelegateManager addRecentSticker: stickerObject forSection: 100];
 	}
 }
 
@@ -82,7 +78,6 @@
 #pragma mark - UICollectionViewDelegateFlowLayout
 
 - (CGSize)collectionView: (UICollectionView*)collectionView layout: (UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath: (NSIndexPath*)indexPath {
-
 	return CGSizeMake(80.0, 80.0);
 }
 

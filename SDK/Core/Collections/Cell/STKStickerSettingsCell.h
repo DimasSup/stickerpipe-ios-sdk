@@ -7,7 +7,7 @@
 //
 
 
-@class STKStickerPackObject;
+@class STKStickerPack;
 
 @interface STKStickerSettingsCell : UITableViewCell
 
@@ -15,6 +15,6 @@
 @property (nonatomic, weak) IBOutlet UILabel* packDescriptionLabel;
 @property (nonatomic, weak) IBOutlet UIImageView* packIconImageView;
 
-- (void)configureWithStickerPack: (STKStickerPackObject*)stickerPack;
+- (void)configureWithStickerPack: (STKStickerPack*)stickerPack;
 
 @end

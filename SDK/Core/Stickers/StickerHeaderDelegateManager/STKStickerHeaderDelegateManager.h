@@ -8,20 +8,35 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "STKStickerPack+CoreDataClass.h"
 
-@class STKStickerPackObject;
+@class STKStickerPack;
+@class NSFetchedResultsController;
 
 @protocol STKStickerHeaderCollectionViewDelegate <NSObject>
 - (void)scrollToIndexPath: (NSIndexPath*)indexPath animated: (BOOL)animated;
+- (BOOL)recentPresented;
 @end
 
-@interface STKStickerHeaderDelegateManager : NSObject <UICollectionViewDataSource, UICollectionViewDelegate, STKStickerHeaderCollectionViewDelegate>
+@interface STKStickerHeaderDelegateManager : NSObject <UICollectionViewDataSource, UICollectionViewDelegate>
+@property (nonatomic, weak) id <STKStickerHeaderCollectionViewDelegate> delegate;
 
-@property (nonatomic, copy) void (^didSelectRow)(NSIndexPath* indexPath, STKStickerPackObject* stickerPackObject, BOOL animated);
 @property (nonatomic, copy) void (^didSelectSettingsRow)(void);
 @property (copy, nonatomic) void(^didSelectCustomSmilesRow)(void);
+//TODO: -temp; better move it somewhere
+@property (nonatomic) NSFetchedResultsController<STKStickerPack*>* frc;
+
+@property (nonatomic, copy) void (^didSelectRow)(NSIndexPath* indexPath, STKStickerPack* stickerPackObject, BOOL animated);
 @property (nonatomic) UIImage* placeholderImage;
 @property (nonatomic) UIColor* placeholderHeaderColor;
-@property (nonatomic) NSArray<STKStickerPackObject*>* stickerPacksArray;
+@property (nonatomic, weak) UICollectionView* collectionView;
 
+@property (nonatomic) NSIndexPath* selectedIdx;
+
+-(void)makeSelected:(NSIndexPath*)indexPath;
+- (void)performFetch;
+- (STKStickerPack*)stickerPackForIndexPath: (NSIndexPath*)indexPath;
+- (void)invalidateSelectionForIndexPath: (NSIndexPath*)indexPath;
+- (void)scrollToIndexPath: (NSIndexPath*)indexPath animated: (BOOL)animated;
+- (void)collectionView: (UICollectionView*)collectionView didSelectItemAtIndexPath: (NSIndexPath*)indexPath animated:(BOOL)animated;
 @end

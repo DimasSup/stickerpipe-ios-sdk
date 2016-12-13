@@ -7,12 +7,12 @@
 //
 
 
-@class STKStickerObject;
 @class STKStickerDelegateManager;
+@class STKSticker;
 
 @interface STKSearchDelegateManager : NSObject <UICollectionViewDataSource, UICollectionViewDelegate, UIScrollViewDelegate>
 
-@property (nonatomic, copy) void (^didSelectSticker)(STKStickerObject* sticker);
+@property (nonatomic, copy) void (^didSelectSticker)(STKSticker* sticker);
 
 @property (nonatomic, weak) UICollectionView* collectionView;
 

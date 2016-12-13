@@ -7,10 +7,10 @@
 //
 
 #import "STKAnalyticService.h"
-#import "STKStatistic.h"
 #import "NSManagedObjectContext+STKAdditions.h"
 #import "NSManagedObject+STKAdditions.h"
 #import "STKWebserviceManager.h"
+#import "STKStatistic+CoreDataProperties.h"
 
 //Categories
 NSString* const STKAnalyticMessageCategory = @"message";
@@ -83,7 +83,7 @@ static const NSInteger kMemoryCacheObjectsCount = 20;
 	typeof(self) __weak weakSelf = self;
 
 	[self.backgroundContext performBlock: ^ {
-		STKStatistic* statistic = [NSEntityDescription insertNewObjectForEntityForName: [STKStatistic entityName] inManagedObjectContext: weakSelf.backgroundContext];
+		STKStatistic* statistic = [NSEntityDescription insertNewObjectForEntityForName: NSStringFromClass([STKStatistic class]) inManagedObjectContext: weakSelf.backgroundContext];
 		statistic.value = value;
 		statistic.category = category;
 		statistic.time = [NSNumber numberWithLongLong: ((NSInteger) [[NSDate date] timeIntervalSince1970])];

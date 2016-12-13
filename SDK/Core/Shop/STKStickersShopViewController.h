@@ -8,7 +8,7 @@
 
 
 @class STKStickersShopViewController;
-@class STKStickerPackObject;
+@class STKStickerPack;
 
 @protocol STKStickersShopViewControllerDelegate <NSObject>
 - (void)hideSuggestCollectionViewIfNeeded;
@@ -17,7 +17,7 @@
 
 - (void)showStickersCollection;
 
-- (void)packRemoved: (STKStickerPackObject*)packObject fromController: (STKStickersShopViewController*)shopController;
+- (void)packRemoved: (STKStickerPack*)packObject fromController: (STKStickersShopViewController*)shopController;
 
 - (void)showPackWithName: (NSString*)name fromController: (STKStickersShopViewController*)shopController;
 

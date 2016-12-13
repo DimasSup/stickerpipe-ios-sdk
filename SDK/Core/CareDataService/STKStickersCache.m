@@ -9,21 +9,20 @@
 #import "STKStickersCache.h"
 #import "NSManagedObjectContext+STKAdditions.h"
 #import "NSManagedObject+STKAdditions.h"
-#import "STKStickerPack.h"
-#import "STKStickerObject.h"
-#import "STKStickerPackObject.h"
-#import "STKSticker.h"
 #import "STKStickersConstants.h"
+#import "STKStickerPack+CoreDataProperties.h"
+#import "STKSticker+CoreDataProperties.h"
 #import "STKUtility.h"
-#import "helper.h"
+
+NSString* const kSTKPackDisabledNotification = @"kSTKPackDisabledNotification";
+
 
 @implementation STKStickersCache
-
-NSString *const kRecentName = @"Recent";
 
 - (instancetype)init {
 	if (self = [super init]) {
 		[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(didUpdateStorage:) name: NSManagedObjectContextDidSaveNotification object: nil];
+		_mainContext = [NSManagedObjectContext stk_defaultContext];
 	}
 
 	return self;
@@ -44,288 +43,63 @@ NSString *const kRecentName = @"Recent";
 
 - (NSError*)saveStickerPacks: (NSArray*)stickerPacks {
 	__block NSError* error;
-	[self.backgroundContext performBlockAndWait: ^ {
+	[self.mainContext performBlockAndWait: ^ {
 		[self removeAbsentPacksWithCurrentPacks: stickerPacks];
 
-		NSUInteger __block shift = 0;
-
-		[stickerPacks enumerateObjectsUsingBlock: ^ (STKStickerPackObject* object, NSUInteger idx, BOOL* stop) {
-			STKStickerPack* stickerPack = [self stickerPackModelWithID: object.packID context: self.backgroundContext];
-			if (!stickerPack.order) {
-				stickerPack.order = @(idx);
-				++shift;
-			} else {
-				stickerPack.order = @([stickerPack.order integerValue] + shift);
-			}
-			[self fillStickerPack: stickerPack withObject: object];
-		}];
-
-		[self.backgroundContext save: &error];
+		[self.mainContext save: &error];
 	}];
 	return error;
 }
 
-- (void)removeAbsentPacksWithCurrentPacks: (NSArray<STKStickerPackObject*>*)stickerPacks {
+- (void)removeAbsentPacksWithCurrentPacks: (NSArray<STKStickerPack*>*)stickerPacks {
 	NSArray* packIDs = [stickerPacks valueForKeyPath: @"@unionOfObjects.packID"];
 
-	NSFetchRequest* requestForDelete = [NSFetchRequest fetchRequestWithEntityName: [STKStickerPack entityName]];
-	requestForDelete.predicate = [NSPredicate predicateWithFormat: @"NOT (%K in %@)", STKStickerPackAttributes.packID, packIDs];
+	NSFetchRequest* requestForDelete = [STKStickerPack fetchRequest];
+	requestForDelete.predicate = [NSPredicate predicateWithFormat: @"NOT (packID in %@)", packIDs];
 
-	NSArray* objectsForDelete = [self.backgroundContext executeFetchRequest: requestForDelete error: nil];
+	NSArray* objectsForDelete = [self.mainContext executeFetchRequest: requestForDelete error: nil];
 
 	for (STKStickerPack* pack in objectsForDelete) {
-		[self.backgroundContext deleteObject: pack];
+		[self.mainContext deleteObject: pack];
 	}
 }
 
-- (void)saveStickerPack: (STKStickerPackObject*)stickerPack {
-	STKStickerPack* stickerModel = [self stickerModelFormStickerObject: stickerPack context: self.backgroundContext];
-	stickerModel.isNew = @YES;
-	for (STKStickerObject* stickerObject in stickerPack.stickers) {
-		STKSticker* sticker = [self stickerModelWithID: stickerObject.stickerID context: self.backgroundContext];
-		sticker.stickerName = stickerObject.stickerName;
-		sticker.stickerID = stickerObject.stickerID;
-		sticker.stickerMessage = stickerObject.stickerMessage;
-		sticker.usedCount = stickerObject.usedCount;
-		sticker.usedDate = stickerObject.usedDate;
-		if (sticker) {
-			[stickerModel.stickersSet addObject: sticker];
-		}
+- (NSError*)saveChangesIfNeeded {
+	NSError* __block error = nil;
+
+	if (self.mainContext.hasChanges) {
+		[self.mainContext save: &error];
 	}
 
-	[self.backgroundContext save: nil];
-}
-
-- (void)saveSticker: (STKStickerObject*)stickerObject {
-	if (stickerObject) {
-		STKSticker* sticker = [self stickerModelWithID: stickerObject.stickerID context: self.backgroundContext];
-		sticker.stickerName = stickerObject.stickerName;
-		sticker.stickerID = stickerObject.stickerID;
-		sticker.stickerMessage = stickerObject.stickerMessage;
-		sticker.usedCount = stickerObject.usedCount;
-		sticker.usedDate = stickerObject.usedDate;
-
-		[self.backgroundContext save: nil];
-	}
-}
-
-- (void)saveDisabledStickerPack: (STKStickerPackObject*)stickerPack {
-	STKStickerPack* stickerModel = [self stickerModelFormStickerObject: stickerPack context: self.backgroundContext];
-	stickerModel.disabled = @YES;
-
-	for (STKStickerObject* stickerObject in stickerPack.stickers) {
-		STKSticker* sticker = [self stickerModelWithID: stickerObject.stickerID context: self.backgroundContext];
-		sticker.stickerName = stickerObject.stickerName;
-		sticker.stickerID = stickerObject.stickerID;
-		sticker.stickerMessage = stickerObject.stickerMessage;
-		sticker.usedCount = stickerObject.usedCount;
-		sticker.usedDate = stickerObject.usedDate;
-		sticker.packName = stickerObject.packName;
-		if (sticker) {
-			[stickerModel.stickersSet addObject: sticker];
-		}
-	}
-
-	[self.backgroundContext save: nil];
-}
-
-
-#pragma mark - Update
-
-- (void)updateStickerPack: (STKStickerPackObject*)stickerPackObject {
-	typeof(self) __weak weakSelf = self;
-
-	[self.backgroundContext performBlock: ^ {
-		NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K == %@", STKStickerPackAttributes.packID, stickerPackObject.packID];
-		NSArray* packs = [STKStickerPack stk_findWithPredicate: predicate sortDescriptors: nil fetchLimit: 1 context: weakSelf.backgroundContext];
-		STKStickerPack* stickerPack = packs.firstObject;
-		if (stickerPack) {
-			[weakSelf fillStickerPack: stickerPack withObject: stickerPackObject];
-
-			NSError* error = nil;
-			[weakSelf.backgroundContext save: &error];
-			if (error) {
-				STKLog(@"Saving context error: %@", error.localizedDescription);
-			}
-		}
-	}];
-}
-
-
-#pragma mark - FillItems
-
-- (STKStickerPack*)fillStickerPack: (STKStickerPack*)stickerPack withObject: (STKStickerPackObject*)stickerPackObject {
-	stickerPack.artist = stickerPackObject.artist;
-	stickerPack.packName = stickerPackObject.packName;
-	stickerPack.packID = stickerPackObject.packID;
-	stickerPack.price = stickerPackObject.price;
-	stickerPack.pricePoint = stickerPackObject.pricePoint;
-	stickerPack.packTitle = stickerPackObject.packTitle;
-	stickerPack.packDescription = stickerPackObject.packDescription;
-	stickerPack.bannerUrl = stickerPackObject.bannerUrl;
-	stickerPack.productID = stickerPackObject.productID;
-	stickerPack.disabled = stickerPackObject.disabled;
-
-	if (stickerPack.isNew.boolValue) {
-		if (stickerPackObject.isNew) {
-			stickerPack.isNew = stickerPackObject.isNew;
-		}
-	} else if (!stickerPack.isNew) {
-		stickerPack.isNew = @YES;
-	}
-
-	if (stickerPackObject.order) {
-		stickerPack.order = stickerPackObject.order;
-	}
-
-	for (STKStickerObject* stickerObject in stickerPackObject.stickers) {
-		STKSticker* sticker = [self stickerModelWithID: stickerObject.stickerID context: self.backgroundContext];
-		sticker.stickerName = stickerObject.stickerName;
-		sticker.stickerID = stickerObject.stickerID;
-		sticker.stickerMessage = stickerObject.stickerMessage;
-		sticker.usedCount = stickerObject.usedCount;
-		sticker.usedDate = stickerObject.usedDate;
-		sticker.packName = stickerObject.packName;
-		if (sticker) {
-			[stickerPack.stickersSet addObject: sticker];
-		}
-	}
-	return stickerPack;
-}
-
-
-#pragma mark - NewItems
-
-- (STKStickerPack*)stickerModelFormStickerObject: (STKStickerPackObject*)stickerPackObject
-										 context: (NSManagedObjectContext*)context {
-	STKStickerPack* stickerPack = [self stickerPackModelWithID: stickerPackObject.packID context: context];
-	stickerPack.artist = stickerPackObject.artist;
-	stickerPack.packName = stickerPackObject.packName;
-	stickerPack.packID = stickerPackObject.packID;
-	stickerPack.price = stickerPackObject.price;
-	stickerPack.pricePoint = stickerPackObject.pricePoint;
-	stickerPack.packTitle = stickerPackObject.packTitle;
-	stickerPack.packDescription = stickerPackObject.packDescription;
-	stickerPack.disabled = stickerPackObject.disabled;
-	stickerPack.isNew = stickerPackObject.isNew;
-	stickerPack.bannerUrl = stickerPackObject.bannerUrl;
-	stickerPack.productID = stickerPackObject.productID;
-	stickerPack.order = stickerPackObject.order;
-	return stickerPack;
-}
-
-- (STKSticker*)stickerModelWithID: (NSNumber*)stickerID context: (NSManagedObjectContext*)context {
-	return [STKSticker stk_objectWithUniqueAttribute: STKStickerAttributes.stickerID value: stickerID context: context];
-}
-
-- (STKStickerPack*)stickerPackModelWithID: (NSNumber*)packID context: (NSManagedObjectContext*)context {
-	return [STKStickerPack stk_objectWithUniqueAttribute: STKStickerPackAttributes.packID value: packID context: context];
+	return error;
 }
 
 
 #pragma mark - Getters
 
-- (void)getStickerPacksIgnoringRecentForContext: (NSManagedObjectContext*)context
-									   response: (void (^)(NSArray*))response {
-	if (context) {
-		NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K == %@ OR %K == nil", STKStickerPackAttributes.disabled, @NO, STKStickerPackAttributes.disabled];
-		NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey: STKStickerPackAttributes.order ascending: YES];
-		NSArray* stickerPacks = [STKStickerPack stk_findWithPredicate: predicate sortDescriptors: @[sortDescriptor] context: context];
+- (NSArray<STKStickerPack*>*)getAllEnabledPacks {
+	NSFetchRequest<STKStickerPack*>* fetchRequest = [STKStickerPack fetchRequest];
+	fetchRequest.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey: @"order" ascending: YES]];
+	fetchRequest.predicate = [NSPredicate predicateWithFormat: @"disabled = NO"];
 
-		NSMutableArray* result = [NSMutableArray array];
+	NSError* error = nil;
 
-		for (STKStickerPack* pack in stickerPacks) {
-			STKStickerPackObject* stickerPackObject = [[STKStickerPackObject alloc] initWithStickerPack: pack];
-			if (stickerPackObject) {
-				[result addObject: stickerPackObject];
-			}
-		}
-		if (response) {
-			dispatch_async(dispatch_get_main_queue(), ^ {
-				response(result);
-			});
-		}
+	NSArray<STKStickerPack*>* packs = [self.mainContext executeFetchRequest: fetchRequest error: &error];
+
+	if (error) {
+		STKLog(@"fetching failed: %@", error.description);
 	}
+
+	return packs;
 }
 
-- (void)getAllPacksIgnoringRecent: (void (^)(NSArray*))response {
-	NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K != nil", STKStickerPackAttributes.disabled];
-
-	NSArray* stickerPacks = [STKStickerPack stk_findWithPredicate: predicate sortDescriptors: nil context: self.mainContext];
-	NSMutableArray* result = [NSMutableArray array];
-
-	for (STKStickerPack* pack in stickerPacks) {
-		STKStickerPackObject* stickerPackObject = [[STKStickerPackObject alloc] initWithStickerPack: pack];
-		if (stickerPackObject) {
-			[result addObject: stickerPackObject];
-		}
-	}
-	if (response) {
-		dispatch_async(dispatch_get_main_queue(), ^ {
-			response(result);
-		});
-	}
-}
-
-- (void)getStickerPacks: (void (^)(NSArray* stickerPacks))response {
-	STKStickerPackObject* recentPack = [self recentStickerPack];
-	NSMutableArray* result = [NSMutableArray array];
-
-//TODO: Check recent stickers
-	[self getStickerPacksIgnoringRecentForContext: self.mainContext response: ^ (NSArray* stickerPacks) {
-		if (recentPack) {
-			[result insertObject: recentPack atIndex: 0];
-			[result addObjectsFromArray: stickerPacks];
-		}
-		if (response) {
-			response(result);
-		}
-	}];
-}
-
-- (STKStickerPackObject*)getStickerPackWithPackName: (NSString*)packName {
-	NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K == %@", STKStickerPackAttributes.packName, packName];
-	STKStickerPack* stickerPack = [[STKStickerPack stk_findWithPredicate: predicate sortDescriptors: nil fetchLimit: 1 context: self.mainContext] firstObject];
-
-	if (stickerPack) {
-		return [[STKStickerPackObject alloc] initWithStickerPack: stickerPack];
-	} else {
-		return nil;
-	}
-}
-
-- (STKStickerPackObject*)recentStickerPack {
-	STKStickerPackObject* recentPack = [STKStickerPackObject new];
-	recentPack.packName = kRecentName;
-	recentPack.packTitle = kRecentName;
-	recentPack.isNew = @NO;
-
-	NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K > 0 AND (%K.%K == NO OR %K.%K == nil)", STKStickerAttributes.usedCount, STKStickerRelationships.stickerPack, STKStickerPackAttributes.disabled, STKStickerRelationships.stickerPack, STKStickerPackAttributes.disabled];
-	NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey: STKStickerAttributes.usedDate
-																	 ascending: NO];
-
-	NSArray* stickers = [STKSticker stk_findWithPredicate: predicate
-										  sortDescriptors: @[sortDescriptor]
-											   fetchLimit: 12
-												  context: self.mainContext];
-
-	NSMutableArray* stickerObjects = [NSMutableArray new];
-	for (STKSticker* sticker in stickers) {
-		STKStickerObject* stickerObject = [[STKStickerObject alloc] initWithSticker: sticker];
-		if (stickerObject) {
-			[stickerObjects addObject: stickerObject];
-		}
-	}
-
-	NSArray* sortedRecentStickers = [stickerObjects sortedArrayUsingDescriptors: @[[NSSortDescriptor sortDescriptorWithKey: STKStickerAttributes.usedDate ascending: NO]]];
-
-	recentPack.stickers = [NSMutableArray arrayWithArray: sortedRecentStickers];
-
-	return recentPack;
+- (STKStickerPack*)getStickerPackWithPackName: (NSString*)packName {
+	NSPredicate* predicate = [NSPredicate predicateWithFormat: @"packName == %@", packName];
+	return [[STKStickerPack stk_findWithPredicate: predicate sortDescriptors: nil fetchLimit: 1 context: self.mainContext] firstObject];
 }
 
 - (NSString*)packNameForStickerId: (NSString*)stickerId {
-	NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K == %@", STKStickerAttributes.stickerID, stickerId];
+	NSPredicate* predicate = [NSPredicate predicateWithFormat: @"stickerID == %@", stickerId];
 	STKSticker* sticker = [[STKSticker stk_findWithPredicate: predicate sortDescriptors: nil fetchLimit: 1 context: self.mainContext] firstObject];
 
 	return sticker.packName;
@@ -333,83 +107,74 @@ NSString *const kRecentName = @"Recent";
 
 #pragma mark - Change
 
-- (void)markStickerPack: (STKStickerPackObject*)pack disabled: (BOOL)disabled {
-	NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K == %@", STKStickerPackAttributes.packID, pack.packID];
-	STKStickerPack* stickerPack = [STKStickerPack stk_findWithPredicate: predicate sortDescriptors: nil fetchLimit: 1 context: self.mainContext].firstObject;
+- (void)markStickerPack: (STKStickerPack*)pack disabled: (BOOL)disabled {
+	pack.disabled = @(disabled);
 
-	stickerPack.disabled = @(disabled);
+	[self saveChangesIfNeeded];
 
-	[self.mainContext save: nil];
-}
-
-- (void)incrementUsedCountWithStickerID: (NSNumber*)stickerID {
-	typeof(self) __weak weakSelf = self;
-
-	[self.backgroundContext performBlock: ^ {
-		NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K == %@", STKStickerAttributes.stickerID, stickerID];
-		NSArray* stickers = [STKSticker stk_findWithPredicate: predicate sortDescriptors: nil fetchLimit: 1 context: self.backgroundContext];
-
-		STKSticker* sticker = stickers.firstObject;
-		sticker.usedCount = @([sticker.usedCount integerValue] + 1);
-		sticker.usedDate = [NSDate date];
-
-		[weakSelf.backgroundContext save: nil];
-	}];
-}
-
-- (void)stickerWithStickerID: (NSNumber*)stickerID completion: (void (^)(STKSticker* sticker))completion {
-	[self.backgroundContext performBlock: ^ {
-		NSPredicate* predicate = [NSPredicate predicateWithFormat: @"%K == %@", STKStickerAttributes.stickerID, stickerID];
-		NSArray* stickers = [STKSticker stk_findWithPredicate: predicate sortDescriptors: nil fetchLimit: 1 context: self.backgroundContext];
-		STKSticker* sticker = stickers.firstObject;
-
-		if (completion) {
-			completion(sticker);
-		}
-	}];
+	[[NSNotificationCenter defaultCenter] postNotificationName: kSTKPackDisabledNotification
+														object: pack];
 }
 
 
 #pragma mark - Check
 
-- (BOOL)hasNewStickerPacks {
-	NSFetchRequest* request = [NSFetchRequest fetchRequestWithEntityName: [STKStickerPack entityName]];
-	request.predicate = [NSPredicate predicateWithFormat: @"%K == %@", STKStickerPackAttributes.isNew, @YES];
-	request.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey: STKStickerPackAttributes.order ascending: NO]];
-	request.fetchOffset = [[NSManagedObjectContext stk_defaultContext] countForFetchRequest: request error: nil] - 3;
-	request.fetchLimit = 3;
-	NSUInteger count = [[NSManagedObjectContext stk_defaultContext] countForFetchRequest: request error: nil];
-	return count > 0 || ([self recentStickerPack].stickers.count == 0);
+- (BOOL)isStickerPackDownloaded: (NSString*)packName {
+	return [self packExisted: packName onlyEnabled: YES];
 }
 
-- (BOOL)isStickerPackDownloaded: (NSString*)packName {
-	NSFetchRequest* request = [[NSFetchRequest alloc] initWithEntityName: [STKStickerPack entityName]];
-	request.predicate = [NSPredicate predicateWithFormat: @"%K == %@ AND (%K == NO OR %K == nil)", STKStickerPackAttributes.packName, packName, STKStickerPackAttributes.disabled, STKStickerPackAttributes.disabled];
+- (BOOL)hasPackWithName: (NSString*)packName {
+	return [self packExisted: packName onlyEnabled: NO];
+}
+
+- (BOOL)packExisted: (NSString*)packName onlyEnabled: (BOOL)onlyEnabled {
+	NSFetchRequest* request = [STKStickerPack fetchRequest];
+	request.predicate = [NSPredicate predicateWithFormat:
+			onlyEnabled ? @"packName == %@ AND disabled == NO" : @"packName == %@", packName];
 	request.fetchLimit = 1;
 	return [self.mainContext countForFetchRequest: request error: nil] > 0;
 }
 
-- (BOOL)hasPackWithName: (NSString*)packName {
-	NSFetchRequest* request = [NSFetchRequest fetchRequestWithEntityName: [STKStickerPack entityName]];
-	request.predicate = [NSPredicate predicateWithFormat: @"%K == %@", STKStickerPackAttributes.packName, packName];
-	return [self.mainContext countForFetchRequest: request error: nil] > 0;
+- (void)incrementStickerUsedCount: (STKSticker*)sticker {
+	[self.mainContext performBlock: ^ {
+		sticker.usedCount = @([sticker.usedCount integerValue] + 1);
+		sticker.usedDate = [NSDate date];
+
+		[self.mainContext save: nil];
+	}];
 }
 
 
-#pragma mark - Properties
+#pragma mark - Recents
 
-- (NSManagedObjectContext*)mainContext {
-	if (!_mainContext) {
-		_mainContext = [NSManagedObjectContext stk_defaultContext];
-	}
-	return _mainContext;
+- (BOOL)hasRecents {
+	return [self.mainContext countForFetchRequest: [self recentFetchRequest] error: nil] > 0;
 }
 
-- (NSManagedObjectContext*)backgroundContext {
-	if (!_backgroundContext) {
-		_backgroundContext = [NSManagedObjectContext stk_backgroundContext];
+- (NSFetchRequest*)recentFetchRequest {
+	NSFetchRequest* request = [STKSticker fetchRequest];
+	request.predicate = [NSPredicate predicateWithFormat: @"usedCount > 0 && stickerPack.disabled == NO"];
+	request.sortDescriptors = @[
+			[NSSortDescriptor sortDescriptorWithKey: @"usedDate" ascending: NO],
+			[NSSortDescriptor sortDescriptorWithKey: @"usedCount" ascending: NO]
+	];
+	request.fetchLimit = 12;
+
+	return request;
+}
+
+- (NSArray<STKSticker*>*)getRecentStickers {
+	NSFetchRequest* request = [self recentFetchRequest];
+
+	NSError* error = nil;
+
+	NSArray* recentStickers = [self.mainContext executeFetchRequest: request error: &error];
+
+	if (error) {
+		NSLog(@"fetch recent stickers failed: %@", error.description);
 	}
-	return _backgroundContext;
+
+	return recentStickers;
 }
 
 @end

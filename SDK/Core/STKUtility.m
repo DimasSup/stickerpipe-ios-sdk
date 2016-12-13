@@ -37,9 +37,10 @@
 			return @"xhdpi";
 		case 3:
 			return @"xxhdpi";
-		default:
-			return nil;
+		default:;
 	}
+
+	return @"xxhdpi";
 }
 
 
@@ -74,6 +75,14 @@ void STKLog(NSString* format, ...) {
 	va_end(argumentList);
 }
 
+
++ (NSBundle*)getResourceBundle {
+	NSString* bundlePath = [[NSBundle mainBundle] pathForResource: @"ResBundle" ofType: @"bundle"];
+	NSBundle* bundle = [NSBundle bundleWithPath: bundlePath];
+
+	return bundle;
+}
+
 @end
 
 
@@ -91,6 +100,27 @@ void STKLog(NSString* format, ...) {
 	}
 
 	return digest;
+}
+
+@end
+
+@implementation NSBundle (CustomBundle)
+
++ (NSBundle*)stkBundle {
+	return [NSBundle mainBundle];
+}
+
++ (NSArray*)loadNibNamed: (NSString*)name owner: (id)owner options: (NSDictionary*)options {
+	return [[NSBundle mainBundle] loadNibNamed: name owner: owner options: options];
+}
+
+@end
+
+
+@implementation UIViewController (CustomBundle)
+
++ (instancetype)viewControllerFromNib: (NSString*)nibName {
+	return [[self alloc] initWithNibName: nibName bundle: [NSBundle mainBundle]];
 }
 
 @end

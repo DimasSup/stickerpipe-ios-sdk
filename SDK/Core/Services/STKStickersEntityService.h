@@ -7,55 +7,36 @@
 //
 
 
-@class STKStickerPackObject, STKSticker, STKStickerObject;
+@class STKSticker;
+@class STKStickerPack;
 
 @interface STKStickersEntityService : NSObject
 
-@property (nonatomic) NSArray* stickersArray;
-
 @property BOOL hasNewModifiedPacks;
 
-- (void)getStickerPacksWithType: (NSString*)type
-					 completion: (void (^)(NSArray* stickerPacks))completion
-						failure: (void (^)(NSError* error))failure;
+- (STKStickerPack*)getStickerPackWithName: (NSString*)packName;
 
-- (void)incrementStickerUsedCountWithID: (NSNumber*)stickerID;
-
-- (void)getStickerPacksIgnoringRecentWithType: (NSString*)type
-								   completion: (void (^)(NSArray* stickerPacks))completion
-									  failure: (void (^)(NSError* error))failre;
-
-- (void)getPackWithMessage: (NSString*)message completion: (void (^)(STKStickerPackObject* stickerPack, BOOL isDownloaded))completion;
-
-- (void)getPackNameForMessage: (NSString*)message completion: (void (^)(NSString* packName))completion;
-
-- (void)downloadNewPack: (NSDictionary*)packDict onSuccess: (void (^)(void))success;
-
-- (STKStickerPackObject*)getStickerPackWithName: (NSString*)packName;
-
-- (STKStickerPackObject*)recentPack;
-
+- (void)updateStickerPacksFromServerWithCompletion: (void (^)(NSError* error))completion;
 - (NSString*)packNameForStickerId: (NSString*)stickerId;
 
 - (BOOL)isPackDownloaded: (NSString*)packName;
-
-- (void)saveStickerPack: (STKStickerPackObject*)stickerPack;
-
-- (void)saveStickerPacks: (NSArray*)stickerPacks;
-
-- (void)updateStickerPackInCache: (STKStickerPackObject*)stickerPackObject;
-
-- (void)togglePackDisabling: (STKStickerPackObject*)pack;
-
 - (BOOL)hasRecentStickers;
-
 - (BOOL)hasNewPacks;
-
 - (BOOL)hasPackWithName: (NSString*)packName;
+
 - (NSUInteger)indexOfPackWithName: (NSString*)packName;
 
-- (void)stickerWithStickerID: (NSNumber*)stickerID completion: (void (^)(STKSticker* sticker))completion;
+- (void)getStickerPacksWithCompletion: (void (^)(NSArray<STKStickerPack*>*))completion;
+- (void)getPackNameForMessage: (NSString*)message completion: (void (^)(NSString* packName))completion;
+- (void)downloadNewPack: (NSDictionary*)packDict;
+- (void)togglePackDisabling: (STKStickerPack*)pack;
+- (void)incrementStickerUsedCount: (STKSticker*)sticker;
+- (NSArray<STKSticker*>*)getRecentStickers;
+- (NSError*)saveChangesIfNeeded;
 
-- (void)saveSticker: (STKStickerObject*)stickerObject;
+- (void)movePackFromIndex:(NSUInteger)sourceIdx toIdx:(NSUInteger)destIdx;
 
+- (void)loadStickersForPacks: (NSArray*)packs completion: (void (^)(NSArray<STKStickerPack*>*))completion;
+
+- (void)fetchStickerPacksFromCacheCompletion: (void (^)(NSArray<STKStickerPack*>*))completion;
 @end
