@@ -62,7 +62,7 @@
 	[dict[@"stickers"] enumerateObjectsUsingBlock: ^ (NSDictionary* dictionary, NSUInteger idx, BOOL* stop) {
 		STKSticker* sticker = [STKSticker stickerWithDictionary: dictionary];
 		sticker.order = @(idx);
-		[self addStickersObject: sticker];
+		[self addStickersObject:sticker];
 	}];
 }
 

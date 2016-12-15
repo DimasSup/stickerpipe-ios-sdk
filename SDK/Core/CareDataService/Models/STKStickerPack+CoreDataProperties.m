@@ -27,5 +27,9 @@
 @dynamic pricePoint;
 @dynamic productID;
 @dynamic stickers;
-
+- (void)addStickersObject:(STKSticker *)value {
+	NSMutableOrderedSet* tempSet = [NSMutableOrderedSet orderedSetWithOrderedSet:self.stickers];
+	[tempSet addObject:value];
+	self.stickers = tempSet;
+}
 @end
