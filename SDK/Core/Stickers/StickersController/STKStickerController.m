@@ -192,7 +192,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	typeof(self) __weak weakSelf = self;
 
 	self.stickersDelegateManager.didChangeDisplayedSection = ^ (NSInteger displayedSection) {
-		[weakSelf setPackSelectedAtIndex: displayedSection];
+		[weakSelf setPackSelectedAtIndex: displayedSection animated:YES];
 	};
 
 	self.stickersDelegateManager.didSelectSticker = ^ (STKSticker* sticker, BOOL recent) {
@@ -227,20 +227,23 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	self.stickersShopButton.tintColor = [UIColor grayColor];
 
 	self.stickersHeaderDelegateManager.delegate = self;
-
+	
 	self.stickersHeaderDelegateManager.didSelectRow = ^ (NSIndexPath* indexPath, STKStickerPack* stickerPack, BOOL animated) {
 		[weakSelf makeSourceNotNewIfNeeded: stickerPack];
-		
-		NSInteger numberOfItems = [weakSelf.stickersCollectionView numberOfItemsInSection: indexPath.item];
-
-		if (numberOfItems != 0) {
-			NSIndexPath* newIndexPath = [NSIndexPath indexPathForItem: 0 inSection: indexPath.item];
-			CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath: newIndexPath].frame;
-			[weakSelf.stickersCollectionView setContentOffset: CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y - kStickersSectionPaddingTopBottom) animated: animated];
-			weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
+		if([weakSelf.stickersCollectionView numberOfSections]>indexPath.row)
+		{
+			NSInteger numberOfItems = [weakSelf.stickersCollectionView numberOfItemsInSection:indexPath.row];
+			
+			
+			if (numberOfItems != 0) {
+				NSIndexPath* newIndexPath = [NSIndexPath indexPathForItem: 0 inSection: indexPath.row];
+				CGRect layoutRect = [weakSelf.stickersCollectionView layoutAttributesForItemAtIndexPath: newIndexPath].frame;
+				[weakSelf.stickersCollectionView setContentOffset: CGPointMake(weakSelf.stickersCollectionView.contentOffset.x, layoutRect.origin.y - kStickersSectionPaddingTopBottom) animated: animated];
+				weakSelf.stickersDelegateManager.currentDisplayedSection = indexPath.item;
+			}
+			[weakSelf hideCustomSmiles];
+			[weakSelf setLastSelectedStickerPack:indexPath.row];
 		}
-		[weakSelf hideCustomSmiles];
-		[weakSelf setLastSelectedStickerPack:indexPath.row];
 	};
 	
 	
@@ -348,7 +351,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 	[self reloadStickersView];
 
-	[self setPackSelectedAtIndex: [self getLastSelectedStickerPack]];
+	[self setPackSelectedAtIndex: [self getLastSelectedStickerPack]>=0?0:-1];
 	[self.stickersCollectionView setContentOffset: CGPointZero];
 
 	self.textInputView.inputView = self.stickersView;
@@ -379,7 +382,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 			[self.hud hideAnimated: YES];
 			self.hud = nil;
 			self.internalStickersView.userInteractionEnabled = YES;
-			[self setPackSelectedAtIndex: [self getLastSelectedStickerPack]];
+			[self setPackSelectedAtIndex: [self getLastSelectedStickerPack]>=0?0:-1];
 		}
 
 		self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
@@ -389,7 +392,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 }
 
 - (void)showModalViewController: (UIViewController*)viewController {
-	[self hideStickersView];;
+//	[self hideStickersView];;
 	STKOrientationNavigationController* navigationController = [[STKOrientationNavigationController alloc] initWithRootViewController: viewController];
 
 	UIViewController* presenter = [self.delegate stickerControllerViewControllerForPresentingModalView];
@@ -568,20 +571,24 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 #pragma mark - Selection
 
-- (void)setPackSelectedAtIndex: (NSInteger)index {
+- (void)setPackSelectedAtIndex: (NSInteger)index
+{
+	[self setPackSelectedAtIndex:index animated:NO];
+}
+- (void)setPackSelectedAtIndex: (NSInteger)index  animated:(BOOL)animated{
 	if(index<0)
 	{
 		NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-		[self.stickersHeaderCollectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
-		[self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:indexPath animated:YES];
+		[self.stickersHeaderCollectionView selectItemAtIndexPath:indexPath animated:animated scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
+		[self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:indexPath animated:animated];
 		[self.stickersHeaderDelegateManager makeSelected:indexPath];
 		
 		
 	}
 	else if (self.stickersHeaderCollectionView.numberOfSections > 0 && [self.stickersHeaderCollectionView numberOfItemsInSection: 1] > index) {
-		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: 0 inSection: 1];
+		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: index inSection: 1];
 
-		[self.stickersHeaderCollectionView selectItemAtIndexPath: indexPath animated: YES scrollPosition: UICollectionViewScrollPositionCenteredHorizontally];
+		[self.stickersHeaderCollectionView selectItemAtIndexPath: indexPath animated:animated scrollPosition: UICollectionViewScrollPositionCenteredHorizontally];
 		dispatch_async(dispatch_get_main_queue(), ^{
 			[self.stickersHeaderDelegateManager invalidateSelectionForIndexPath: indexPath];
 		});
@@ -904,14 +911,14 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)packWithName: (NSString*)packName downloadedFromController: (STKStickersShopViewController*)shopController {
 	[self.stickersService getStickerPacksWithCompletion: ^ (NSArray<STKStickerPack*>* stickerPacks) {
-		[self showStickersView];
+		
 		self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
 		self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
 		
 		NSIndexPath* path = [NSIndexPath indexPathForRow: self.recentPresented ? 1 : 0 inSection: 1];
-		
+		[self showStickersView];
 		[self setPackSelectedAtIndex: path.item];
-
+		
 		[self.stickersHeaderCollectionView selectItemAtIndexPath: path
 														animated: NO
 												  scrollPosition: UICollectionViewScrollPositionCenteredHorizontally];
