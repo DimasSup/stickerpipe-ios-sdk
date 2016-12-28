@@ -324,9 +324,17 @@ static NSUInteger const productsCount = 2;
 
 - (void)showCollections {
 	dispatch_async(dispatch_get_main_queue(), ^ {
-		[self dismissViewControllerAnimated: YES completion: ^ {
+		if([self presentedViewController])
+		{
+			[self dismissViewControllerAnimated: YES completion: ^ {
+				[self.delegate showStickersCollection];
+			}];
+		}
+		else
+		{
 			[self.delegate showStickersCollection];
-		}];
+		}
+		
 	});
 }
 

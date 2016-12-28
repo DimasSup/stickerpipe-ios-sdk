@@ -166,7 +166,7 @@ static const NSTimeInterval kUpdatesDelay = 900.0; //15 min
 			newsCount++;
 		}
 	}
-	return ![self hasRecentStickers] || newsCount > 0;
+	return newsCount > 0;
 }
 
 - (BOOL)isPackDownloaded: (NSString*)packName {

@@ -80,7 +80,7 @@
                         <constraint firstAttribute="height" constant="30" id="smS-G4-1uK"/>
                     </constraints>
                 </view>
-                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zXj-Bo-M12">
+                <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zXj-Bo-M12">
                     <rect key="frame" x="0.0" y="0.0" width="320" height="276"/>
                     <subviews>
                         <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" delaysContentTouches="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="DtA-zE-a5r">

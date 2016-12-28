@@ -573,11 +573,13 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	{
 		NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
 		[self.stickersHeaderCollectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
+		[self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:indexPath animated:YES];
 		[self.stickersHeaderDelegateManager makeSelected:indexPath];
+		
 		
 	}
 	else if (self.stickersHeaderCollectionView.numberOfSections > 0 && [self.stickersHeaderCollectionView numberOfItemsInSection: 1] > index) {
-		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: index inSection: 1];
+		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: 0 inSection: 1];
 
 		[self.stickersHeaderCollectionView selectItemAtIndexPath: indexPath animated: YES scrollPosition: UICollectionViewScrollPositionCenteredHorizontally];
 		dispatch_async(dispatch_get_main_queue(), ^{
