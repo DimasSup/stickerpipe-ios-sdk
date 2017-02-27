@@ -16,6 +16,7 @@
 @protocol STKStickerHeaderCollectionViewDelegate <NSObject>
 - (void)scrollToIndexPath: (NSIndexPath*)indexPath animated: (BOOL)animated;
 - (BOOL)recentPresented;
+-(BOOL)supportSmiles;
 @end
 
 @interface STKStickerHeaderDelegateManager : NSObject <UICollectionViewDataSource, UICollectionViewDelegate>

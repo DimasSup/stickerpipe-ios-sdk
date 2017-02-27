@@ -62,6 +62,7 @@
 @property (nonatomic) BOOL recentPresented;
 
 @property (nonatomic, weak) MBProgressHUD* hud;
+@property(nonatomic,assign,readonly)NSInteger startHeaderIndex;
 @end
 
 @implementation STKStickerController
@@ -546,7 +547,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	}
 	else
 	{
-		return [NSIndexPath indexPathForItem:value inSection:1];
+		return [NSIndexPath indexPathForItem:value inSection:self.startHeaderIndex];
 	}
 }
 -(int)getLastSelectedStickerPack
@@ -585,8 +586,8 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		
 		
 	}
-	else if (self.stickersHeaderCollectionView.numberOfSections > 0 && [self.stickersHeaderCollectionView numberOfItemsInSection: 1] > index) {
-		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: index inSection: 1];
+	else if (self.stickersHeaderCollectionView.numberOfSections > 0 && [self.stickersHeaderCollectionView numberOfItemsInSection: self.startHeaderIndex] > index) {
+		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: index inSection: self.startHeaderIndex];
 
 		[self.stickersHeaderCollectionView selectItemAtIndexPath: indexPath animated:animated scrollPosition: UICollectionViewScrollPositionCenteredHorizontally];
 		dispatch_async(dispatch_get_main_queue(), ^{
@@ -633,7 +634,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 
 - (void)selectPack: (NSUInteger)index {
 	[self setPackSelectedAtIndex: index];
-	[self.stickersHeaderDelegateManager collectionView: self.stickersHeaderCollectionView didSelectItemAtIndexPath: [NSIndexPath indexPathForRow: index inSection: 1]];
+	[self.stickersHeaderDelegateManager collectionView: self.stickersHeaderCollectionView didSelectItemAtIndexPath: [NSIndexPath indexPathForRow: index inSection: self.startHeaderIndex]];
 }
 
 #pragma mark - Checks
@@ -859,6 +860,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	return lastWord;
 }
 
+#pragma mark - delegate header
+-(BOOL)supportSmiles
+{
+	return self.textInputView != nil;
+}
 
 #pragma mark - STKStickersShopViewControllerDelegate
 
@@ -897,7 +903,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	
 	[self setPackSelectedAtIndex: stickerIndex];
 	if ([self.stickersHeaderCollectionView numberOfItemsInSection: 1] - 1 >= stickerIndex) {
-		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: stickerIndex inSection: 1];
+		NSIndexPath* indexPath = [NSIndexPath indexPathForItem: stickerIndex inSection: self.startHeaderIndex];
 		[self.stickersHeaderDelegateManager scrollToIndexPath: indexPath animated: NO];
 		[self.stickersHeaderDelegateManager collectionView:self.stickersHeaderCollectionView didSelectItemAtIndexPath:indexPath animated:NO];
 		
@@ -915,7 +921,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		self.keyboardButton.badgeView.hidden = ![self.stickersService hasNewPacks];
 		self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
 		
-		NSIndexPath* path = [NSIndexPath indexPathForRow: self.recentPresented ? 1 : 0 inSection: 1];
+		NSIndexPath* path = [NSIndexPath indexPathForRow: self.recentPresented ? 1 : 0 inSection: self.startHeaderIndex];
 		[self showStickersView];
 		[self setPackSelectedAtIndex: path.item];
 		
@@ -952,6 +958,13 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 		[[STKWebserviceManager sharedInstance] removeObserver: self
 												   forKeyPath: @"networkReachable"];
 	} @catch (id e){}
+}
+
+
+#pragma mark - 
+-(NSInteger)startHeaderIndex
+{
+	return self.supportSmiles?1:0;
 }
 
 @end

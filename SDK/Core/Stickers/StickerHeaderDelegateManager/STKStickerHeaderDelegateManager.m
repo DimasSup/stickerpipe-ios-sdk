@@ -48,11 +48,16 @@
 #pragma mark - UICollectionViewDelegate
 
 - (NSInteger)numberOfSectionsInCollectionView: (UICollectionView*)collectionView {
-	return self.frc.sections.count + 1;
+	
+	if([self.delegate supportSmiles])
+	{
+		return self.frc.sections.count + 1;
+	}
+	return self.frc.sections.count;
 }
 
 - (NSInteger)collectionView: (UICollectionView*)collectionView numberOfItemsInSection: (NSInteger)section {
-	if(section == 0)
+	if([self.delegate supportSmiles] && section == 0)
 	{
 		return 1;
 	}
@@ -70,13 +75,18 @@
 	cell.layer.shouldRasterize = YES;
 	cell.layer.rasterizationScale = [UIScreen mainScreen].scale;
 	
-	if(indexPath.section == 0)
+	if([self.delegate supportSmiles] && indexPath.section == 0)
 	{
 		[cell configureSmileCell];
+		
 	}
 	else
 	{
-		indexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:indexPath.section  -1];
+		
+		if([self.delegate supportSmiles])
+		{
+			indexPath = [NSIndexPath indexPathForItem:indexPath.item inSection:indexPath.section  -1];
+		}
 		STKStickerPack* pack = [self stickerPackForIndexPath: indexPath];
 		
 		if (pack) {
@@ -157,12 +167,15 @@
 }
 - (void)collectionView: (UICollectionView*)collectionView didSelectItemAtIndexPath: (NSIndexPath*)indexPath animated:(BOOL)animated{
 	[self invalidateSelectionForIndexPath: indexPath];
-	if(indexPath.section == 0)
+	if([self.delegate supportSmiles])
 	{
-		self.didSelectCustomSmilesRow();
-		return;
+		if(indexPath.section == 0)
+		{
+			self.didSelectCustomSmilesRow();
+			return;
+		}
+		indexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section - 1];
 	}
-	indexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section - 1];
 	
 	self.didSelectRow(indexPath, [self stickerPackForIndexPath: indexPath], animated);
 }
