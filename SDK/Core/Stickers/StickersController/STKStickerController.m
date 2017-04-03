@@ -269,7 +269,7 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	[self.stickersHeaderCollectionView registerClass: [STKStickerHeaderCell class] forCellWithReuseIdentifier: @"STKStickerPanelHeaderCell"];
 
 	self.stickersHeaderCollectionView.backgroundColor = self.headerBackgroundColor ? self.headerBackgroundColor : [STKUtility defaultGreyColor];
-
+	
 	self.stickersShopButton.badgeView.hidden = !self.stickersService.hasNewModifiedPacks;
 }
 
@@ -283,10 +283,10 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 	[self.keyboardButton addTarget: self action: @selector(keyboardButtonAction:) forControlEvents: UIControlEventTouchUpInside];
 	self.keyboardButton.frame = CGRectMake(self.textInputView.frame.origin.x, self.textInputView.frame.origin.y, 33, 33);
 	self.keyboardButton.autoresizingMask =UIViewAutoresizingFlexibleLeftMargin;
-	[self.textInputView.superview addSubview: button];
-
-	[self.textInputView.superview layoutSubviews];
-	
+	if(!self.textInputView.hideStickerButton){
+		[self.textInputView.superview addSubview: button];
+		[self.textInputView.superview layoutSubviews];
+	}
 }
 
 - (void)initSuggestCollectionViewWithStickersArray: (NSArray*)stickers {
@@ -948,7 +948,11 @@ static const CGFloat kKeyboardButtonHeight = 33.0;
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver: self];
 	[_internalStickersView removeFromSuperview];
-
+	@try {
+		[self.textInputView removeObserver:self forKeyPath:@"showSmileButton"];
+	} @catch (NSException *exception) {
+		
+	}
 	@try{
 		[[STKWebserviceManager sharedInstance] removeObserver: self
 												   forKeyPath: @"lastUpdateDate"];

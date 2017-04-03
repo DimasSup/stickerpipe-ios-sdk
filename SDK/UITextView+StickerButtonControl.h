@@ -10,4 +10,5 @@
 
 @interface UITextView (StickerButtonControl)
 @property(nonatomic)BOOL showSmileButton;
+@property(nonatomic,assign)BOOL hideStickerButton;
 @end
