@@ -4,7 +4,7 @@
 //
 
 #import "UIView+ActivityIndicator.h"
-#import "MBProgressHUD.h"
+@import MBProgressHUD;
 
 @implementation UIView (ActivityIndicator)
 

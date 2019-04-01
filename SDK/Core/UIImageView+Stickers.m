@@ -11,7 +11,7 @@
 #import <objc/runtime.h>
 #import "UIImage+Tint.h"
 #import "STKImageManager.h"
-#import "UIImageView+WebCache.h"
+@import SDWebImage;
 #import "UIImage+CustomBundle.h"
 #import "helper.h"
 

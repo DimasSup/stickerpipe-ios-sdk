@@ -4,7 +4,6 @@
 //
 
 #import "STKWebserviceManager.h"
-#import "AFHTTPSessionManager.h"
 #import "STKStickersManager.h"
 #import "STKUUIDManager.h"
 #import "STKApiKeyManager.h"
@@ -13,6 +12,7 @@
 #import "STKUtility.h"
 #import "helper.h"
 #import "STKStatistic+CoreDataProperties.h"
+@import AFNetworking;
 
 @protocol KeyValueHTTP<NSObject>
 - (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field;

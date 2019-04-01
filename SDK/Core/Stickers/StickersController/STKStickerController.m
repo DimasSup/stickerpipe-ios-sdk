@@ -34,7 +34,7 @@
 #import "LPAppDelegate.h"
 #import "UIImage+CustomBundle.h"
 #import "UIView+ActivityIndicator.h"
-#import "MBProgressHUD.h"
+@import MBProgressHUD;
 #import "UIView+CordsAdditions.h"
 
 @interface STKStickerController () <UITextViewDelegate, STKStickersSettingsViewControllerDelegate, STKStickersShopViewControllerDelegate, STKStickerHeaderCollectionViewDelegate>

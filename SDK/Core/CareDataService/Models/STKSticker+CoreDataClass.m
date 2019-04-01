@@ -10,8 +10,7 @@
 #import "NSManagedObject+STKAdditions.h"
 #import "NSManagedObjectContext+STKAdditions.h"
 #import "STKUtility.h"
-#import "SDWebImageDownloader.h"
-#import "SDImageCache.h"
+@import  SDWebImage;
 
 @implementation STKSticker
 

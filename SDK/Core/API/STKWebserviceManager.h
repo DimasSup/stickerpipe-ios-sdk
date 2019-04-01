@@ -3,8 +3,7 @@
 // Copyright (c) 2016 908 Inc. All rights reserved.
 //
 
-#import "SDWebImageDownloader.h"
-
+@import SDWebImage;
 @class AFHTTPSessionManager;
 @class STKSearchModel;
 @class DFImageTask;
